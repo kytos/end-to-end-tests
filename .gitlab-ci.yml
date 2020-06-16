@@ -1,12 +1,11 @@
-services:
-  - name: python:3.6
-    entrypoint: ["/kytos-entrypoint.sh"]
-    alias: my-controller-kytos
+variables:
+  DOCKER_PRIVILEGED: true
 
 test_kytos_mininet:
  image:
-   name: ciena/mininet
-   entrypoint: ["/usr/bin/tail", "-f", "/dev/null"]
+   name: kytos/nightly
  script:
+  - kytos napps install mef_eline
+  - kytos napps list
   - apt-get update && apt-get install -y python-pytest python-requests
   - pytest tests/

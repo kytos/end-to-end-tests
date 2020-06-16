@@ -6,7 +6,7 @@ from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.node import RemoteController, OVSSwitch
 
-CONTROLLER = 'my-controller-kytos'
+CONTROLLER = '127.0.0.1'
 URL = 'http://%s:8181/api/kytos/mef_eline' % (CONTROLLER)
 
 # pylint: disable=C0103
