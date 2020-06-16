@@ -1,5 +1,5 @@
 variables:
-  DOCKER_PRIVILEGED: true
+  DOCKER_PRIVILEGED: "true"
 
 test_kytos_mininet:
  image:
