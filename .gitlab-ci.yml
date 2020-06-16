@@ -1,0 +1,12 @@
+services:
+  - name: python:3.6
+    entrypoint: ["kytos-entrypoint.sh"]
+    alias: my-controller-kytos
+
+test_kytos_mininet:
+ image:
+   name: ciena/mininet
+   entrypoint: ["/usr/bin/tail", "-f", "/dev/null"]
+ script:
+  - apt-get update && apt-get install -y python-pytest python-requests
+  - pytest tests/
