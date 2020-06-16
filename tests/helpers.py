@@ -27,7 +27,7 @@ class RingTopo( Topo ):
         self.addLink( s2, s3 )
         self.addLink( s3, s1 )
 
-class TestNetwork():
+class NetworkTest():
     def __init__(self, controller_ip):
         # Create an instance of our topology
         topo = RingTopo()

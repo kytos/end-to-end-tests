@@ -1,6 +1,6 @@
 import unittest
 import requests
-from tests.helpers import TestNetwork
+from tests.helpers import NetworkTest
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
@@ -8,7 +8,7 @@ KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
 
 class TestE2EBasic(unittest.TestCase):
     def setUp(self):
-        self.net = TestNetwork()
+        self.net = NetworkTest(CONTROLLER)
         self.net.start()
 
     def tearDown(self):
