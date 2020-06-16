@@ -1,6 +1,6 @@
 services:
   - name: python:3.6
-    entrypoint: ["kytos-entrypoint.sh"]
+    entrypoint: ["/kytos-entrypoint.sh"]
     alias: my-controller-kytos
 
 test_kytos_mininet:
