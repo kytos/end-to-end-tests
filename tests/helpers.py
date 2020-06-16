@@ -46,4 +46,4 @@ class NetworkTest():
 
     def stop(self):
         self.net.stop()
-        mininet.clean.cleanup()
+        #mininet.clean.cleanup()
