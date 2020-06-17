@@ -2,6 +2,8 @@ from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.node import RemoteController, OVSSwitch
 import mininet.clean
+from mock import patch
+import time
 
 class RingTopo( Topo ):
     "Ring topology with three switches and one host connected to each switch"
@@ -31,6 +33,7 @@ class NetworkTest():
     def __init__(self, controller_ip):
         # Create an instance of our topology
         topo = RingTopo()
+        patch('mininet.util.fixLimits', side_effect=None)
 
         # Create a network based on the topology using OVS and controlled by
         # a remote controller.
@@ -44,6 +47,10 @@ class NetworkTest():
     def start(self):
         self.net.start()
 
+    def wait_switches_connect(self):
+        while any(not sw.connected() for sw in self.net.switches):
+            time.sleep(1)
+
     def stop(self):
         self.net.stop()
-        #mininet.clean.cleanup()
+        mininet.clean.cleanup()
