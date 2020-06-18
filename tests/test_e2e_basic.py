@@ -20,6 +20,8 @@ class TestE2EBasic(unittest.TestCase):
         self.net.stop()
         # check all the logs on the end
         # TODO: the test file should be renamed to include a number as the prefix
+        # TODO: persist the logs of syslog
+        # TODO: multiple instances or single instance for checking memory leak / usage (benchmark - how many flows are supported? how many switches are supported?)
 
 #    def test_start_kytos_without_errors(self)
 #        # /api/kytos/topology/v3/switches --> check if it is disabled
