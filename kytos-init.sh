@@ -9,4 +9,4 @@ kytosd &
 apt-get update
 apt-get install -y python-pytest python-requests python-mock
 python -m pytest tests/
-tail -f /dev/null
+#tail -f /dev/null
