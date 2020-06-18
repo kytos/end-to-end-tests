@@ -19,6 +19,13 @@ class TestE2EBasic(unittest.TestCase):
         # This function tears down the whole topology.
         self.net.stop()
 
+#    def test_start_kytos_without_errors(self)
+#        # /api/kytos/topology/v3/switches --> check if it is disabled
+#        # /v3/switches/{dpid}/enable
+#        # /api/kytos/topology/v3/switches --> check if it is enabled
+#        # kill kytosd and restart, check if switches are still enabled
+#        # check topology discovery
+
     def test_list_evcs_should_be_empty(self):
         """Test if list circuits return 'no circuit stored.'."""
         api_url = KYTOS_API+'/mef_eline/v2/evc/'
