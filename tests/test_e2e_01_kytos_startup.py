@@ -2,26 +2,27 @@ import unittest
 import requests
 from tests.helpers import NetworkTest
 import os
-import signal
 import time
 import re
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
 
+# TODO: check all the logs on the end
+# TODO: persist the logs of syslog
+# TODO: multiple instances or single instance for checking memory leak / usage (benchmark - how many flows are supported? how many switches are supported?)
 
 class TestE2EKytosServer(unittest.TestCase):
-    # TODO: check all the logs on the end
-    # TODO: persist the logs of syslog
-    # TODO: multiple instances or single instance for checking memory leak / usage (benchmark - how many flows are supported? how many switches are supported?)
-    def setUp(self):
-        self.net = NetworkTest(CONTROLLER)
-        self.net.start()
-        self.net.wait_switches_connect()
+    net = None
+    @classmethod
+    def setUpClass(cls):
+        cls.net = NetworkTest(CONTROLLER)
+        cls.net.start()
+        cls.net.wait_switches_connect()
 
-    def tearDown(self):
-        # This function tears down the whole topology.
-        self.net.stop()
+    @classmethod
+    def tearDownClass(cls):
+        cls.net.stop()
 
     def test_start_kytos_api_core(self):
         # check server status if it is UP and running
@@ -57,12 +58,6 @@ class TestE2EKytosServer(unittest.TestCase):
         data = response.json()
         self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
 
-        # restart kytos and check if the napp is still disabled
-        with open('/var/run/kytos/kytosd.pid', "r") as f:
-            pid = int(f.read())
-            os.kill(pid, signal.SIGTERM)
-        time.sleep(5)
-        os.system('kytosd &')
         self.net.wait_switches_connect()
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
