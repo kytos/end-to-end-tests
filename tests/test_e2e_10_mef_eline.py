@@ -162,3 +162,32 @@ class TestE2ETopology(unittest.TestCase):
         # self.assertEqual(path_1, path_2)
 
         self.assertTrue(True)
+        
+        def test_on_primary_path_fail_should_migrate_to_backup_with_dynamic_discovery_enabled(self):
+            #TODO
+            # payload = {
+            #     "name": "my evc1",
+            #     "enabled": True,
+            #     "uni_a": {
+            #         "interface_id": "00:00:00:00:00:00:00:01:1",
+            #         "tag": {
+            #             "tag_type": 1,
+            #             "value": 101
+            #         }
+            #     },
+            #     "uni_z": {
+            #         "interface_id": "00:00:00:00:00:00:00:01:4",
+            #         "tag": {
+            #             "tag_type": 1,
+            #             "value": 101
+            #         }
+            #     },
+            #      "current_path": [],
+            #     "primary_path": [],
+            #     "backup_path": [],
+            #     "dynamic_backup_path": "true",
+            #         "active": "true",
+            #         "enabled": "true"
+            # }
+            
+            self.assertTrue(True)
