@@ -29,8 +29,43 @@ class TestE2ETopology(unittest.TestCase):
         self.assertEqual(response.json(), {})
 
     def test_create_evc_intra_switch(self):
-        # TODO
-        self.assertTrue(True)
+        """ create an intra-switch EVC e-line with VLAN tag 
+        (UNIs in the same switch) """
+       payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:01:4",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            }
+        }
+        api_url = KYTOS_API+'/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=json.dumps(payload))
+        self.assertEqual(response.status_code, 201)
+
+        h1, h2 = self.net.get( 'h1', 'h2' )
+        result = h1.cmd( 'ping -c1', h2.IP() )
+        self.assertIn(', 0% packet loss,', result)
+        data = response.json()
+        self.assertIn('circuit_id', data)
+
+        s1 = self.net.get( 's1' )
+        flows_s1 = s1.dpctl('dump-flows')
+        # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        self.assertEqual(len(flows_s1.split('\r\n ')), 3)
+
+        # TODO: make sure it should be dl_vlan instead of vlan_vid
+        self.assertIn('dl_vlan=100', flows_s1)
 
     def test_create_evc_inter_switch(self):
         payload = {
@@ -85,5 +120,45 @@ class TestE2ETopology(unittest.TestCase):
         self.assertTrue(True)
 
     def test_on_primary_path_fail_should_migrate_to_backup(self):
-        # TODO
+        # TODO: When the primary_path is down and backup_path exists and is UP
+        # the circuit will change from primary_path to backup_path.
+        # payload = {
+        #     "name": "my evc1",
+        #     "enabled": True,
+        #     "uni_a": {
+        #         "interface_id": "00:00:00:00:00:00:00:01:1",
+        #         "tag": {
+        #             "tag_type": 1,
+        #             "value": 101
+        #         }
+        #     },
+        #     "uni_z": {
+        #         "interface_id": "00:00:00:00:00:00:00:01:4",
+        #         "tag": {
+        #             "tag_type": 1,
+        #             "value": 101
+        #         }
+        #     },
+        #      "current_path": [],
+        #     "primary_path": [
+        #         {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+        #          "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:4"}}
+        #     ],
+        #     "backup_path": [
+        #         {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+        #          "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:6"}}
+        #     ]
+        # }
+        #
+        #  links = [
+        #         get_link_mocked(endpoint_a_port=1, endpoint_b_port=4,
+        #                         metadata={"s_vlan": 101}),
+        #         get_link_mocked(endpoint_a_port=4, endpoint_b_port=1,
+        #                         metadata={"s_vlan": 101})
+        #     ]
+        #
+        # path_1 = Path(links)
+        # path_2 = Path(links)
+        # self.assertEqual(path_1, path_2)
+
         self.assertTrue(True)
