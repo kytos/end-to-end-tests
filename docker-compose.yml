@@ -1,10 +1,17 @@
 version: '2.1'
 services:
   kytos:
-    image: kytos/nightly
+    image: kytos/nightly:latest
     privileged: true
     volumes:
       - "./kytos-init.sh:/kytos-init.sh"
       - "./tests:/tests"
     command:
       - /kytos-init.sh
+  mininet:
+      image: italovalcy/mininet:latest
+      privileged: true
+      links:
+        - "kytos"
+      command:
+        - /usr/bin/tail -f /dev/null

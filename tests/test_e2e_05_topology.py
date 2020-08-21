@@ -134,6 +134,8 @@ class TestE2ETopology(unittest.TestCase):
         # TODO: 1) start kytosd -E; 2) enable all interfaces; 3) restart
         # kytos - kill kytos.pid && kytosd -E; 4 check if all interfaces 
         # remain enabled
+        #
+        # Example: curl -s -X POST http://172.19.0.2:8181/api/kytos/topology/v3/interfaces/switch/00:00:00:00:00:00:00:01/enable
         self.assertTrue(True)
 
     def test_060_disabling_interface_persistent(self):
