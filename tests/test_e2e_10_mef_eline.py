@@ -464,6 +464,70 @@ class TestE2EMefEline(unittest.TestCase):
     def test_on_primary_path_fail_should_migrate_to_backup(self):
         # TODO: When the primary_path is down and backup_path exists and is UP
         # the circuit will change from primary_path to backup_path.
+
+        payload = {
+         "name": "my evc1",
+         "enabled": True,
+         "uni_a": {
+             "interface_id": "00:00:00:00:00:00:00:01:1",
+             "tag": {
+                 "tag_type": 1,
+                 "value": 101
+             }
+         },
+         "uni_z": {
+             "interface_id": "00:00:00:00:00:00:00:01:4",
+             "tag": {
+                 "tag_type": 1,
+                 "value": 101
+             }
+         },
+          "current_path": [],
+         "primary_path": [
+             {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+              "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:1"}}
+         ],
+         "backup_path": [
+             {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+              "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:04:1"}}
+         ]
+        }
+    
+    
+        """disabling links to test if back-up path is taken"""
+        net.configLinkStatus('s1','s3','down') # used to up/down the link.
+    
+        """Check on the virtual switches directly for flows"""
+        # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        s1, s2, s3, s4 = self.net.net.get( 's1', 's2', 's3','s4' )
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
+        flows_s4 = s4.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 3
+        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s3.split('\r\n ')) == 3
+        assert len(flows_s4.split('\r\n ')) == 3
+    
+        """Make api request for @current_path"""
+        url = "http://67.17.206.252:8181/api/kytos/mef_eline/v2/evc/"
+        request = requests.post(url=url, json=payload)
+    
+        """Parse incomming json file for @current_path"""
+        current_path = json.loads(request.content.decode("utf-8")) #reading from json file
+    
+        """Compare @current_path with expected backup_path"""
+    
+        path_taken = current_path
+        path_backup = [ {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+        "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:04:1"}}]
+    
+        self.assertEqual(path_taken, path_backup)
+    
+        # self.assertTrue(True)
+        
+    def test_070_on_primary_path_fail_should_migrate_to_backup_with_dynamic_discovery_enabled(self):
+        #TODO
         # payload = {
         #     "name": "my evc1",
         #     "enabled": True,
@@ -482,54 +546,11 @@ class TestE2EMefEline(unittest.TestCase):
         #         }
         #     },
         #      "current_path": [],
-        #     "primary_path": [
-        #         {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-        #          "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:4"}}
-        #     ],
-        #     "backup_path": [
-        #         {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-        #          "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:6"}}
-        #     ]
+        #     "primary_path": [],
+        #     "backup_path": [],
+        #     "dynamic_backup_path": "true",
+        #         "active": "true",
+        #         "enabled": "true"
         # }
-        #
-        #  links = [
-        #         get_link_mocked(endpoint_a_port=1, endpoint_b_port=4,
-        #                         metadata={"s_vlan": 101}),
-        #         get_link_mocked(endpoint_a_port=4, endpoint_b_port=1,
-        #                         metadata={"s_vlan": 101})
-        #     ]
-        #
-        # path_1 = Path(links)
-        # path_2 = Path(links)
-        # self.assertEqual(path_1, path_2)
-
-        assert True
         
-        def test_070_on_primary_path_fail_should_migrate_to_backup_with_dynamic_discovery_enabled(self):
-            #TODO
-            # payload = {
-            #     "name": "my evc1",
-            #     "enabled": True,
-            #     "uni_a": {
-            #         "interface_id": "00:00:00:00:00:00:00:01:1",
-            #         "tag": {
-            #             "tag_type": 1,
-            #             "value": 101
-            #         }
-            #     },
-            #     "uni_z": {
-            #         "interface_id": "00:00:00:00:00:00:00:01:4",
-            #         "tag": {
-            #             "tag_type": 1,
-            #             "value": 101
-            #         }
-            #     },
-            #      "current_path": [],
-            #     "primary_path": [],
-            #     "backup_path": [],
-            #     "dynamic_backup_path": "true",
-            #         "active": "true",
-            #         "enabled": "true"
-            # }
-            
-            self.assertTrue(True)
+        self.assertTrue(True)
