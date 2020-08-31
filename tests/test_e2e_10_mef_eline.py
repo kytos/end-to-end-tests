@@ -567,3 +567,90 @@ class TestE2EMefEline(unittest.TestCase):
         assert len(flows_s2.split('\r\n ')) == 3
         assert len(flows_s3.split('\r\n ')) == 3
         assert len(flows_s4.split('\r\n ')) == 3
+
+    def evc_inter_switch_without_VLAN_tag(self):
+        """ KYTOS_IP = "67.17.206.252" (sdn_controller_address) """
+
+        # send evc_req and get circuit_id
+        """ curl -s -X POST -d '{"name": "my evc3","enabled": true, "dynamic_backup_path":true, "uni_a": { "interface_id":
+        "00:00:00:00:00:00:00:01:1" }, "uni_z": {"interface_id": "00:00:00:00:00:00:00:02:1"}}' 
+        http://$KYTOS_IP:8181/api/kytos/mef_eline/v2/evc/ -H "Content-Type: application/json" """
+
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:01:4",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "current_path": [],
+            "primary_path": [
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:1"}}
+            ],
+            "backup_path": [
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:1"}}
+            ],
+            "dynamic_backup_path": "true",
+            "active": "true",
+            "enabled": "true"
+        }
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=json.dumps(payload))
+        self.assertEqual(response.status_code, 201)
+
+        """ check again for evc created and status "active": true
+        curl http://67.17.206.252:8181/api/kytos/mef_eline/v2/evc/ | python - m json.tool """
+
+    def evc_intra_switch_without_VLAN_tag(self):
+
+        # send evc_req and get circuit_id
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:01:4",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "current_path": [],
+            "primary_path": [
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:2"}}
+            ],
+            "backup_path": [
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
+                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:3"}}
+            ],
+            "dynamic_backup_path": "true",
+            "active": "true",
+            "enabled": "true"
+        }
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=json.dumps(payload))
+        self.assertEqual(response.status_code, 201)
+
+        """ check again for evc created and status "active": true
+            curl http://67.17.206.252:8181/api/kytos/mef_eline/v2/evc/ | python - m json.tool """
