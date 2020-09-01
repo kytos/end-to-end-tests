@@ -462,8 +462,9 @@ class TestE2EMefEline(unittest.TestCase):
         assert True
 
     def test_on_primary_path_fail_should_migrate_to_backup(self):
-    """ When the primary_path is down and backup_path exists and is UP
-        the circuit will change from primary_path to backup_path. """
+        # TODO Check for false positives between uni_a switch 1 and uni_z switch 3 instead of switch 2
+        """ When the primary_path is down and backup_path exists and is UP
+            the circuit will change from primary_path to backup_path. """
 
         payload = {
             "name": "my evc1",
@@ -476,7 +477,7 @@ class TestE2EMefEline(unittest.TestCase):
                 }
             },
             "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:01:4",
+                "interface_id": "00:00:00:00:00:00:00:02:1",
                 "tag": {
                     "tag_type": 1,
                     "value": 101
@@ -484,25 +485,31 @@ class TestE2EMefEline(unittest.TestCase):
             },
             "current_path": [],
             "primary_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:1"}}
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:3"},
+                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:3"}}
             ],
             "backup_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:1"}}
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:4"},
+                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:04:4"}},
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:04:3"},
+                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:4"}},
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:03:1"},
+                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:4"}}
             ]
         }
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=json.dumps(payload))
-        self.assertEqual(response.status_code, 201)
+        assert response.status_code == 201
 
-        """ Now in Mininet, disable links to test if back-up path is taken with the following command:
-            net.configLinkStatus('s1', 's2', 'down') """
+        time.sleep(10)
 
-        """ Check on the virtual switches directly for flows.
+        """ Command to up/down links to test if back-up path is taken with the following command: """
+        self.net.net.configLinkStatus('s1', 's2', 'down')
+
+        """Check on the virtual switches directly for flows.
         Each switch that the flow traveled must have 3 flows:
-        01 for LLDP + 02 for the EVC (ingress + egress) """
+        01 for LLDP + 02 for the EVC (ingress + egress)"""
         s1, s2, s3, s4 = self.net.net.get('s1', 's2', 's3', 's4')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
@@ -512,6 +519,22 @@ class TestE2EMefEline(unittest.TestCase):
         assert len(flows_s2.split('\r\n ')) == 3
         assert len(flows_s3.split('\r\n ')) == 3
         assert len(flows_s4.split('\r\n ')) == 3
+
+        # Nodes should be able to ping each other
+        h1, h3 = self.net.net.get('h1', 'h3')
+        h1.cmd('ip link add link %s name vlan101 type vlan id 101' % (h1.intfNames()[0]))
+        h1.cmd('ip link set up vlan101')
+        h1.cmd('ip addr add 101.0.0.1/24 dev vlan101')
+        h3.cmd('ip link add link %s name vlan101 type vlan id 101' % (h3.intfNames()[0]))
+        h3.cmd('ip link set up vlan101')
+        h3.cmd('ip addr add 101.0.0.3/24 dev vlan101')
+        result = h1.cmd('ping -c1 101.0.0.3')
+        assert ', 0% packet loss,' in result
+
+        # clean up
+        h1.cmd('ip link del vlan101')
+        h3.cmd('ip link del vlan101')
+        self.net.restart_kytos_clean()
 
     def test_on_primary_path_fail_should_migrate_to_backup_with_dynamic_discovery_enabled(self):
         """ When the primary_path is down and backup_path exists and is UP
@@ -528,7 +551,7 @@ class TestE2EMefEline(unittest.TestCase):
                 }
             },
             "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:01:4",
+                "interface_id": "00:00:00:00:00:00:00:02:1",
                 "tag": {
                     "tag_type": 1,
                     "value": 101
@@ -536,12 +559,16 @@ class TestE2EMefEline(unittest.TestCase):
             },
             "current_path": [],
             "primary_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:1"}}
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:3"}}
             ],
             "backup_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:1"}}
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:04:4"}},
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:04:3"},
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:4"}},
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:03:1"},
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:4"}}
             ],
             "dynamic_backup_path": "true",
             "active": "true",
@@ -550,14 +577,15 @@ class TestE2EMefEline(unittest.TestCase):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=json.dumps(payload))
-        self.assertEqual(response.status_code, 201)
+        assert response.status_code == 201
 
-        """ Now in Mininet, disable links to test if back-up path is taken with the following command:
-            net.configLinkStatus('s1', 's2', 'down') """
+        time.sleep(10)
 
-        """Check on the virtual switches directly for flows. Each switch that the flow traveled must have 3 flows:
-        01 for LLDP + 02 for the EVC (ingress + egress)"""
+        # Command to disable links to test if back-up path is taken with the following command:
+        self.net.net.configLinkStatus('s1', 's2', 'down')
 
+        # Check on the virtual switches directly for flows. Each switch that the flow traveled must have 3 flows:
+        # 01 for LLDP + 02 for the EVC (ingress + egress)
         s1, s2, s3, s4 = self.net.net.get('s1', 's2', 's3', 's4')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
@@ -568,51 +596,81 @@ class TestE2EMefEline(unittest.TestCase):
         assert len(flows_s3.split('\r\n ')) == 3
         assert len(flows_s4.split('\r\n ')) == 3
 
+        # Nodes should be able to ping each other
+        h1, h3 = self.net.net.get('h1', 'h3')
+        h1.cmd('ip link add link %s name vlan101 type vlan id 101' % (h1.intfNames()[0]))
+        h1.cmd('ip link set up vlan101')
+        h1.cmd('ip addr add 101.0.0.1/24 dev vlan101')
+        h3.cmd('ip link add link %s name vlan101 type vlan id 101' % (h3.intfNames()[0]))
+        h3.cmd('ip link set up vlan101')
+        h3.cmd('ip addr add 101.0.0.3/24 dev vlan101')
+        result = h1.cmd('ping -c1 101.0.0.3')
+        assert ', 0% packet loss,' in result
+
+        # clean up
+        h1.cmd('ip link del vlan101')
+        h3.cmd('ip link del vlan101')
+        self.net.restart_kytos_clean()
+
     def evc_inter_switch_without_VLAN_tag(self):
-        """ KYTOS_IP = "67.17.206.252" (sdn_controller_address) """
 
-        # send evc_req and get circuit_id
-        """ curl -s -X POST -d '{"name": "my evc3","enabled": true, "dynamic_backup_path":true, "uni_a": { "interface_id":
-        "00:00:00:00:00:00:00:01:1" }, "uni_z": {"interface_id": "00:00:00:00:00:00:00:02:1"}}' 
-        http://$KYTOS_IP:8181/api/kytos/mef_eline/v2/evc/ -H "Content-Type: application/json" """
-
+        #evc_req
         payload = {
             "name": "my evc1",
             "enabled": True,
             "uni_a": {
-                "interface_id": "00:00:00:00:00:00:00:01:1",
-                "tag": {
-                    "tag_type": 1,
-                    "value": 101
-                }
+                "interface_id": "00:00:00:00:00:00:00:01:1"
             },
             "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:01:4",
-                "tag": {
-                    "tag_type": 1,
-                    "value": 101
-                }
+            "interface_id": "00:00:00:00:00:00:00:01:4"
+
             },
             "current_path": [],
             "primary_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:1"}}
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:3"}}
             ],
             "backup_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:1"}}
-            ],
-            "dynamic_backup_path": "true",
-            "active": "true",
-            "enabled": "true"
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:04:4"}},
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:04:3"},
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:4"}},
+                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:03:1"},
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:4"}}
+            ]
         }
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=json.dumps(payload))
         self.assertEqual(response.status_code, 201)
 
-        """ check again for evc created and status "active": true
-        curl http://67.17.206.252:8181/api/kytos/mef_eline/v2/evc/ | python - m json.tool """
+        # Check on the virtual switches directly for flows. Each switch that the flow traveled must have 3 flows:
+        # 01 for LLDP + 02 for the EVC (ingress + egress)
+        s1, s2, s3, s4 = self.net.net.get('s1', 's2', 's3', 's4')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
+        flows_s4 = s4.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 3
+        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s3.split('\r\n ')) == 3
+        assert len(flows_s4.split('\r\n ')) == 3
+
+        # Nodes should be able to ping each other
+        h1, h3 = self.net.net.get('h1', 'h3')
+        h1.cmd('ip link add link %s name vlan101 type vlan id 101' % (h1.intfNames()[0]))
+        h1.cmd('ip link set up vlan101')
+        h1.cmd('ip addr add 101.0.0.1/24 dev vlan101')
+        h3.cmd('ip link add link %s name vlan101 type vlan id 101' % (h3.intfNames()[0]))
+        h3.cmd('ip link set up vlan101')
+        h3.cmd('ip addr add 101.0.0.3/24 dev vlan101')
+        result = h1.cmd('ping -c1 101.0.0.3')
+        assert ', 0% packet loss,' in result
+
+        # clean up
+        h1.cmd('ip link del vlan101')
+        h3.cmd('ip link del vlan101')
+        self.net.restart_kytos_clean()
 
     def evc_intra_switch_without_VLAN_tag(self):
 
@@ -621,36 +679,53 @@ class TestE2EMefEline(unittest.TestCase):
             "name": "my evc1",
             "enabled": True,
             "uni_a": {
-                "interface_id": "00:00:00:00:00:00:00:01:1",
-                "tag": {
-                    "tag_type": 1,
-                    "value": 101
-                }
+                "interface_id": "00:00:00:00:00:00:00:01:1"
             },
             "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:01:4",
-                "tag": {
-                    "tag_type": 1,
-                    "value": 101
-                }
+                "interface_id": "00:00:00:00:00:00:00:01:4"
             },
             "current_path": [],
             "primary_path": [
                 {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:2"}}
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:2"}}
             ],
             "backup_path": [
                 {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                    "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:3"}}
-            ],
-            "dynamic_backup_path": "true",
-            "active": "true",
-            "enabled": "true"
+                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:3"}}
+            ]
         }
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=json.dumps(payload))
         self.assertEqual(response.status_code, 201)
 
-        """ check again for evc created and status "active": true
-            curl http://67.17.206.252:8181/api/kytos/mef_eline/v2/evc/ | python - m json.tool """
+
+        # Check on the virtual switches directly for flows. Each switch that the flow traveled must have 3 flows:
+        # 01 for LLDP + 02 for the EVC (ingress + egress)
+        s1, s2, s3, s4 = self.net.net.get('s1', 's2', 's3', 's4')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
+        flows_s4 = s4.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 3
+        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s3.split('\r\n ')) == 3
+        assert len(flows_s4.split('\r\n ')) == 3
+
+        # TODO: assert that evc was installed by pinging, and look for verification of the circuit id been created
+
+        # clean up
+        self.net.restart_kytos_clean()
+
+    def create_many_EVC_at_once_and_verify_proper_installtion(self):
+        # TODO Create many EVC at once and check if they are all working (e.g., 300 EVCs in the same file)
+        #  check if vlan-id is inside the dump-flows
+        assert True
+
+    def patch_EVC_by_changing_UNIs_from_interface_to_another(self):
+        # TODO
+        assert True
+
+    def create_EVC_with_scheduled_times_for_provisioning_and_ending(self):
+        # TODO
+        assert True
