@@ -718,3 +718,99 @@ class TestE2EMefEline(unittest.TestCase):
 
         # clean up
         self.net.restart_kytos_clean()
+
+    def create_many_evc_at_once_and_verify_proper_installation(self):
+        # TODO Create many EVC at once and check if they are all working (e.g., 300 EVCs in the same file)
+
+        url = "http://localhost:8181/api/kytos/mef_eline/v2/evc/"
+        vlan_start = 1
+        vlan_end = 200
+
+        vlan = vlan_start
+        while vlan <= vlan_end:
+            evc = {
+                "Content-Type": "application/json",
+                "cache-control": "no-cache",
+                "name": "evc_%s" % vlan,
+                "uni_a": {
+                    "interface_id": "00:00:00:00:00:00:00:01:1",
+                    "tag": {
+                        "tag_type": 1,
+                        "value": vlan
+                    }
+                },
+                "uni_z": {
+                    "interface_id": "00:00:00:00:00:00:00:02:1",
+                    "tag": {
+                        "tag_type": 1,
+                        "value": vlan
+                    }
+                },
+                "current_path": [],
+                "primary_path": [
+                    {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                     "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}
+                ],
+                "backup_path": [
+                    {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                     "endpoint_b": {"id": "00:00:00:00:00:00:00:04:4"}},
+                    {"endpoint_a": {"id": "00:00:00:00:00:00:00:04:3"},
+                     "endpoint_b": {"id": "00:00:00:00:00:00:00:03:4"}},
+                    {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:1"},
+                     "endpoint_b": {"id": "00:00:00:00:00:00:00:02:4"}}
+                ],
+                "dynamic_backup_path": "true",
+                "active": "true",
+                "enabled": "true"
+            }
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=json.dumps(evc))
+        self.assertEqual(response.status_code, 200)
+
+        request = requests.post(url=url, json=evc)
+        circuit_id = json.loads(request.content.decode("utf-8"))
+
+        if isinstance(circuit_id, dict):
+            print("circuit_id %s created" % circuit_id['circuit_id'])
+
+        # Check if vlan_id is inside the dump-flows. Each switch that the flow traveled must have 3 flows:
+        # 01 for LLDP + 02 for the EVC (ingress + egress)
+        s1, s2, s3, s4 = self.net.net.get('s1', 's2', 's3', 's4')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
+        flows_s4 = s4.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 3
+        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s3.split('\r\n ')) == 3
+        assert len(flows_s4.split('\r\n ')) == 3
+
+        # Clean up: Delete all EVCs & re-start Kytos fresh
+        print("Removing all EVCs ...")
+        evcs = requests.get(url)
+        evcs = json.loads(evcs.content.decode("utf-8"))
+        for evc in evcs:
+            if evcs[evc]['enabled']:
+                requests.delete(url=url + evc)
+        print("... Done!")
+
+        self.net.restart_kytos_clean()
+
+    def patch_evc_by_changing_unis_from_interface_to_another(self):
+        # TODO
+        """To edit an EVC, a PATCH request must be used:
+
+        PATCH /kytos/mef_eline/v2.0/evc/<id>
+
+        Information necessary to modify the EVC:
+
+        {UNI_A, UNI_Z, str bandwidth, datetime start_date, datetime end_date,
+        [str primary_links], [str backup_links], bool dynamic_backup_path,
+        tenant, service_level}"""
+
+        assert True
+
+    def create_evc_with_scheduled_times_for_provisioning_and_ending(self):
+        # TODO
+        assert True
