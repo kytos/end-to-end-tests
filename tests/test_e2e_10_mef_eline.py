@@ -488,16 +488,16 @@ class TestE2EMefEline(unittest.TestCase):
             },
             "current_path": [],
             "primary_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:3"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}
             ],
             "backup_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:4"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:04:4"}},
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:04:3"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:4"}},
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:03:1"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:4"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:04:4"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:04:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:4"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:1"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:4"}}
             ]
         }
 
@@ -562,16 +562,16 @@ class TestE2EMefEline(unittest.TestCase):
             },
             "current_path": [],
             "primary_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:3"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}
             ],
             "backup_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:4"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:04:4"}},
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:04:3"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:4"}},
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:03:1"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:4"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:04:4"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:04:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:4"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:1"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:4"}}
             ],
             "dynamic_backup_path": "true",
             "active": "true",
@@ -630,16 +630,16 @@ class TestE2EMefEline(unittest.TestCase):
             },
             "current_path": [],
             "primary_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:3"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}
             ],
             "backup_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:4"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:04:4"}},
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:04:3"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:4"}},
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:03:1"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:4"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:04:4"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:04:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:4"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:1"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:4"}}
             ]
         }
 
@@ -689,12 +689,12 @@ class TestE2EMefEline(unittest.TestCase):
             },
             "current_path": [],
             "primary_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:2"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:1"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:01:2"}}
             ],
             "backup_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:1"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:01:3"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:1"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:01:3"}}
             ]
         }
 
