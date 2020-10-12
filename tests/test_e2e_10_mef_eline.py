@@ -722,7 +722,7 @@ class TestE2EMefEline(unittest.TestCase):
     def create_many_evc_at_once_and_verify_proper_installtion(self):
         # TODO Create many EVC at once and check if they are all working (e.g., 300 EVCs in the same file)
 
-        url = "http://67.17.206.252:8181/api/kytos/mef_eline/v2/evc/"
+        url = "http://localhost:8181/api/kytos/mef_eline/v2/evc/"
         vlan_start = 1
         vlan_end = 200
 
