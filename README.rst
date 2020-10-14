@@ -10,8 +10,8 @@ As of today, the E2E code available analyzes the mef_eline, topology, and mainte
 All tests are based on simple Mininet topologies (which are provided in the helpers.py file), and they are executed within a docker container that holds the 
 code for installing all the basic requirements needed to set up an environment capable of executing the tests.
 
-Getting started
-########
+Getting Started
+###############
 
 Once you have cloned this project, you need to go into the project repository and run the following command::
 
@@ -23,37 +23,26 @@ for Kytos and Mininet.
 After all installations finish, the docker-compose file will call the kytos-init.sh script which takes care of finishing installing Kytos and all of the required 
 network applications in a quick and efficient way. This script is also responsible for executing all the tests within the projects repository via the commands::
 
-  $ python -m pytest --timeout=60 tests/ # Which runs all available tests
+  $ python -m pytest --timeout=60 tests/
 
-or::
+Which runs all available tests, or run only a specific test::
 
-  $ python -m pytest --timeout=60 tests/test_e2e_10_mef_eline.py::TestE2EMefEline::test_on_primary_path_fail_should_migrate_to_backup # Which only runs specific tests
+  $ python -m pytest --timeout=60 \
+        tests/test_e2e_10_mef_eline.py::TestE2EMefEline::test_on_primary_path_fail_should_migrate_to_backup
 
 The above lines are entirely up to the user to modify, and will allow them to choose in which way they want to use the tests.
 
 Requirements
-########
-
-Python
-
-Mininet
-
-Docker
-
-Kytos SDN Controller
-
-Kytos/storehouse
-
-Kytos/of_core 
-
-Kytos/flow_manager 
-
-Kytos/topology 
-
-Kytos/of_lldp pathfinder 
-
-Kytos/mef_eline 
-
-Kytos/maintenance
-
+############
+* Python
+* Mininet
+* Docker
+* Kytos SDN Controller
+* kytos/storehouse
+* kytos/of_core 
+* kytos/flow_manager 
+* kytos/topology 
+* kytos/of_lldp pathfinder 
+* kytos/mef_eline 
+* kytos/maintenance
 
