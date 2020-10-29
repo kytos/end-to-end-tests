@@ -93,7 +93,7 @@ class NetworkTest():
             #    os.kill(pid, signal.SIGTERM)
             time.sleep(5)
         except Exception as e:
-            print "FAIL restarting kytos -- %s" % (e)
+            print("FAIL restarting kytos -- %s" % (e))
         if clean_config:
             # TODO: config is defined at NAPPS_DIR/kytos/storehouse/settings.py 
             # and NAPPS_DIR is defined at /etc/kytos/kytos.conf
