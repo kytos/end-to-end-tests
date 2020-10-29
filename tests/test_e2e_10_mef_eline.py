@@ -425,10 +425,8 @@ class TestE2EMefEline(unittest.TestCase):
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        print
-        flows_s1
-        print
-        flows_s2
+        print(flows_s1)
+        print(flows_s2)
         assert len(flows_s1.split('\r\n ')) == 3
         assert len(flows_s2.split('\r\n ')) == 3
 
