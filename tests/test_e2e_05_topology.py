@@ -67,10 +67,10 @@ class TestE2ETopology(unittest.TestCase):
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
 
-        # restore the status
-        api_url = KYTOS_API+'/topology/v3/restore'
-        response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        ## restore the status
+        #api_url = KYTOS_API+'/topology/v3/restore'
+        #response = requests.get(api_url)
+        #self.assertEqual(response.status_code, 200)
 
         # check if the switches are still enabled and now with the links
         api_url = KYTOS_API+'/topology/v3/switches'
@@ -118,10 +118,10 @@ class TestE2ETopology(unittest.TestCase):
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
 
-        # restore the status
-        api_url = KYTOS_API+'/topology/v3/restore'
-        response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        ## restore the status
+        #api_url = KYTOS_API+'/topology/v3/restore'
+        #response = requests.get(api_url)
+        #self.assertEqual(response.status_code, 200)
 
         # check if the interfaces are still enabled and now with the links
         api_url = KYTOS_API+'/topology/v3/interfaces'
@@ -191,10 +191,10 @@ class TestE2ETopology(unittest.TestCase):
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
 
-        # restore the status
-        api_url = KYTOS_API+'/topology/v3/restore'
-        response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        ## restore the status
+        #api_url = KYTOS_API+'/topology/v3/restore'
+        #response = requests.get(api_url)
+        #self.assertEqual(response.status_code, 200)
 
         # wait 10s to kytos execute LLDP
         time.sleep(10)
