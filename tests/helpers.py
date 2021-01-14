@@ -64,11 +64,19 @@ class DanielaTopo( Topo ):
         self.addLink(s3, s4)
         self.addLink(s4, s1)
 
+class TopologyFactory():
+    def create(self, type):
+        if type == "RingTopo":
+            return RingTopo()
+        elif type == "DanielaTopo":
+            return DanielaTopo()
+
 class NetworkTest():
-    def __init__(self, controller_ip):
+    def __init__(self, controller_ip, topo_name='RingTopo'):
         # Create an instance of our topology
         mininet.clean.cleanup()
-        topo = RingTopo()
+        factory = TopologyFactory()
+        topo = factory.create(topo_name)
 
         # Create a network based on the topology using OVS and controlled by
         # a remote controller.
