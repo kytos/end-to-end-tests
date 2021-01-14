@@ -34,19 +34,21 @@ class TestE2EKytosServer(unittest.TestCase):
 
         # check the list of enabled napps
         expected_napps = [
-                ["kytos", "pathfinder"], 
-                ["kytos", "mef_eline"], 
-                ["kytos", "storehouse"], 
-                ["kytos", "flow_manager"], 
-                ["kytos", "of_core"], 
-                ["kytos", "topology"], 
-                ["kytos", "of_lldp"]
+                ("kytos", "pathfinder"),
+                ("kytos", "mef_eline"),
+                ("kytos", "maintenance"),
+                ("kytos", "storehouse"),
+                ("kytos", "flow_manager"),
+                ("kytos", "of_core"),
+                ("kytos", "topology"),
+                ("kytos", "of_lldp")
             ]
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data['napps'], expected_napps)
+        #self.assertEqual(set(data['napps']), set(expected_napps))
+        assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps)
 
         # check disable a napp
         api_url = KYTOS_API+'/core/napps/kytos/mef_eline/disable'
@@ -56,14 +58,20 @@ class TestE2EKytosServer(unittest.TestCase):
         response = requests.get(api_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
+        #self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
+        assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps) - set([("kytos", "mef_eline")])
 
+        # restart kytos and check if the switches are still enabled
+        self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
+
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
+        #self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
+        assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps) - set([("kytos", "mef_eline")])
+
 
         # check enable a napp
         api_url = KYTOS_API+'/core/napps/kytos/mef_eline/enable'
@@ -73,7 +81,8 @@ class TestE2EKytosServer(unittest.TestCase):
         response = requests.get(api_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data['napps'], expected_napps)
+        #self.assertEqual(data['napps'], expected_napps)
+        assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps)
 
         # test auth api
         # TODO
