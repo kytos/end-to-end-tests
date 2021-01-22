@@ -43,7 +43,7 @@ class TestE2EMefEline(unittest.TestCase):
                 }
             },
             "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:01:4",
+                "interface_id": "00:00:00:00:00:00:00:01:2",
                 "tag": {
                     "tag_type": 1,
                     "value": 101
@@ -51,22 +51,34 @@ class TestE2EMefEline(unittest.TestCase):
             }
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
-        response = requests.post(api_url, json=json.dumps(payload))
-        self.assertEqual(response.status_code, 200)
-
-        h1, h2 = self.net.get('h1', 'h2')
-        result = h1.cmd('ping -c1', h2.IP())
-        self.assertIn(', 0% packet loss,', result)
+        response = requests.post(api_url, json=payload)
+        self.assertEqual(response.status_code, 201)
         data = response.json()
         self.assertIn('circuit_id', data)
 
-        s1 = self.net.get('s1')
+        h11, h12 = self.net.net.get('h11', 'h12')
+        h11.cmd('ip link add link %s name vlan101 type vlan id 101' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan101')
+        h11.cmd('ip addr add 10.1.1.11/24 dev vlan101')
+        h12.cmd('ip link add link %s name vlan101 type vlan id 101' % (h12.intfNames()[0]))
+        h12.cmd('ip link set up vlan101')
+        h12.cmd('ip addr add 10.1.1.12/24 dev vlan101')
+
+        result = h11.cmd('ping -c1 10.1.1.12')
+        self.assertIn(', 0% packet loss,', result)
+
+        s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
         # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         self.assertEqual(len(flows_s1.split('\r\n ')), 3)
 
         # TODO: make sure it should be dl_vlan instead of vlan_vid
-        self.assertIn('dl_vlan=100', flows_s1)
+        self.assertIn('dl_vlan=101', flows_s1)
+
+        # clean up
+        h11.cmd('ip link del vlan101')
+        h12.cmd('ip link del vlan101')
+        self.net.restart_kytos_clean()
 
     def test_015_create_evc_inter_switch(self):
         payload = {
@@ -90,7 +102,7 @@ class TestE2EMefEline(unittest.TestCase):
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
         time.sleep(5)
@@ -140,7 +152,7 @@ class TestE2EMefEline(unittest.TestCase):
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
         time.sleep(5)
@@ -189,7 +201,7 @@ class TestE2EMefEline(unittest.TestCase):
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
         time.sleep(5)
@@ -240,7 +252,7 @@ class TestE2EMefEline(unittest.TestCase):
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
         evc1 = data['circuit_id']
@@ -262,7 +274,7 @@ class TestE2EMefEline(unittest.TestCase):
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
         evc2 = data['circuit_id']
@@ -385,7 +397,7 @@ class TestE2EMefEline(unittest.TestCase):
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
         evc1 = data['circuit_id']
@@ -414,7 +426,7 @@ class TestE2EMefEline(unittest.TestCase):
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
         evc2 = data['circuit_id']

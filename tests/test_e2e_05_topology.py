@@ -67,10 +67,10 @@ class TestE2ETopology(unittest.TestCase):
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
 
-        # restore the status
-        api_url = KYTOS_API+'/topology/v3/restore'
-        response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        ## restore the status
+        #api_url = KYTOS_API+'/topology/v3/restore'
+        #response = requests.get(api_url)
+        #self.assertEqual(response.status_code, 200)
 
         # check if the switches are still enabled and now with the links
         api_url = KYTOS_API+'/topology/v3/switches'
@@ -118,10 +118,10 @@ class TestE2ETopology(unittest.TestCase):
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
 
-        # restore the status
-        api_url = KYTOS_API+'/topology/v3/restore'
-        response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        ## restore the status
+        #api_url = KYTOS_API+'/topology/v3/restore'
+        #response = requests.get(api_url)
+        #self.assertEqual(response.status_code, 200)
 
         # check if the interfaces are still enabled and now with the links
         api_url = KYTOS_API+'/topology/v3/interfaces'
@@ -159,14 +159,7 @@ class TestE2ETopology(unittest.TestCase):
         response = requests.get(api_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(len(data['links']), 3)
-        link_id1 = None
-        for k,v in data['links'].items():
-            link_a, link_b = v['endpoint_a']['id'], v['endpoint_b']['id']
-            if set([link_a, link_b]) == set([endpoint_a, endpoint_b]):
-                link_id1 = k
-        self.assertNotEqual(link_id1, None)
-        self.assertFalse(data['links'][link_id1]['enabled'])
+        self.assertEqual(len(data['links']), 0)
 
         # enable the links (need to enable the switches and ports first)
         for i in [1,2,3]:
@@ -177,6 +170,24 @@ class TestE2ETopology(unittest.TestCase):
             api_url = KYTOS_API+'/topology/v3/interfaces/switch/%s/enable' % (sw)
             response = requests.post(api_url)
             self.assertEqual(response.status_code, 200)
+
+        # wait 10s to kytos execute LLDP
+        time.sleep(10)
+
+        # now all the links should stay disabled
+        api_url = KYTOS_API+'/topology/v3/links'
+        response = requests.get(api_url)
+        data = response.json()
+        self.assertEqual(len(data['links']), 3)
+
+        link_id1 = None
+        for k,v in data['links'].items():
+            link_a, link_b = v['endpoint_a']['id'], v['endpoint_b']['id']
+            if set([link_a, link_b]) == set([endpoint_a, endpoint_b]):
+                link_id1 = k
+        self.assertNotEqual(link_id1, None)
+        self.assertFalse(data['links'][link_id1]['enabled'])
+
         api_url = KYTOS_API+'/topology/v3/links/%s/enable' % (link_id1)
         response = requests.post(api_url)
         self.assertEqual(response.status_code, 201)
@@ -191,10 +202,10 @@ class TestE2ETopology(unittest.TestCase):
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
 
-        # restore the status
-        api_url = KYTOS_API+'/topology/v3/restore'
-        response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        ## restore the status
+        #api_url = KYTOS_API+'/topology/v3/restore'
+        #response = requests.get(api_url)
+        #self.assertEqual(response.status_code, 200)
 
         # wait 10s to kytos execute LLDP
         time.sleep(10)
