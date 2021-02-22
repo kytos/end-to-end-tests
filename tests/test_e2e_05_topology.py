@@ -102,7 +102,7 @@ class TestE2ETopology(unittest.TestCase):
         # enable the interfaces
         api_url = KYTOS_API+'/topology/v3/interfaces/%s/enable' % (sw1if1)
         response = requests.post(api_url)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         api_url = KYTOS_API+'/topology/v3/interfaces/%s/enable' % (sw2if1)
         response = requests.post(api_url)
         self.assertEqual(response.status_code, 201)

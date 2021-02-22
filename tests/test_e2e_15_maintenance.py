@@ -62,6 +62,7 @@ class TestE2EMaintenance(unittest.TestCase):
         start = datetime.now() + timedelta(seconds=60)
         end = start + timedelta(seconds=60)
         payload = {
+            "description": "my MW on switch 2",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [

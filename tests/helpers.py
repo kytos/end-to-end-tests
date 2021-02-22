@@ -120,7 +120,7 @@ class NetworkTest():
             time.sleep(1)
             max_wait += 1
             if max_wait > 30:
-                raise TimeoutError
+                raise Exception('Timeout: timed out waiting switches reconnect')
 
     def restart_kytos_clean(self):
         self.start_controller(clean_config=True, enable_all=True)
