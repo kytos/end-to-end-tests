@@ -44,7 +44,6 @@ class TestE2EMefEline(unittest.TestCase):
                     "value": 101
                 }
             },
-            "current_path": [],
             "primary_path": [
                 {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
                  "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}
@@ -118,7 +117,6 @@ class TestE2EMefEline(unittest.TestCase):
                     "value": 101
                 }
             },
-            "current_path": [],
             "primary_path": [
                 {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
                  "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}
