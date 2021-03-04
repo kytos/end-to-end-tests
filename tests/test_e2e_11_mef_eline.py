@@ -26,7 +26,7 @@ class TestE2EMefEline(unittest.TestCase):
         # TODO Check for false positives between uni_a switch 1 and uni_z switch 3 instead of switch 2
         """ When the primary_path is down and backup_path exists and is UP
             the circuit will change from primary_path to backup_path. """
-
+        time.sleep(10)
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -99,7 +99,7 @@ class TestE2EMefEline(unittest.TestCase):
     def test_on_primary_path_fail_should_migrate_to_backup_with_dynamic_discovery_enabled(self):
         """ When the primary_path is down and backup_path exists and is UP
             the circuit will change from primary_path to backup_path with dynamic_discovery_enabled. """
-
+        time.sleep(10)
         payload = {
             "name": "my evc1",
             "enabled": True,

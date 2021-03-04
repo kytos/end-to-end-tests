@@ -12,10 +12,10 @@ class RingTopo( Topo ):
 
     def build( self ):
         # Create two hosts.
-        h11 = self.addHost( 'h11' )
-        h12 = self.addHost( 'h12' )
-        h2 = self.addHost( 'h2' )
-        h3 = self.addHost( 'h3' )
+        h11 = self.addHost( 'h11', ip='0.0.0.0')
+        h12 = self.addHost( 'h12', ip='0.0.0.0')
+        h2 = self.addHost( 'h2', ip='0.0.0.0' )
+        h3 = self.addHost( 'h3', ip='0.0.0.0' )
 
         # Create the switches
         s1 = self.addSwitch( 's1' )

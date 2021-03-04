@@ -82,6 +82,7 @@ class TestE2EMefEline(unittest.TestCase):
         self.net.restart_kytos_clean()
 
     def test_015_create_evc_inter_switch(self):
+        time.sleep(10)
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -111,7 +112,9 @@ class TestE2EMefEline(unittest.TestCase):
         # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
+        print(flows_s1)
         flows_s2 = s2.dpctl('dump-flows')
+        print(flows_s2)
         assert len(flows_s1.split('\r\n ')) == 3
         assert len(flows_s2.split('\r\n ')) == 3
 
@@ -138,6 +141,7 @@ class TestE2EMefEline(unittest.TestCase):
         self.net.restart_kytos_clean()
 
     def test_020_create_evc_different_tags_each_side(self):
+        time.sleep(10)
         payload = {
             "name": "Vlan102_103_Test",
             "enabled": True,
@@ -189,6 +193,7 @@ class TestE2EMefEline(unittest.TestCase):
 
     def test_020_create_evc_tag_notag(self):
         self.net.restart_kytos_clean()
+        time.sleep(10)
         payload = {
             "name": "Vlan104_Test",
             "enabled": True,
@@ -240,6 +245,7 @@ class TestE2EMefEline(unittest.TestCase):
     def test_020_create_evc_same_vid_different_uni(self):
         # Create circuit 1
         self.net.restart_kytos_clean()
+        time.sleep(10)
         payload = {
             "name": "Vlan110_Test",
             "enabled": True,
@@ -335,6 +341,7 @@ class TestE2EMefEline(unittest.TestCase):
         # let's suppose that xyz is the circuit id previously created
         # curl -X PATCH -H "Content-Type: application/json" -d '{"enable": false}' http://172.18.0.2:8181/api/kytos/mef_eline/v2/evc/xyz
         self.net.restart_kytos_clean()
+        time.sleep(10)
         payload = {
             "name": "Vlan125_Test_evc1",
             "enabled": True,
@@ -387,6 +394,7 @@ class TestE2EMefEline(unittest.TestCase):
 
     def test_025_create_circuit_reusing_same_vlanid_from_previous_evc(self):
         self.net.restart_kytos_clean()
+        time.sleep(10)
         payload = {
             "name": "Vlan125_Test_evc1",
             "enabled": True,
