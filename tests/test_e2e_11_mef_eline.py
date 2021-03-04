@@ -142,6 +142,7 @@ class TestE2EMefEline(unittest.TestCase):
 
         # Command to disable links to test if back-up path is taken with the following command:
         self.net.net.configLinkStatus('s1', 's2', 'down')
+        time.sleep(2)
 
         # Check on the virtual switches directly for flows. Each switch that the flow traveled must have 3 flows:
         # 01 for LLDP + 02 for the EVC (ingress + egress)
