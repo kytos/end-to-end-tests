@@ -57,7 +57,10 @@ class TestE2EMaintenance(unittest.TestCase):
         assert True
 
     def test_010_create_mw_on_switch_should_move_evc(self):
+        self.net.restart_kytos_clean()
+        time.sleep(5)
         self.create_circuit(100)
+        time.sleep(20)
 
         start = datetime.now() + timedelta(seconds=60)
         end = start + timedelta(seconds=60)
@@ -76,7 +79,7 @@ class TestE2EMaintenance(unittest.TestCase):
         assert 'mw_id' in data
 
         # wait the MW to begin
-        time.sleep(60)
+        time.sleep(80)
 
         # switch 1 and 3 should have 3 flows, switch 2 should have only 1 flow
         s1, s2, s3 = self.net.net.get( 's1', 's2', 's3' )
@@ -105,8 +108,8 @@ class TestE2EMaintenance(unittest.TestCase):
         result = h11.cmd( 'ping -c1 100.0.0.2' )
         assert ', 0% packet loss,' in result
 
-        # wait more 65s to the MW to finish and check if the path returned to pass through sw2
-        time.sleep(65)
+        # wait more 60s to the MW to finish and check if the path returned to pass through sw2
+        time.sleep(60)
 
         flows_s2 = s2.dpctl('dump-flows')
         assert len(flows_s2.split('\r\n ')) == 3
@@ -116,5 +119,4 @@ class TestE2EMaintenance(unittest.TestCase):
         # clean up
         h11.cmd('ip link del vlan100')
         h3.cmd('ip link del vlan100')
-        self.net.restart_kytos_clean()
 
