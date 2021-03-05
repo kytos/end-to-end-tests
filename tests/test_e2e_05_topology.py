@@ -117,6 +117,7 @@ class TestE2ETopology(unittest.TestCase):
         # restart kytos and check if the interfaces are still enabled
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
+        time.sleep(5)
 
         ## restore the status
         #api_url = KYTOS_API+'/topology/v3/restore'
@@ -172,7 +173,7 @@ class TestE2ETopology(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
 
         # wait 10s to kytos execute LLDP
-        time.sleep(10)
+        time.sleep(20)
 
         # now all the links should stay disabled
         api_url = KYTOS_API+'/topology/v3/links'
