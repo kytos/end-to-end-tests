@@ -26,6 +26,7 @@ class TestE2EMefEline(unittest.TestCase):
         # TODO Check for false positives between uni_a switch 1 and uni_z switch 3 instead of switch 2
         """ When the primary_path is down and backup_path exists and is UP
             the circuit will change from primary_path to backup_path. """
+        self.net.restart_kytos_clean()
         time.sleep(10)
         payload = {
             "name": "my evc1",
@@ -60,7 +61,7 @@ class TestE2EMefEline(unittest.TestCase):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 200
+        assert response.status_code == 201
 
         time.sleep(10)
 
@@ -94,11 +95,11 @@ class TestE2EMefEline(unittest.TestCase):
         # clean up
         h1.cmd('ip link del vlan101')
         h3.cmd('ip link del vlan101')
-        self.net.restart_kytos_clean()
 
     def test_on_primary_path_fail_should_migrate_to_backup_with_dynamic_discovery_enabled(self):
         """ When the primary_path is down and backup_path exists and is UP
             the circuit will change from primary_path to backup_path with dynamic_discovery_enabled. """
+        self.net.restart_kytos_clean()
         time.sleep(10)
         payload = {
             "name": "my evc1",
