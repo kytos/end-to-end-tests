@@ -22,6 +22,10 @@ class TestE2EOfLLDP(unittest.TestCase):
     def tearDownClass(cls):
         cls.net.stop()
 
+    def get_iface_stats_rx_pkt(self, host):
+        rx_pkts = host.cmd("ip -s link show dev %s | grep RX: -A 1 | tail -n1 | awk '{print $2}'" % (host.intfNames()[0]))
+        return int(rx_pkts.strip())
+
     def test_001_list_interfaces_with_lldp(self):
         """ List interfaces with OF LLDP. """
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
@@ -42,3 +46,111 @@ class TestE2EOfLLDP(unittest.TestCase):
         ]
         assert set(data["interfaces"]) == set(expected_interfaces)
 
+        # make sure the interfaces are actually receiving LLDP
+        h11, h12, h2, h3 = self.net.net.get('h11', 'h12', 'h2', 'h3')
+        rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
+        rx_stats_h12 = self.get_iface_stats_rx_pkt(h12)
+        rx_stats_h2  = self.get_iface_stats_rx_pkt(h2)
+        rx_stats_h3  = self.get_iface_stats_rx_pkt(h3)
+        time.sleep(10)
+        rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
+        rx_stats_h12_2 = self.get_iface_stats_rx_pkt(h12)
+        rx_stats_h2_2  = self.get_iface_stats_rx_pkt(h2)
+        rx_stats_h3_2  = self.get_iface_stats_rx_pkt(h3)
+
+        assert rx_stats_h11_2 > rx_stats_h11 \
+                and rx_stats_h12_2 > rx_stats_h12 \
+                and rx_stats_h2_2 > rx_stats_h2 \
+                and rx_stats_h3_2 > rx_stats_h3
+
+    def test_010_disable_of_lldp(self):
+        """ Test if the disabling OF LLDP in an interface worked properly. """
+
+        # disabling all the UNI interfaces
+        payload = {
+            "interfaces": [
+                "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:01:2", "00:00:00:00:00:00:00:01:4294967294",
+                "00:00:00:00:00:00:00:02:1", "00:00:00:00:00:00:00:02:4294967294",
+                "00:00:00:00:00:00:00:03:1", "00:00:00:00:00:00:00:03:4294967294"
+            ]
+        }
+        expected_interfaces = [
+                "00:00:00:00:00:00:00:01:3", "00:00:00:00:00:00:00:01:4",
+                "00:00:00:00:00:00:00:02:2", "00:00:00:00:00:00:00:02:3",
+                "00:00:00:00:00:00:00:03:2", "00:00:00:00:00:00:00:03:3"
+        ]
+
+        api_url = KYTOS_API + '/of_lldp/v1/interfaces/disable/'
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 200
+
+        api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
+        response = requests.get(api_url)
+        data = response.json()
+        assert set(data["interfaces"]) == set(expected_interfaces)
+
+        h11, h12, h2, h3 = self.net.net.get('h11', 'h12', 'h2', 'h3')
+        rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
+        rx_stats_h12 = self.get_iface_stats_rx_pkt(h12)
+        rx_stats_h2  = self.get_iface_stats_rx_pkt(h2)
+        rx_stats_h3  = self.get_iface_stats_rx_pkt(h3)
+        time.sleep(10)
+        rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
+        rx_stats_h12_2 = self.get_iface_stats_rx_pkt(h12)
+        rx_stats_h2_2  = self.get_iface_stats_rx_pkt(h2)
+        rx_stats_h3_2  = self.get_iface_stats_rx_pkt(h3)
+
+        assert rx_stats_h11_2 == rx_stats_h11 \
+                and rx_stats_h12_2 == rx_stats_h12 \
+                and rx_stats_h2_2 == rx_stats_h2 \
+                and rx_stats_h3_2 == rx_stats_h3
+
+        # restart kytos and check if lldp remains disabled
+        self.net.start_controller(clean_config=False)
+        self.net.wait_switches_connect()
+
+        api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
+        response = requests.get(api_url)
+        data = response.json()
+        assert set(data["interfaces"]) == set(expected_interfaces)
+
+    def test_020_enable_of_lldp(self):
+        """ Test if enabling OF LLDP in an interface works properly. """
+        # TODO: we should not depend on previous tests..
+
+        # disabling all the UNI interfaces
+        payload = {
+            "interfaces": [
+                "00:00:00:00:00:00:00:01:1"
+            ]
+        }
+        expected_interfaces = [
+                "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:01:3", "00:00:00:00:00:00:00:01:4",
+                "00:00:00:00:00:00:00:02:2", "00:00:00:00:00:00:00:02:3",
+                "00:00:00:00:00:00:00:03:2", "00:00:00:00:00:00:00:03:3"
+        ]
+
+        api_url = KYTOS_API + '/of_lldp/v1/interfaces/enable/'
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 200
+
+        api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
+        response = requests.get(api_url)
+        data = response.json()
+        assert set(data["interfaces"]) == set(expected_interfaces)
+
+        h11 = self.net.net.get('h11')
+        rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
+        time.sleep(10)
+        rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
+
+        assert rx_stats_h11_2 > rx_stats_h11
+
+        # restart kytos and check if lldp remains disabled
+        self.net.start_controller(clean_config=False)
+        self.net.wait_switches_connect()
+
+        api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
+        response = requests.get(api_url)
+        data = response.json()
+        assert set(data["interfaces"]) == set(expected_interfaces)
