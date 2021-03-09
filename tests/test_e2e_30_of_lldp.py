@@ -26,6 +26,14 @@ class TestE2EOfLLDP(unittest.TestCase):
         rx_pkts = host.cmd("ip -s link show dev %s | grep RX: -A 1 | tail -n1 | awk '{print $2}'" % (host.intfNames()[0]))
         return int(rx_pkts.strip())
 
+    def disable_all_of_lldp(self):
+        api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
+        response = requests.get(api_url)
+        data = response.json()
+        all_interfaces = data.get("interfaces", [])
+        response = requests.post(api_url+'disable/', json={"interfaces": all_interfaces})
+        assert response.status_code == 200
+
     def test_001_list_interfaces_with_lldp(self):
         """ List interfaces with OF LLDP. """
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
@@ -65,7 +73,7 @@ class TestE2EOfLLDP(unittest.TestCase):
 
     def test_010_disable_of_lldp(self):
         """ Test if the disabling OF LLDP in an interface worked properly. """
-
+        self.net.restart_kytos_clean()
         # disabling all the UNI interfaces
         payload = {
             "interfaces": [
@@ -108,6 +116,7 @@ class TestE2EOfLLDP(unittest.TestCase):
         # restart kytos and check if lldp remains disabled
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
+        time.sleep(5)
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
         response = requests.get(api_url)
@@ -116,18 +125,17 @@ class TestE2EOfLLDP(unittest.TestCase):
 
     def test_020_enable_of_lldp(self):
         """ Test if enabling OF LLDP in an interface works properly. """
-        # TODO: we should not depend on previous tests..
+        self.net.restart_kytos_clean()
+        time.sleep(5)
+        self.disable_all_of_lldp()
 
-        # disabling all the UNI interfaces
         payload = {
             "interfaces": [
                 "00:00:00:00:00:00:00:01:1"
             ]
         }
         expected_interfaces = [
-                "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:01:3", "00:00:00:00:00:00:00:01:4",
-                "00:00:00:00:00:00:00:02:2", "00:00:00:00:00:00:00:02:3",
-                "00:00:00:00:00:00:00:03:2", "00:00:00:00:00:00:00:03:3"
+                "00:00:00:00:00:00:00:01:1"
         ]
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/enable/'
@@ -149,8 +157,54 @@ class TestE2EOfLLDP(unittest.TestCase):
         # restart kytos and check if lldp remains disabled
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
+        time.sleep(5)
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
         response = requests.get(api_url)
         data = response.json()
         assert set(data["interfaces"]) == set(expected_interfaces)
+
+    def test_030_change_polling_interval(self):
+        """ Test if changing the polling interval works works properly. """
+        self.net.restart_kytos_clean()
+
+        api_url = KYTOS_API + '/of_lldp/v1/polling_time'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        assert "polling_time" in data
+        assert data["polling_time"] == 3
+
+        h11 = self.net.net.get('h11')
+        rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
+        time.sleep(31)
+        rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
+
+        # the delta pps should be around 10, because the interface is every 3s
+        delta_pps = rx_stats_h11_2 - rx_stats_h11
+
+        api_url = KYTOS_API + '/of_lldp/v1/polling_time'
+        response = requests.post(api_url, json={"polling_time": 1})
+        assert response.status_code == 200
+
+        response = requests.get(api_url)
+        data = response.json()
+        assert data["polling_time"] == 1
+
+        rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
+        time.sleep(31)
+        rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
+
+        delta_pps_2 = rx_stats_h11_2 - rx_stats_h11
+
+        # the delta pps now should be around 30, because the interval is every 1s
+        assert delta_pps_2 > delta_pps + 15
+
+        # restart kytos and check if the polling interval remains the same
+        self.net.start_controller(clean_config=False)
+        self.net.wait_switches_connect()
+        time.sleep(5)
+
+        response = requests.get(api_url)
+        data = response.json()
+        assert data["polling_time"] == 1
