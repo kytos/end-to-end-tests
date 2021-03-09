@@ -102,7 +102,7 @@ class TestE2EMaintenance(unittest.TestCase):
         h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
         h11.cmd('ip link set up vlan100')
         h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
-        h3.cmd('ip link add link %s name vlan100 type vlan id 100' % (h2.intfNames()[0]))
+        h3.cmd('ip link add link %s name vlan100 type vlan id 100' % (h3.intfNames()[0]))
         h3.cmd('ip link set up vlan100')
         h3.cmd('ip addr add 100.0.0.2/24 dev vlan100')
         result = h11.cmd( 'ping -c1 100.0.0.2' )
