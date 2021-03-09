@@ -1,3 +1,5 @@
+import pytest
+import json
 import unittest
 import requests
 from tests.helpers import NetworkTest
@@ -163,7 +165,7 @@ class TestE2ETopology(unittest.TestCase):
         self.assertEqual(len(data['links']), 0)
 
         # enable the links (need to enable the switches and ports first)
-        for i in [1,2,3]:
+        for i in [1, 2, 3]:
             sw = "00:00:00:00:00:00:00:0%d" % (i)
             api_url = KYTOS_API+'/topology/v3/switches/%s/enable' % (sw)
             response = requests.post(api_url)
@@ -229,3 +231,150 @@ class TestE2ETopology(unittest.TestCase):
 #        # /api/kytos/topology/v3/switches --> check if it is enabled
 #        # kill kytosd and restart, check if switches are still enabled
 #        # check topology discovery
+
+    def test_disabled_switch_on_start(self):
+
+        sw = "00:00:00:00:00:00:00:01"
+
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Make sure the switch is disabled
+        api_url = KYTOS_API + '/topology/v3/switches'
+        response = requests.get(api_url)
+        data = response.json()
+
+        assert response.status_code == 200
+        assert data['switches'][sw]['enabled'] is False
+
+    def test_disabling_switch(self):
+
+        sw = "00:00:00:00:00:00:00:01"
+
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Enable the switch
+        api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % sw
+        response = requests.post(api_url)
+        assert response.status_code == 201
+
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=False, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Check if the switch is enabled
+        api_url = KYTOS_API + '/topology/v3/switches'
+        response = requests.get(api_url)
+        data = response.json()
+
+        assert response.status_code == 200
+        assert data['switches'][sw]['enabled'] is True
+
+        # Disable the switch and check if the switch is disabled
+        api_url = KYTOS_API + '/topology/v3/switches/%s/disable' % sw
+        print(api_url)
+        response = requests.post(api_url)
+        assert response.status_code == 201
+
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=False, enable_all=False)
+        self.net.wait_switches_connect()
+
+        api_url = KYTOS_API + '/topology/v3/switches'
+        response = requests.get(api_url)
+        data = response.json()
+        assert data['switches'][sw]['enabled'] is False
+
+    def test_remove_switch_metadata(self):
+
+        sw = "00:00:00:00:00:00:00:01"
+
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Insert switch metadata
+        payload = {"tmp_key": "tmp_value"}
+        api_url = KYTOS_API + '/topology/v3/switches/%s/metadata' % sw
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201
+
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=False, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Verify that the metadata is inserted
+        api_url = KYTOS_API + '/topology/v3/switches'
+        response = requests.get(api_url)
+        data = response.json()
+        assert payload.keys()[0] in data['switches'][sw]['metadata'].keys()
+
+        # Delete the switch metadata
+        api_url = KYTOS_API + '/topology/v3/switches/%s/metadata/%s' % (sw, payload.keys()[0])
+        response = requests.delete(api_url)
+        assert response.status_code == 200
+
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=False, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Make sure the metadata is removed
+        api_url = KYTOS_API + '/topology/v3/switches'
+        response = requests.get(api_url)
+        data = response.json()
+        assert payload.keys()[0] not in data['switches'][sw]['metadata'].keys()
+
+    def test_remove_interfaces_metadata(self):
+
+        intf = "00:00:00:00:00:00:00:01:4"
+
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Insert interface metadata
+        payload = {"tmp_key": "tmp_value"}
+        api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % intf
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201
+
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=False, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Verify that the metadata is inserted
+        api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % intf
+        response = requests.get(api_url)
+        data = response.json()
+        assert payload.keys()[0] in data['metadata'].keys()
+
+        # Delete the interface metadata
+        api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata/%s' % (intf, payload.keys()[0])
+        response = requests.delete(api_url)
+        assert response.status_code == 200
+
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=False, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Make sure the metadata is removed
+        api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % intf
+        response = requests.get(api_url)
+        data = response.json()
+        assert payload.keys()[0] not in data['metadata'].keys()
+
+    def test_remove_links_metadata(self):
+        pass
