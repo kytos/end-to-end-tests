@@ -88,7 +88,8 @@ class NetworkTest():
         self.net.start()
         self.start_controller(clean_config=True)
 
-    def start_controller(self, clean_config=False, enable_all=False):
+    def start_controller(self, clean_config=False, enable_all=False,
+                         del_flows=False):
         # restart kytos and check if the napp is still disabled
         try:
             os.system('pkill kytosd')
@@ -102,6 +103,7 @@ class NetworkTest():
             # TODO: config is defined at NAPPS_DIR/kytos/storehouse/settings.py 
             # and NAPPS_DIR is defined at /etc/kytos/kytos.conf
             os.system('rm -rf /var/tmp/kytos/storehouse')
+        if clean_config or del_flows:
             # remove any installed flow
             for sw in self.net.switches:
                 sw.dpctl('del-flows')
