@@ -451,6 +451,8 @@ class TestE2ETopology(unittest.TestCase):
 
         # Insert interface metadata
         payload = {"tmp_key": "tmp_value"}
+        key = next(iter(payload))
+
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201
@@ -467,10 +469,11 @@ class TestE2ETopology(unittest.TestCase):
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id
         response = requests.get(api_url)
         data = response.json()
-        assert next(iter(payload)) in data['metadata'].keys()
+        keys = data['metadata'].keys()
+        assert key in keys
 
         # Delete the interface metadata
-        api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata/%s' % (interface_id, next(iter(payload)))
+        api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata/%s' % (interface_id, key)
         response = requests.delete(api_url)
         assert response.status_code == 200
 
@@ -486,7 +489,8 @@ class TestE2ETopology(unittest.TestCase):
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id
         response = requests.get(api_url)
         data = response.json()
-        assert next(iter(payload)) not in data['metadata'].keys()
+        keys = data['metadata'].keys()
+        assert key not in keys
 
     def test_enabling_all_interfaces_on_a_switch_persistent(self):
 
@@ -612,6 +616,8 @@ class TestE2ETopology(unittest.TestCase):
 
         # Insert link metadata
         payload = {"tmp_key": "tmp_value"}
+        key = next(iter(payload))
+
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201
@@ -628,10 +634,11 @@ class TestE2ETopology(unittest.TestCase):
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1
         response = requests.get(api_url)
         data = response.json()
-        assert next(iter(payload)) in data['metadata'].keys()
+        keys = data['metadata'].keys()
+        assert key in keys
 
         # Delete the link metadata
-        api_url = KYTOS_API + '/topology/v3/links/%s/metadata/%s' % (link_id1, next(iter(payload)))
+        api_url = KYTOS_API + '/topology/v3/links/%s/metadata/%s' % (link_id1, key)
         response = requests.delete(api_url)
         assert response.status_code == 200
 
@@ -647,4 +654,6 @@ class TestE2ETopology(unittest.TestCase):
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1
         response = requests.get(api_url)
         data = response.json()
-        assert next(iter(payload)) not in data['metadata'].keys()
+
+        keys = data['metadata'].keys()
+        assert key not in keys
