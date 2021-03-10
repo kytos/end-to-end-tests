@@ -461,7 +461,7 @@ class TestE2ETopology(unittest.TestCase):
         self.net.wait_switches_connect()
 
         # Wait 10s to kytos execute LLDP
-        time.sleep(10)
+        time.sleep(20)
 
         # Verify that the metadata is inserted
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id
@@ -480,7 +480,7 @@ class TestE2ETopology(unittest.TestCase):
         self.net.wait_switches_connect()
 
         # Wait 10s to kytos execute LLDP
-        time.sleep(10)
+        time.sleep(20)
 
         # Make sure the metadata is removed
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id
