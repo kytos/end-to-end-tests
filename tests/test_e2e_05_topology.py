@@ -441,6 +441,7 @@ class TestE2ETopology(unittest.TestCase):
         assert data['interfaces'][interface_id]['enabled'] is True
 
     def test_removing_interfaces_metadata_persistent(self):
+        # It fails due to a bug, reported to Kytos team
 
         interface_id = "00:00:00:00:00:00:00:01:4"
 
