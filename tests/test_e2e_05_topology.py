@@ -5,7 +5,7 @@ from tests.helpers import NetworkTest
 import time
 
 CONTROLLER = '127.0.0.1'
-KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
+KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 
 class TestE2ETopology(unittest.TestCase):
@@ -124,8 +124,7 @@ class TestE2ETopology(unittest.TestCase):
         #response = requests.get(api_url)
         #self.assertEqual(response.status_code, 200)
 
-        # check if the interfaces are still enabled and now with the links
-        api_url = KYTOS_API+'/topology/v3/interfaces'
+        api_url = KYTOS_API + '/topology/v3/interfaces'
         response = requests.get(api_url)
         data = response.json()
         self.assertTrue(data['interfaces'][sw1if1]['enabled'])
@@ -156,7 +155,7 @@ class TestE2ETopology(unittest.TestCase):
         endpoint_b = '00:00:00:00:00:00:00:02:2'
 
         # make sure the links are disabled by default
-        api_url = KYTOS_API+'/topology/v3/links'
+        api_url = KYTOS_API + '/topology/v3/links'
         response = requests.get(api_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -176,22 +175,22 @@ class TestE2ETopology(unittest.TestCase):
         time.sleep(20)
 
         # now all the links should stay disabled
-        api_url = KYTOS_API+'/topology/v3/links'
+        api_url = KYTOS_API + '/topology/v3/links'
         response = requests.get(api_url)
         data = response.json()
         self.assertEqual(len(data['links']), 3)
 
         link_id1 = None
-        for k,v in data['links'].items():
+        for k, v in data['links'].items():
             link_a, link_b = v['endpoint_a']['id'], v['endpoint_b']['id']
-            if set([link_a, link_b]) == set([endpoint_a, endpoint_b]):
+            if {link_a, link_b} == {endpoint_a, endpoint_b}:
                 link_id1 = k
         self.assertNotEqual(link_id1, None)
         self.assertFalse(data['links'][link_id1]['enabled'])
 
-        api_url = KYTOS_API+'/topology/v3/links/%s/enable' % (link_id1)
+        api_url = KYTOS_API + '/topology/v3/links/%s/enable' % link_id1
         response = requests.post(api_url)
-        self.assertEqual(response.status_code, 201)
+        assert response.status_code == 201
 
         # check if the links are now enabled
         api_url = KYTOS_API+'/topology/v3/links'
