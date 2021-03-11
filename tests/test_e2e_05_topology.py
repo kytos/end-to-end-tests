@@ -1,5 +1,5 @@
+import pytest
 import json
-import unittest
 import requests
 from tests.helpers import NetworkTest
 import time
@@ -25,11 +25,13 @@ class TestE2ETopology(unittest.TestCase):
         response = requests.get(api_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertTrue('switches' in data)
-        self.assertEqual(len(data['switches']), 3)
-        self.assertTrue('00:00:00:00:00:00:00:01' in data['switches'])
-        self.assertTrue('00:00:00:00:00:00:00:02' in data['switches'])
-        self.assertTrue('00:00:00:00:00:00:00:03' in data['switches'])
+
+        assert response.status_code == 200
+        assert 'switches' in data
+        assert len(data['switches']) == 3
+        assert '00:00:00:00:00:00:00:01' in data['switches']
+        assert '00:00:00:00:00:00:00:02' in data['switches']
+        assert '00:00:00:00:00:00:00:03' in data['switches']
 
     def test_020_enabling_switch_persistent(self):
         sw1 = '00:00:00:00:00:00:00:01'
@@ -149,12 +151,15 @@ class TestE2ETopology(unittest.TestCase):
         response = requests.get(api_url)
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(len(data['links']), 0)
+
+        assert response.status_code == 200
+        assert len(data['links']) == 0
 
         # enable the links (need to enable the switches and ports first)
         for i in [1, 2, 3]:
-            sw = "00:00:00:00:00:00:00:0%d" % (i)
-            api_url = KYTOS_API+'/topology/v3/switches/%s/enable' % (sw)
+            sw = "00:00:00:00:00:00:00:0%d" % i
+
+            api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % sw
             response = requests.post(api_url)
             assert response.status_code == 201
 
