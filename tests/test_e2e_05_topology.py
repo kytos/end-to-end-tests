@@ -23,7 +23,6 @@ class TestE2ETopology(unittest.TestCase):
     def test_010_list_switches(self):
         api_url = KYTOS_API+'/topology/v3/switches'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
         data = response.json()
 
         assert response.status_code == 200
