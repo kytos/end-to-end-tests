@@ -59,7 +59,6 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-        # maybe stop the controller, remove the flow from the switch and then restart
 
         time.sleep(20)
 
@@ -105,7 +104,6 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-        # maybe stop the controller, remove the flow from the switch and then restart
 
         time.sleep(20)
 
@@ -163,7 +161,6 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-        # maybe stop the controller, remove the flow from the switch and then restart
 
         time.sleep(20)
 
@@ -220,7 +217,6 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-        # maybe stop the controller, remove the flow from the switch and then restart
 
         time.sleep(20)
 
