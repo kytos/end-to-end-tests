@@ -40,28 +40,18 @@ class TestE2ETopology(unittest.TestCase):
         api_url = KYTOS_API+'/topology/v3/switches'
         response = requests.get(api_url)
         data = response.json()
-        self.assertFalse(data['switches'][sw1]['enabled'])
-        self.assertFalse(data['switches'][sw2]['enabled'])
-        self.assertFalse(data['switches'][sw3]['enabled'])
+        assert data['switches'][switch_id]['enabled'] is False
 
-        # enable the switches
-        api_url = KYTOS_API+'/topology/v3/switches/%s/enable' % (sw1)
+        # Enable the switches
+        api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % switch_id
         response = requests.post(api_url)
-        self.assertEqual(response.status_code, 201)
-        api_url = KYTOS_API+'/topology/v3/switches/%s/enable' % (sw2)
-        response = requests.post(api_url)
-        self.assertEqual(response.status_code, 201)
-        api_url = KYTOS_API+'/topology/v3/switches/%s/enable' % (sw3)
-        response = requests.post(api_url)
-        self.assertEqual(response.status_code, 201)
+        assert response.status_code == 201
 
         # check if the switches are now enabled
         api_url = KYTOS_API+'/topology/v3/switches'
         response = requests.get(api_url)
         data = response.json()
-        self.assertTrue(data['switches'][sw1]['enabled'])
-        self.assertTrue(data['switches'][sw2]['enabled'])
-        self.assertTrue(data['switches'][sw3]['enabled'])
+        assert data['switches'][switch_id]['enabled'] is True
 
         # restart kytos and check if the switches are still enabled
         self.net.start_controller(clean_config=False)
@@ -166,10 +156,11 @@ class TestE2ETopology(unittest.TestCase):
             sw = "00:00:00:00:00:00:00:0%d" % (i)
             api_url = KYTOS_API+'/topology/v3/switches/%s/enable' % (sw)
             response = requests.post(api_url)
-            self.assertEqual(response.status_code, 201)
-            api_url = KYTOS_API+'/topology/v3/interfaces/switch/%s/enable' % (sw)
+            assert response.status_code == 201
+
+            api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % sw
             response = requests.post(api_url)
-            self.assertEqual(response.status_code, 200)
+            assert response.status_code == 200
 
         # wait 10s to kytos execute LLDP
         time.sleep(20)
@@ -178,25 +169,25 @@ class TestE2ETopology(unittest.TestCase):
         api_url = KYTOS_API + '/topology/v3/links'
         response = requests.get(api_url)
         data = response.json()
-        self.assertEqual(len(data['links']), 3)
+        assert len(data['links']) == 3
 
         link_id1 = None
         for k, v in data['links'].items():
             link_a, link_b = v['endpoint_a']['id'], v['endpoint_b']['id']
             if {link_a, link_b} == {endpoint_a, endpoint_b}:
                 link_id1 = k
-        self.assertNotEqual(link_id1, None)
-        self.assertFalse(data['links'][link_id1]['enabled'])
+        assert link_id1 is not None
+        assert data['links'][link_id1]['enabled'] is False
 
         api_url = KYTOS_API + '/topology/v3/links/%s/enable' % link_id1
         response = requests.post(api_url)
         assert response.status_code == 201
 
         # check if the links are now enabled
-        api_url = KYTOS_API+'/topology/v3/links'
+        api_url = KYTOS_API + '/topology/v3/links'
         response = requests.get(api_url)
         data = response.json()
-        self.assertTrue(data['links'][link_id1]['enabled'])
+        assert data['links'][link_id1]['enabled'] is True
 
         # restart kytos and check if the links are still enabled
         self.net.start_controller(clean_config=False)
@@ -214,13 +205,7 @@ class TestE2ETopology(unittest.TestCase):
         api_url = KYTOS_API+'/topology/v3/links'
         response = requests.get(api_url)
         data = response.json()
-        self.assertTrue(data['links'][link_id1]['enabled'])
-
-    def test_090_disabling_link_persistent(self):
-        # TODO: 1) start kytosd -E; 2) disable the link1; 3) restart
-        # kytos - kill kytos.pid && kytosd -E; 4 check if the link1
-        # remain disabled
-        self.assertTrue(True)
+        assert data['links'][link_id1]['enabled'] is True
 
 #    def test_100_all_enabled_should_activate_topology_discovery(self):
 #        # /api/kytos/topology/v3/switches --> check if it is disabled
