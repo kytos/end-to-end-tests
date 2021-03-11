@@ -8,20 +8,36 @@ CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 
-class TestE2ETopology(unittest.TestCase):
+class TestE2ETopology:
     net = None
-    @classmethod
-    def setUpClass(cls):
-        cls.net = NetworkTest(CONTROLLER)
-        cls.net.start()
-        cls.net.wait_switches_connect()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.net.stop()
+    def setup_method(self, method):
+        """
+        It is called at the beginning of the class execution
+        """
+        self.net = NetworkTest(CONTROLLER)
+        self.net.start()
+        self.net.wait_switches_connect()
+    
+    def teardown_method(self, method):
+        """
+        It is called everytime a method ends it execution
+        """
+        self.net.stop()
+    
+    @pytest.fixture
+    def restart_kytos(self):
 
-    def test_010_list_switches(self):
-        api_url = KYTOS_API+'/topology/v3/switches'
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
+
+    def test_010_list_switches(self, restart_kytos):
+        """
+        Test /api/kytos/topology/v3/ on GET
+        """
+        api_url = KYTOS_API + '/topology/v3/switches'
         response = requests.get(api_url)
         data = response.json()
 
