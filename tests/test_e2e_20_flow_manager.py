@@ -59,7 +59,7 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-
+        
         time.sleep(20)
 
         s1 = self.net.net.get('s1')
@@ -104,7 +104,7 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-
+        
         time.sleep(20)
 
         for sw_name in ['s1', 's2', 's3']:
@@ -161,7 +161,7 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-
+        
         time.sleep(20)
 
         s1 = self.net.net.get('s1')
@@ -282,3 +282,26 @@ class TestE2EFlowManager:
     def test_020_modify_match_restarting(self):
         self.modify_match(restart_kytos=True)
 
+    def flow_another_table(self, restart_kytos=False):
+        """Test if, after adding a flow in another table outside kytos, the 
+            flow is removed."""
+        self.net.restart_kytos_clean()
+        time.sleep(5)
+
+        s1 = self.net.net.get('s1')
+        s1.dpctl('add-flow', 'table=2,in_port=1,actions=output:2')
+        if restart_kytos:
+            # restart controller keeping configuration
+            self.net.start_controller()
+
+        time.sleep(60)
+
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 1
+
+    def test_020_flow_another_table(self):
+        self.flow_another_table()
+
+    def test_020_flow_another_table_restarting(self):
+        self.flow_another_table(restart_kytos=True)
