@@ -68,6 +68,14 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 201
 
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=False, enable_all=False)
+        self.net.wait_switches_connect()
+
+        # Wait 10s to kytos execute LLDP
+        time.sleep(10)
+
         # Check if the switches are enabled
         api_url = KYTOS_API + '/topology/v3/switches'
         response = requests.get(api_url)
@@ -630,8 +638,8 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
-        time.sleep(10)
+        # Wait 15s to kytos execute LLDP
+        time.sleep(15)
 
         # Verify that the metadata is inserted
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1
@@ -681,3 +689,35 @@ class TestE2ETopology:
         data = response.json()
         for interface in data['interfaces']:
             assert data['interfaces'][interface]['enabled'] is False
+
+    def test_400_switch_enabled_on_clean_start(self):
+
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=True)
+        self.net.wait_switches_connect()
+
+        # Make sure the switch is disabled
+        api_url = KYTOS_API + '/topology/v3/switches'
+        response = requests.get(api_url)
+
+        assert response.status_code == 200
+        data = response.json()
+        for switch in data['switches']:
+            assert data['switches'][switch]['enabled'] is True
+
+    def test_500_interfaces_enabled_on_clean_start(self):
+
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=True)
+        self.net.wait_switches_connect()
+
+        # Make sure the interfaces are disabled
+        api_url = KYTOS_API + '/topology/v3/interfaces'
+        response = requests.get(api_url)
+
+        assert response.status_code == 200
+        data = response.json()
+        for interface in data['interfaces']:
+            assert data['interfaces'][interface]['enabled'] is True
