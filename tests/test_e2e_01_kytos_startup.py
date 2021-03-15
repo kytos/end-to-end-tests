@@ -1,36 +1,51 @@
-import unittest
 import requests
 from tests.helpers import NetworkTest
-import os
-import time
 import re
 
 CONTROLLER = '127.0.0.1'
-KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
+KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 # TODO: check all the logs on the end
 # TODO: persist the logs of syslog
-# TODO: multiple instances or single instance for checking memory leak / usage (benchmark - how many flows are supported? how many switches are supported?)
+# TODO: multiple instances or single instance for checking memory leak /
+#  usage (benchmark - how many flows are supported? how many switches are supported?)
 
-class TestE2EKytosServer(unittest.TestCase):
+
+class TestE2EKytosServer:
     net = None
-    @classmethod
-    def setUpClass(cls):
-        cls.net = NetworkTest(CONTROLLER)
-        cls.net.start()
-        cls.net.wait_switches_connect()
+    # @classmethod
+    # def setUpClass(cls):
+    #     cls.net = NetworkTest(CONTROLLER)
+    #     cls.net.start()
+    #     cls.net.wait_switches_connect()
+    #
+    # @classmethod
+    # def tearDownClass(cls):
+    #     cls.net.stop()
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.net.stop()
+    def setup_method(self, method):
+        """
+        It is called at the beginning of the class execution
+        """
+        self.net = NetworkTest(CONTROLLER)
+        self.net.start()
+        self.net.wait_switches_connect()
+
+    def teardown_method(self, method):
+        """
+        It is called everytime a method ends it execution
+        """
+        self.net.stop()
 
     def test_start_kytos_api_core(self):
         # check server status if it is UP and running
         api_url = KYTOS_API+'/core/status/'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        # self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
-        self.assertEqual(data['response'], 'running')
+        # self.assertEqual(data['response'], 'running')
+        assert data['response'] == 'running'
 
         # check the list of enabled napps
         expected_napps = [
@@ -45,20 +60,23 @@ class TestE2EKytosServer(unittest.TestCase):
             ]
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        # self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
-        #self.assertEqual(set(data['napps']), set(expected_napps))
+        # self.assertEqual(set(data['napps']), set(expected_napps))
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps)
 
         # check disable a napp
         api_url = KYTOS_API+'/core/napps/kytos/mef_eline/disable'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        # self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        # self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
-        #self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
+        # self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps) - set([("kytos", "mef_eline")])
 
         # restart kytos and check if the switches are still enabled
@@ -67,26 +85,29 @@ class TestE2EKytosServer(unittest.TestCase):
 
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        # self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
-        #self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
+        # self.assertEqual(data['napps'], expected_napps[:1] + expected_napps[2:])
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps) - set([("kytos", "mef_eline")])
-
 
         # check enable a napp
         api_url = KYTOS_API+'/core/napps/kytos/mef_eline/enable'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        # self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
+        # self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         data = response.json()
-        #self.assertEqual(data['napps'], expected_napps)
+        # self.assertEqual(data['napps'], expected_napps)
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps)
 
-        # test auth api
-        # TODO
+    # test auth api
+    # TODO
 
     def test_start_kytos_without_errors(self):
         with open('/var/log/syslog', "r") as f:
-            self.assertEqual(re.findall('kytos.*(error|exception)', f.read(), re.I), [])
+            # self.assertEqual(re.findall('kytos.*(error|exception)', f.read(), re.I), [])
+            assert re.findall('kytos.*(error|exception)', f.read(), re.I) == []
