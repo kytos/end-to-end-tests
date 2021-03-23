@@ -199,12 +199,3 @@ class TestE2EOfLLDP(unittest.TestCase):
 
         # the delta pps now should be around 30, because the interval is every 1s
         assert delta_pps_2 > delta_pps + 15
-
-        # restart kytos and check if the polling interval remains the same
-        self.net.start_controller(clean_config=False)
-        self.net.wait_switches_connect()
-        time.sleep(5)
-
-        response = requests.get(api_url)
-        data = response.json()
-        assert data["polling_time"] == 1
