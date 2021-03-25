@@ -21,14 +21,12 @@ class TestE2EKytosServer:
         self.net = NetworkTest(CONTROLLER)
         self.net.start()
         self.net.wait_switches_connect()
-        print("setup_method")
 
     def teardown_method(self, method):
         """
         It is called everytime a method ends it execution
         """
         self.net.stop()
-        print("teardown_method")
 
     def test_start_kytos_api_core(self):
 
@@ -56,10 +54,6 @@ class TestE2EKytosServer:
         assert response.status_code == 200
 
         data = response.json()
-        # mef_eline is not running
-        # I had to modify the output to reformat unicode strings
-        # s1 = set([tuple(map(str, lst)) for lst in data['napps']])
-        # s2 = set(expected_napps)
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps)
 
         # Check disable a napp
@@ -72,10 +66,6 @@ class TestE2EKytosServer:
         assert response.status_code == 200
 
         data = response.json()
-        # s1 = set([tuple(lst) for lst in data['napps']])
-        # s2 = set(expected_napps)
-        # s3 = set([("kytos", "mef_eline")])
-        # print(s3)
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps) - set([("kytos", "mef_eline")])
 
         # Restart kytos and check if the switches are still enabled
@@ -87,12 +77,6 @@ class TestE2EKytosServer:
         assert response.status_code == 200
 
         data = response.json()
-        # s1 = set([tuple(lst) for lst in data['napps']])
-        # print(s1)
-        # s2 = set(expected_napps)
-        # print(s2)
-        # s3 = set([("kytos", "mef_eline")])
-        # print(s3)
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps) - set([("kytos", "mef_eline")])
 
         # check enable a napp
