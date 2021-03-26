@@ -445,7 +445,7 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 1
 
     def test_020_flow_table_0(self):
-        self.flow_another_table()
+        self.flow_table_0()
 
     def test_020_flow_table_0_restarting(self):
-        self.flow_another_table(restart_kytos=True)
+        self.flow_table_0(restart_kytos=True)
