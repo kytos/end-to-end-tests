@@ -282,6 +282,127 @@ class TestE2EFlowManager:
     def test_020_modify_match_restarting(self):
         self.modify_match(restart_kytos=True)
 
+    def replace_action_flow(self, restart_kytos=False):
+
+        self.net.restart_kytos_clean()
+        time.sleep(5)
+
+        payload = {
+            "flows": [
+                {
+                    "priority": 10,
+                    "idle_timeout": 360,
+                    "hard_timeout": 1200,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                }
+            ]
+        }
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
+        assert response.status_code == 200
+        data = response.json()
+        assert 'FlowMod Messages Sent' in data['response']
+
+        # wait for the flow to be installed
+        time.sleep(20)
+
+        # Verify the flow
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 2
+        assert 'in_port="s1-eth1' in flows_s1
+
+        # Modify the actions and verify its modification
+        s1.dpctl('mod-flows', 'actions=output:3')
+        flows_s1 = s1.dpctl('dump-flows')
+        assert 'actions=output:"s1-eth2"' not in flows_s1
+        assert 'actions=output:"s1-eth3"' in flows_s1
+
+        if restart_kytos:
+            # restart controller keeping configuration
+            self.net.start_controller()
+
+        time.sleep(62)
+
+        # Check that the flow keeps the original setting
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 2
+        assert 'actions=output:"s1-eth3"' not in flows_s1
+        assert 'in_port="s1-eth1' in flows_s1
+
+    def test_020_replace_action_flow(self):
+        self.replace_action_flow()
+
+    def test_020_replace_action_flow_restarting(self):
+        self.replace_action_flow(restart_kytos=True)
+
+    def add_action_flow(self, restart_kytos=False):
+
+        self.net.restart_kytos_clean()
+        time.sleep(5)
+
+        payload = {
+            "flows": [
+                {
+                    "priority": 10,
+                    "idle_timeout": 360,
+                    "hard_timeout": 1200,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {"action_type": "output", "port": 2}
+                    ]
+                }
+            ]
+        }
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
+        assert response.status_code == 200
+        data = response.json()
+        assert 'FlowMod Messages Sent' in data['response']
+
+        # wait for the flow to be installed
+        time.sleep(20)
+
+        # Verify the flow
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 2
+        assert 'in_port="s1-eth1' in flows_s1
+
+        s1.dpctl('add-flow', 'in_port=1,idle_timeout=360,hard_timeout=1200,priority=10,actions=strip_vlan,output:2')
+
+        if restart_kytos:
+            # restart controller keeping configuration
+            self.net.start_controller()
+
+        time.sleep(62)
+
+        flows_s1 = s1.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 2
+        assert 'actions=strip_vlan,' not in flows_s1
+        assert 'actions=output:"s1-eth2' in flows_s1
+
+    def test_020_add_action_flow(self):
+        self.add_action_flow()
+
+    def test_020_add_action_flow_restarting(self):
+        self.add_action_flow(restart_kytos=True)
+
     def flow_another_table(self, restart_kytos=False):
         """Test if, after adding a flow in another table outside kytos, the 
             flow is removed."""
