@@ -9,6 +9,7 @@ import time
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
 
+
 class TestE2EFlowManager:
     net = None
 
@@ -31,24 +32,24 @@ class TestE2EFlowManager:
         payload = {
             "flows": [
                 {
-                "priority": 10,
-                "idle_timeout": 360,
-                "hard_timeout": 1200,
-                "match": {
-                    "in_port": 1
-                },
-                "actions": [
-                    {
-                    "action_type": "output",
-                    "port": 2
-                    }
-                ]
+                    "priority": 10,
+                    "idle_timeout": 360,
+                    "hard_timeout": 1200,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
                 }
             ]
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload), 
+        response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
@@ -59,7 +60,7 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-        
+
         time.sleep(20)
 
         s1 = self.net.net.get('s1')
@@ -76,24 +77,24 @@ class TestE2EFlowManager:
         payload = {
             "flows": [
                 {
-                "priority": 10,
-                "idle_timeout": 360,
-                "hard_timeout": 1200,
-                "match": {
-                    "in_port": 1
-                },
-                "actions": [
-                    {
-                    "action_type": "output",
-                    "port": 2
-                    }
-                ]
+                    "priority": 10,
+                    "idle_timeout": 360,
+                    "hard_timeout": 1200,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
                 }
             ]
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows'
-        response = requests.post(api_url, data=json.dumps(payload), 
+        response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
@@ -104,7 +105,7 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-        
+
         time.sleep(20)
 
         for sw_name in ['s1', 's2', 's3']:
@@ -122,24 +123,24 @@ class TestE2EFlowManager:
         payload = {
             "flows": [
                 {
-                "priority": 10,
-                "idle_timeout": 360,
-                "hard_timeout": 1200,
-                "match": {
-                    "in_port": 1
-                },
-                "actions": [
-                    {
-                    "action_type": "output",
-                    "port": 2
-                    }
-                ]
+                    "priority": 10,
+                    "idle_timeout": 360,
+                    "hard_timeout": 1200,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
                 }
             ]
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload), 
+        response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
@@ -150,7 +151,7 @@ class TestE2EFlowManager:
 
         # delete the flow
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.delete(api_url, data=json.dumps(payload), 
+        response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
@@ -161,7 +162,7 @@ class TestE2EFlowManager:
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
-        
+
         time.sleep(20)
 
         s1 = self.net.net.get('s1')
@@ -178,24 +179,24 @@ class TestE2EFlowManager:
         payload = {
             "flows": [
                 {
-                "priority": 10,
-                "idle_timeout": 360,
-                "hard_timeout": 1200,
-                "match": {
-                    "in_port": 1
-                },
-                "actions": [
-                    {
-                    "action_type": "output",
-                    "port": 2
-                    }
-                ]
+                    "priority": 10,
+                    "idle_timeout": 360,
+                    "hard_timeout": 1200,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
                 }
             ]
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows'
-        response = requests.post(api_url, data=json.dumps(payload), 
+        response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
@@ -206,7 +207,7 @@ class TestE2EFlowManager:
 
         # delete the flow
         api_url = KYTOS_API + '/flow_manager/v2/flows'
-        response = requests.delete(api_url, data=json.dumps(payload), 
+        response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
@@ -235,24 +236,24 @@ class TestE2EFlowManager:
         payload = {
             "flows": [
                 {
-                "priority": 10,
-                "idle_timeout": 360,
-                "hard_timeout": 1200,
-                "match": {
-                    "in_port": 1
-                },
-                "actions": [
-                    {
-                    "action_type": "output",
-                    "port": 2
-                    }
-                ]
+                    "priority": 10,
+                    "idle_timeout": 360,
+                    "hard_timeout": 1200,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
                 }
             ]
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload), 
+        response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
@@ -264,7 +265,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         s1.dpctl('del-flows', 'in_port=1')
         s1.dpctl('add-flow', 'idle_timeout=360,hard_timeout=1200,priority=10,'
-                 'dl_vlan=324,actions=output:1')
+                             'dl_vlan=324,actions=output:1')
         if restart_kytos:
             # restart controller keeping configuration
             self.net.start_controller()
