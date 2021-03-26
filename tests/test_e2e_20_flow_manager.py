@@ -1,13 +1,10 @@
 import json
-import pytest
-import unittest
 import requests
 from tests.helpers import NetworkTest
-import os
 import time
 
 CONTROLLER = '127.0.0.1'
-KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
+KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 
 class TestE2EFlowManager:
