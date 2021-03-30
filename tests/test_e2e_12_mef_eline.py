@@ -1,16 +1,14 @@
-import unittest
-import requests
-from tests.helpers import NetworkTest
-import os
-import time
 from datetime import datetime, timedelta
 import json
+import requests
+import time
+from tests.helpers import NetworkTest
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = f'http://{CONTROLLER}:8181/api/kytos'
 
 
-class TestE2EMefEline(unittest.TestCase):
+class TestE2EMefEline():
     net = None
 
     @classmethod
