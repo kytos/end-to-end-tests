@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+import pytest
 import requests
 import time
 from tests.helpers import NetworkTest
@@ -12,14 +13,28 @@ class TestE2EMefEline():
     net = None
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
-        cls.net.restart_kytos_clean()
 
     @classmethod
-    def tearDownClass(cls):
+    def teardown_class(cls):
         cls.net.stop()
+
+    @pytest.fixture()
+    def kytos_clean(self):
+        self.net.restart_kytos_clean()
+
+    @pytest.fixture()
+    def circuit_id(self, kytos_clean):
+        created_id = self._create_circuit()
+        return created_id
+
+    @pytest.fixture()
+    def disabled_circuit_id(self, circuit_id):
+        self._disable_circuit(circuit_id)
+        time.sleep(2)
+        return circuit_id    
 
     def _circuit_exists(self, circuit_id):
         api_url = f'{KYTOS_API}/mef_eline/v2/evc/{circuit_id}'
@@ -61,25 +76,20 @@ class TestE2EMefEline():
         
         return 
 
-    def test_create_schedule_by_frequency(self):
+    def test_create_schedule_by_frequency(self, disabled_circuit_id):
         """ Test scheduler creation to enable the circuit by frequency, 
             every minute. """
-        self.net.restart_kytos_clean()
-
-        circuit_id = self._create_circuit()
-        self._disable_circuit(circuit_id)
-        time.sleep(2)
 
         # Schedule by frequency every minute
         payload = {
-              "circuit_id":circuit_id,
+              "circuit_id":disabled_circuit_id,
               "schedule": {
                 "frequency": "* * * * *"
               }
             }
 
         # verify if the circuit is really disabled
-        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{circuit_id}'
+        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{disabled_circuit_id}'
         response = requests.get(api_url)
         json = response.json() 
         assert json.get("enabled") == False
@@ -93,7 +103,7 @@ class TestE2EMefEline():
         time.sleep(62)
 
         # Verify if the circuit is enabled 
-        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{circuit_id}'
+        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{disabled_circuit_id}'
         response = requests.get(api_url)
         assert response.status_code == 200
 
@@ -105,28 +115,23 @@ class TestE2EMefEline():
         assert scheduler_frq is not None
         assert payload_frq == scheduler_frq
 
-    def test_create_schedule_by_date(self):
+    def test_create_schedule_by_date(self, disabled_circuit_id):
         """ Test scheduler creation to enable the circuit by date, 
             after one minute. """
-        self.net.restart_kytos_clean()
-
-        circuit_id = self._create_circuit()
-        self._disable_circuit(circuit_id)
-        time.sleep(2)
 
         # Schedule by date to next minute
         ts = datetime.now() + timedelta(seconds=60)
         schedule_time = ts.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
         payload = {
-              "circuit_id":circuit_id,
+              "circuit_id":disabled_circuit_id,
               "schedule": {
                 "date": schedule_time
               }
             }
 
         # verify if the circuit is really disabled
-        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{circuit_id}'
+        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{disabled_circuit_id}'
         response = requests.get(api_url)
         json = response.json() 
         assert json.get("enabled") == False
@@ -140,7 +145,7 @@ class TestE2EMefEline():
         time.sleep(62)
 
         # Verify if the circuit is enabled 
-        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{circuit_id}'
+        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{disabled_circuit_id}'
         response = requests.get(api_url)
         assert response.status_code == 200
 
@@ -150,11 +155,9 @@ class TestE2EMefEline():
         scheduler_date = json.get("circuit_scheduler")[0].get("date")
         payload_date = payload.get("schedule").get("date")
         assert payload_date == scheduler_date
-        
-    def test_delete_schedule(self):
+     
+    def test_delete_schedule(self, circuit_id):
         """ Test to delete a scheduler. """
-        self.net.restart_kytos_clean()
-        circuit_id = self._create_circuit()
 
         # Schedule by frequency every minute
         payload = {
@@ -185,18 +188,13 @@ class TestE2EMefEline():
         response = requests.get(api_url)
         assert response.status_code == 405
 
-    def test_patch_schedule(self):
+    def test_patch_schedule(self, disabled_circuit_id):
         """ Test to modify a scheduler and enable a circuit 
             after one minute """
-        self.net.restart_kytos_clean()
-        # create disabled circuit
-        circuit_id = self._create_circuit()
-        self._disable_circuit(circuit_id)
-        time.sleep(2)
 
         # Schedule by frequency every hour
         payload = {
-              "circuit_id":circuit_id,
+              "circuit_id":disabled_circuit_id,
               "schedule": {
                 "frequency": "* 1 * * *"
               }
@@ -212,7 +210,7 @@ class TestE2EMefEline():
         schedule_id = json.get("id")
 
         # verify if the circuit is really disabled
-        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{circuit_id}'
+        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{disabled_circuit_id}'
         response = requests.get(api_url)
         json = response.json()
         assert json.get("enabled") == False
@@ -231,7 +229,7 @@ class TestE2EMefEline():
         time.sleep(62)
 
         # Verify if the circuit is enabled
-        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{circuit_id}'
+        api_url = f'{KYTOS_API}/mef_eline/v2/evc/{disabled_circuit_id}'
         response = requests.get(api_url)
         json = response.json()
 
