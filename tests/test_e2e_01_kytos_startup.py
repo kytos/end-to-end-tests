@@ -1,3 +1,5 @@
+import time
+
 import requests
 from tests.helpers import NetworkTest
 import re
@@ -16,17 +18,23 @@ class TestE2EKytosServer:
 
     def setup_method(self, method):
         """
-        It is called at the beginning of the class execution
+        It is called at the beginning of every class method execution
         """
-        self.net = NetworkTest(CONTROLLER)
-        self.net.start()
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=False)
         self.net.wait_switches_connect()
+        time.sleep(5)
 
-    def teardown_method(self, method):
-        """
-        It is called everytime a method ends it execution
-        """
-        self.net.stop()
+    @classmethod
+    def setup_class(cls):
+        cls.net = NetworkTest(CONTROLLER)
+        cls.net.start()
+        cls.net.wait_switches_connect()
+
+    @classmethod
+    def teardown_class(cls):
+        cls.net.stop()
 
     def test_start_kytos_api_core(self):
 

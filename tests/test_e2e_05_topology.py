@@ -1,4 +1,3 @@
-import pytest
 import json
 import requests
 from tests.helpers import NetworkTest
@@ -13,27 +12,25 @@ class TestE2ETopology:
 
     def setup_method(self, method):
         """
-        It is called at the beginning of the class execution
+        It is called at the beginning of every class method execution
         """
-        self.net = NetworkTest(CONTROLLER)
-        self.net.start()
-        self.net.wait_switches_connect()
-    
-    def teardown_method(self, method):
-        """
-        It is called everytime a method ends it execution
-        """
-        self.net.stop()
-    
-    @pytest.fixture
-    def restart_kytos(self):
-
         # Start the controller setting an environment in
         # which all elements are disabled in a clean setting
         self.net.start_controller(clean_config=True, enable_all=False)
         self.net.wait_switches_connect()
+        time.sleep(5)
 
-    def test_010_list_switches(self, restart_kytos):
+    @classmethod
+    def setup_class(cls):
+        cls.net = NetworkTest(CONTROLLER)
+        cls.net.start()
+        cls.net.wait_switches_connect()
+
+    @classmethod
+    def teardown_class(cls):
+        cls.net.stop()
+
+    def test_010_list_switches(self):
         """
         Test /api/kytos/topology/v3/ on GET
         """
@@ -48,7 +45,7 @@ class TestE2ETopology:
         assert '00:00:00:00:00:00:00:02' in data['switches']
         assert '00:00:00:00:00:00:00:03' in data['switches']
 
-    def test_020_enabling_switch_persistent(self, restart_kytos):
+    def test_020_enabling_switch_persistent(self):
         """
         Test /api/kytos/topology/v3/switches/{dpid}/enable on POST
         supported by
@@ -96,7 +93,7 @@ class TestE2ETopology:
         data = response.json()
         assert data['switches'][switch_id]['enabled'] is True
 
-    def test_030_disabling_switch_persistent(self, restart_kytos):
+    def test_030_disabling_switch_persistent(self):
         """
         Test /api/kytos/topology/v3/switches/{dpid}/disable on POST
         supported by
@@ -144,7 +141,7 @@ class TestE2ETopology:
         data = response.json()
         assert data['switches'][switch_id]['enabled'] is False
 
-    def test_040_removing_switch_metadata_persistent(self, restart_kytos):
+    def test_040_removing_switch_metadata_persistent(self):
         """
         Test /api/kytos/topology/v3/switches/{dpid}/metadata/{key} on DELETED
         supported by:
@@ -197,7 +194,7 @@ class TestE2ETopology:
         keys = data['metadata'].keys()
         assert key not in keys
 
-    def test_050_enabling_interface_persistent(self, restart_kytos):
+    def test_050_enabling_interface_persistent(self):
         """
         Test /api/kytos/topology/v3/interfaces/{interface_id}/enable on POST
         supported by
@@ -232,7 +229,7 @@ class TestE2ETopology:
         data = response.json()
         assert data['interfaces'][interface_id]['enabled'] is True
 
-    def test_060_enabling_all_interfaces_on_a_switch_persistent(self, restart_kytos):
+    def test_060_enabling_all_interfaces_on_a_switch_persistent(self):
         """
         Test /api/kytos/topology/v3/interfaces/switch/{dpid}/enable on POST
         supported by
@@ -270,7 +267,7 @@ class TestE2ETopology:
         for interface in data['switches'][switch_id]['interfaces']:
             assert data['switches'][switch_id]['interfaces'][interface]['enabled'] is True
 
-    def test_070_disabling_interface_persistent(self, restart_kytos):
+    def test_070_disabling_interface_persistent(self):
         """
         Test /api/kytos/topology/v3/interfaces/{interface_id}/disable on POST
         supported by:
@@ -317,7 +314,7 @@ class TestE2ETopology:
         data = response.json()
         assert data['interfaces'][interface_id]['enabled'] is False
 
-    def test_080_disabling_all_interfaces_on_a_switch_persistent(self, restart_kytos):
+    def test_080_disabling_all_interfaces_on_a_switch_persistent(self):
         """
         Test /api/kytos/topology/v3/interfaces/{interface_id}/disable on POST
         supported by:
@@ -349,7 +346,7 @@ class TestE2ETopology:
         for interface in data['switches'][switch_id]['interfaces']:
             assert data['switches'][switch_id]['interfaces'][interface]['enabled'] is True
 
-    def test_090_removing_interfaces_metadata_persistent(self, restart_kytos):
+    def test_090_removing_interfaces_metadata_persistent(self):
         """
         Test /api/kytos/topology/v3/interfaces/{interface_id}/metadata/{key} on DELETE
         supported by:
@@ -404,7 +401,7 @@ class TestE2ETopology:
         keys = data['metadata'].keys()
         assert key not in keys
 
-    def test_100_enabling_link_persistent(self, restart_kytos):
+    def test_100_enabling_link_persistent(self):
         """
         Test /api/kytos/topology/v3/links/{link_id}/enable on POST
         supported by:
@@ -474,7 +471,7 @@ class TestE2ETopology:
         data = response.json()
         assert data['links'][link_id1]['enabled'] is True
 
-    def test_110_disabling_link_persistent(self, restart_kytos):
+    def test_110_disabling_link_persistent(self):
         """
         Test /api/kytos/topology/v3/links/{link_id}/disable on POST
         supported by:
@@ -569,7 +566,7 @@ class TestE2ETopology:
         data = response.json()
         assert data['links'][link_id1]['enabled'] is False
 
-    def test_120_removing_link_metadata_persistent(self, restart_kytos):
+    def test_120_removing_link_metadata_persistent(self):
         """
         Test /api/kytos/topology/v3/links/{link_id}/metadata/{key} on DELETE
         supported by:
@@ -669,7 +666,7 @@ class TestE2ETopology:
         keys = data['metadata'].keys()
         assert key not in keys
 
-    def test_200_switch_disabled_on_clean_start(self, restart_kytos):
+    def test_200_switch_disabled_on_clean_start(self):
 
         switch_id = "00:00:00:00:00:00:00:01"
 
@@ -681,7 +678,7 @@ class TestE2ETopology:
         assert response.status_code == 200
         assert data['switches'][switch_id]['enabled'] is False
 
-    def test_300_interfaces_disabled_on_clean_start(self, restart_kytos):
+    def test_300_interfaces_disabled_on_clean_start(self):
 
         # Make sure the interfaces are disabled
         api_url = KYTOS_API + '/topology/v3/interfaces'
@@ -694,8 +691,8 @@ class TestE2ETopology:
 
         # Start the controller setting an environment in
         # which all elements are disabled in a clean setting
-        self.net.start_controller(clean_config=True, enable_all=True)
-        self.net.wait_switches_connect()
+        # self.net.start_controller(clean_config=True, enable_all=True)
+        # self.net.wait_switches_connect()
 
         # Make sure the switch is disabled
         api_url = KYTOS_API + '/topology/v3/switches'
@@ -710,8 +707,8 @@ class TestE2ETopology:
 
         # Start the controller setting an environment in
         # which all elements are disabled in a clean setting
-        self.net.start_controller(clean_config=True, enable_all=True)
-        self.net.wait_switches_connect()
+        # self.net.start_controller(clean_config=True, enable_all=True)
+        # self.net.wait_switches_connect()
 
         # Make sure the interfaces are disabled
         api_url = KYTOS_API + '/topology/v3/interfaces'
