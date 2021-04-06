@@ -1,16 +1,25 @@
 import json
-import pytest
 import requests
 from tests.helpers import NetworkTest
-import os
 import time
 import re
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
+
 class TestE2EFlowManager:
     net = None
+
+    def setup_method(self, method):
+        """
+        It is called at the beginning of every class method execution
+        """
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
+        time.sleep(5)
 
     @classmethod
     def setup_class(cls):
@@ -25,8 +34,6 @@ class TestE2EFlowManager:
     def test_030_restart_kytos_should_preserve_flows(self):
         """Test if, after kytos restart, the flows are preserved on the switch
            flow table."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
 
         payload = {
             "flows": [
@@ -78,8 +85,6 @@ class TestE2EFlowManager:
     def test_031_on_switch_restart_kytos_should_recreate_flows(self):
         """Test if, after kytos restart, the flows are preserved on the switch 
            flow table."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
 
         payload = {
             "flows": [

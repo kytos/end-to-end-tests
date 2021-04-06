@@ -10,6 +10,16 @@ KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 class TestE2EFlowManager:
     net = None
 
+    def setup_method(self, method):
+        """
+        It is called at the beginning of every class method execution
+        """
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
+        time.sleep(5)
+
     @classmethod
     def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
@@ -23,8 +33,8 @@ class TestE2EFlowManager:
     def test_020_install_flow(self):
         """Test if, after kytos restart, a flow installed to a switch will
            still be installed."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         payload = {
             "flows": [
@@ -68,8 +78,8 @@ class TestE2EFlowManager:
     def test_020_install_flows(self):
         """Test if, after kytos restart, a flow installed to all switches will
            still be installed."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         payload = {
             "flows": [
@@ -114,8 +124,8 @@ class TestE2EFlowManager:
     def test_020_delete_flow(self):
         """Test if, after kytos restart, a flow deleted from a switch will
            still be deleted."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         payload = {
             "flows": [
@@ -170,8 +180,8 @@ class TestE2EFlowManager:
     def test_020_delete_flows(self):
         """Test if, after kytos restart, a flow deleted from all switches will
            still be deleted."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         payload = {
             "flows": [
@@ -227,8 +237,8 @@ class TestE2EFlowManager:
     def modify_match(self, restart_kytos=False):
         """Test if after a match is modified outside kytos, the original
            flow is restored."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         payload = {
             "flows": [
@@ -281,9 +291,8 @@ class TestE2EFlowManager:
         self.modify_match(restart_kytos=True)
 
     def replace_action_flow(self, restart_kytos=False):
-
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         payload = {
             "flows": [
@@ -346,9 +355,8 @@ class TestE2EFlowManager:
         self.replace_action_flow(restart_kytos=True)
 
     def add_action_flow(self, restart_kytos=False):
-
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         payload = {
             "flows": [
@@ -404,8 +412,8 @@ class TestE2EFlowManager:
     def flow_another_table(self, restart_kytos=False):
         """Test if, after adding a flow in another table outside kytos, the 
             flow is removed."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         s1 = self.net.net.get('s1')
         s1.dpctl('add-flow', 'table=2,in_port=1,actions=output:2')
@@ -428,8 +436,8 @@ class TestE2EFlowManager:
     def flow_table_0(self, restart_kytos=False):
         """Test if, after adding a flow in another table outside kytos, the
             flow is removed."""
-        self.net.restart_kytos_clean()
-        time.sleep(5)
+        # self.net.restart_kytos_clean()
+        # time.sleep(5)
 
         s1 = self.net.net.get('s1')
         s1.dpctl('add-flow', 'table=0,in_port=1,actions=output:2')
