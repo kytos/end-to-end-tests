@@ -37,7 +37,7 @@ class TestE2EMefEline():
         return circuit_id    
 
     def _circuit_exists(self, circuit_id):
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
         response = requests.get(api_url)
         return response.status_code == 200
 
@@ -52,7 +52,7 @@ class TestE2EMefEline():
                 "interface_id": "00:00:00:00:00:00:00:01:2",
             }
         }
-        api_url = '%s/mef_eline/v2/evc/' % (KYTOS_API)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=payload)
         assert response.status_code == 201
 
@@ -69,7 +69,7 @@ class TestE2EMefEline():
         payload = {
             "enable": False,
         }
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
         response = requests.patch(api_url, json=payload)
 
         assert response.status_code == 200
@@ -89,13 +89,13 @@ class TestE2EMefEline():
             }
 
         # verify if the circuit is really disabled
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, disabled_circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
         json = response.json() 
         assert json.get("enabled") == False
 
         # create circuit schedule
-        api_url = '%s/mef_eline/v2/evc/schedule' % (KYTOS_API)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
         assert response.status_code == 201  
         
@@ -103,7 +103,7 @@ class TestE2EMefEline():
         time.sleep(62)
 
         # Verify if the circuit is enabled 
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, disabled_circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
         assert response.status_code == 200
 
@@ -131,13 +131,13 @@ class TestE2EMefEline():
             }
 
         # verify if the circuit is really disabled
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, disabled_circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
         json = response.json() 
         assert json.get("enabled") == False
 
         # create circuit schedule
-        api_url = '%s/mef_eline/v2/evc/schedule' % (KYTOS_API)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
         assert response.status_code == 201  
         
@@ -145,7 +145,7 @@ class TestE2EMefEline():
         time.sleep(62)
 
         # Verify if the circuit is enabled 
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, disabled_circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
         assert response.status_code == 200
 
@@ -168,23 +168,23 @@ class TestE2EMefEline():
             }
 
         # create circuit schedule
-        api_url = '%s/mef_eline/v2/evc/schedule' % (KYTOS_API)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
         assert response.status_code == 201
 
         # Recover schedule id created
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
         response = requests.get(api_url)
         json = response.json()
         schedule_id = json.get("circuit_scheduler")[0].get("id")
 
         # delete circuit schedule
-        api_url = '%s/mef_eline/v2/evc/schedule/%s' % (KYTOS_API, schedule_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.delete(api_url)
         assert response.status_code == 200
 
         # Verify if the circuit schedule does not exist
-        api_url = '%s/mef_eline/v2/evc/schedule/%s' % (KYTOS_API, schedule_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.get(api_url)
         assert response.status_code == 405
 
@@ -201,7 +201,7 @@ class TestE2EMefEline():
             }
 
         # create circuit schedule
-        api_url = '%s/mef_eline/v2/evc/schedule' % (KYTOS_API)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
         json = response.json()
         assert response.status_code == 201
@@ -210,7 +210,7 @@ class TestE2EMefEline():
         schedule_id = json.get("id")
 
         # verify if the circuit is really disabled
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, disabled_circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
         json = response.json()
         assert json.get("enabled") == False
@@ -221,7 +221,7 @@ class TestE2EMefEline():
         }
 
         # patch circuit schedule
-        api_url = '%s/mef_eline/v2/evc/schedule/%s' % (KYTOS_API, schedule_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.patch(api_url, json=payload)
         assert response.status_code == 200
 
@@ -229,7 +229,7 @@ class TestE2EMefEline():
         time.sleep(62)
 
         # Verify if the circuit is enabled
-        api_url = '%s/mef_eline/v2/evc/%s' % (KYTOS_API, disabled_circuit_id)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
         json = response.json()
 
