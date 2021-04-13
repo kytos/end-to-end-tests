@@ -9,25 +9,37 @@ CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
 
 
-class TestE2EMefEline(unittest.TestCase):
+class TestE2EMefEline:
     net = None
 
+    def setup_method(self, method):
+        """
+        It is called at the beginning of every class method execution
+        """
+        # Start the controller setting an environment in
+        # which all elements are disabled in a clean setting
+        self.net.start_controller(clean_config=True, enable_all=True)
+        self.net.wait_switches_connect()
+        time.sleep(10)
+
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.restart_kytos_clean()
+        cls.net.wait_switches_connect()
+        time.sleep(5)
 
     @classmethod
-    def tearDownClass(cls):
+    def teardown_class(cls):
         cls.net.stop()
 
     def test_001_list_evcs_should_be_empty(self):
         """Test if list circuits return 'no circuit stored.'."""
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.get(api_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {})
+        assert response.status_code == 200
+        assert response.json() == {}
 
     def test_010_create_evc_intra_switch(self):
         """ create an intra-switch EVC e-line with VLAN tag
@@ -52,7 +64,7 @@ class TestE2EMefEline(unittest.TestCase):
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=payload)
-        self.assertEqual(response.status_code, 201)
+        assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
         time.sleep(20)
