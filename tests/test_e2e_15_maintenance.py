@@ -1,7 +1,5 @@
-import unittest
 import requests
 from tests.helpers import NetworkTest
-import os
 import time
 import json
 from datetime import datetime, timedelta
@@ -11,16 +9,19 @@ KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
 
 TIME_FMT = "%Y-%m-%dT%H:%M:%S+0000"
 
-class TestE2EMaintenance(unittest.TestCase):
+
+class TestE2EMaintenance:
     net = None
+
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.restart_kytos_clean()
+        time.sleep(10)
 
     @classmethod
-    def tearDownClass(cls):
+    def teardown_class(cls):
         cls.net.stop()
 
     def create_circuit(self, vlan_id):
