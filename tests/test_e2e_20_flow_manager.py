@@ -31,7 +31,7 @@ class TestE2EFlowManager:
     def teardown_class(cls):
         cls.net.stop()
 
-    def test_020_install_flow(self):
+    def test_010_install_flow(self):
         """Test if, after kytos restart, a flow installed to a switch will
            still be installed."""
 
@@ -74,7 +74,7 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 2
         assert 'actions=output:"s1-eth2"' in flows_s1
 
-    def test_020_install_flows(self):
+    def test_015_install_flows(self):
         """Test if, after kytos restart, a flow installed to all switches will
            still be installed."""
 
@@ -172,7 +172,7 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 1
         assert 'actions=output:"s1-eth2"' not in flows_s1
 
-    def test_020_delete_flows(self):
+    def test_025_delete_flows(self):
         """Test if, after kytos restart, a flow deleted from all switches will
            still be deleted."""
 
@@ -277,10 +277,10 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 2
         assert 'in_port="s1-eth1' in flows_s1
 
-    def test_020_modify_match(self):
+    def test_030_modify_match(self):
         self.modify_match()
 
-    def test_020_modify_match_restarting(self):
+    def test_035_modify_match_restarting(self):
         self.modify_match(restart_kytos=True)
 
     def replace_action_flow(self, restart_kytos=False):
@@ -339,10 +339,10 @@ class TestE2EFlowManager:
         assert 'actions=output:"s1-eth3"' not in flows_s1
         assert 'in_port="s1-eth1' in flows_s1
 
-    def test_020_replace_action_flow(self):
+    def test_040_replace_action_flow(self):
         self.replace_action_flow()
 
-    def test_020_replace_action_flow_restarting(self):
+    def test_045_replace_action_flow_restarting(self):
         self.replace_action_flow(restart_kytos=True)
 
     def add_action_flow(self, restart_kytos=False):
@@ -392,10 +392,10 @@ class TestE2EFlowManager:
         assert 'actions=strip_vlan,' not in flows_s1
         assert 'actions=output:"s1-eth2' in flows_s1
 
-    def test_020_add_action_flow(self):
+    def test_050_add_action_flow(self):
         self.add_action_flow()
 
-    def test_020_add_action_flow_restarting(self):
+    def test_055_add_action_flow_restarting(self):
         self.add_action_flow(restart_kytos=True)
 
     def flow_another_table(self, restart_kytos=False):
@@ -414,10 +414,10 @@ class TestE2EFlowManager:
         flows_s1 = s1.dpctl('dump-flows')
         assert len(flows_s1.split('\r\n ')) == 1
 
-    def test_020_flow_another_table(self):
+    def test_060_flow_another_table(self):
         self.flow_another_table()
 
-    def test_020_flow_another_table_restarting(self):
+    def test_065_flow_another_table_restarting(self):
         self.flow_another_table(restart_kytos=True)
 
     def flow_table_0(self, restart_kytos=False):
@@ -437,8 +437,8 @@ class TestE2EFlowManager:
         flows_s1 = s1.dpctl('dump-flows')
         assert len(flows_s1.split('\r\n ')) == 1
 
-    def test_020_flow_table_0(self):
+    def test_070_flow_table_0(self):
         self.flow_table_0()
 
-    def test_020_flow_table_0_restarting(self):
+    def test_075_flow_table_0_restarting(self):
         self.flow_table_0(restart_kytos=True)
