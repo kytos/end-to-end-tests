@@ -19,13 +19,14 @@ class TestE2EFlowManager:
         # which all elements are disabled in a clean setting
         self.net.start_controller(clean_config=True, enable_all=False)
         self.net.wait_switches_connect()
-        time.sleep(5)
+        time.sleep(10)
 
     @classmethod
     def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.wait_switches_connect()
+        time.sleep(10)
 
     @classmethod
     def teardown_class(cls):
@@ -38,23 +39,23 @@ class TestE2EFlowManager:
         payload = {
             "flows": [
                 {
-                "priority": 10,
-                "match": {
-                    "in_port": 1,
-                    "dl_vlan": 999
-                },
-                "actions": [
-                    {
-                    "action_type": "output",
-                    "port": 2
-                    }
-                ]
+                    "priority": 10,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 999
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
                 }
             ]
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload), 
+        response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
@@ -89,23 +90,23 @@ class TestE2EFlowManager:
         payload = {
             "flows": [
                 {
-                "priority": 10,
-                "match": {
-                    "in_port": 1,
-                    "dl_vlan": 999
-                },
-                "actions": [
-                    {
-                    "action_type": "output",
-                    "port": 2
-                    }
-                ]
+                    "priority": 10,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 999
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
                 }
             ]
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload), 
+        response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         data = response.json()
