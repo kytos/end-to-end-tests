@@ -9,17 +9,17 @@ CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
 
 
-class TestE2EOfLLDP(unittest.TestCase):
+class TestE2EOfLLDP:
     net = None
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.restart_kytos_clean()
 
     @classmethod
-    def tearDownClass(cls):
+    def teardown_class(cls):
         cls.net.stop()
 
     def get_iface_stats_rx_pkt(self, host):
