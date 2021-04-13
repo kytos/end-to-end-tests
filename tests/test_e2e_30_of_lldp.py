@@ -1,12 +1,9 @@
-import unittest
 import requests
 from tests.helpers import NetworkTest
-import os
 import time
-import json
 
 CONTROLLER = '127.0.0.1'
-KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
+KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 
 class TestE2EOfLLDP:
@@ -28,7 +25,8 @@ class TestE2EOfLLDP:
         rx_pkts = host.cmd("ip -s link show dev %s | grep RX: -A 1 | tail -n1 | awk '{print $2}'" % (host.intfNames()[0]))
         return int(rx_pkts.strip())
 
-    def disable_all_of_lldp(self):
+    @staticmethod
+    def disable_all_of_lldp():
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
         response = requests.get(api_url)
         data = response.json()
@@ -50,9 +48,12 @@ class TestE2EOfLLDP:
         # s2 lo:  s2-eth1:h2-eth0 s2-eth2:s1-eth3 s2-eth3:s3-eth2
         # s3 lo:  s3-eth1:h3-eth0 s3-eth2:s2-eth3 s3-eth3:s1-eth4
         expected_interfaces = [
-                "00:00:00:00:00:00:00:01:1","00:00:00:00:00:00:00:01:2","00:00:00:00:00:00:00:01:3", "00:00:00:00:00:00:00:01:4", "00:00:00:00:00:00:00:01:4294967294",
-                "00:00:00:00:00:00:00:02:1","00:00:00:00:00:00:00:02:2","00:00:00:00:00:00:00:02:3", "00:00:00:00:00:00:00:02:4294967294",
-                "00:00:00:00:00:00:00:03:1","00:00:00:00:00:00:00:03:2","00:00:00:00:00:00:00:03:3", "00:00:00:00:00:00:00:03:4294967294"
+                "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:01:2", "00:00:00:00:00:00:00:01:3",
+                "00:00:00:00:00:00:00:01:4", "00:00:00:00:00:00:00:01:4294967294",
+                "00:00:00:00:00:00:00:02:1", "00:00:00:00:00:00:00:02:2", "00:00:00:00:00:00:00:02:3",
+                "00:00:00:00:00:00:00:02:4294967294",
+                "00:00:00:00:00:00:00:03:1", "00:00:00:00:00:00:00:03:2", "00:00:00:00:00:00:00:03:3",
+                "00:00:00:00:00:00:00:03:4294967294"
         ]
         assert set(data["interfaces"]) == set(expected_interfaces)
 
@@ -60,18 +61,18 @@ class TestE2EOfLLDP:
         h11, h12, h2, h3 = self.net.net.get('h11', 'h12', 'h2', 'h3')
         rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
         rx_stats_h12 = self.get_iface_stats_rx_pkt(h12)
-        rx_stats_h2  = self.get_iface_stats_rx_pkt(h2)
-        rx_stats_h3  = self.get_iface_stats_rx_pkt(h3)
+        rx_stats_h2 = self.get_iface_stats_rx_pkt(h2)
+        rx_stats_h3 = self.get_iface_stats_rx_pkt(h3)
         time.sleep(10)
         rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
         rx_stats_h12_2 = self.get_iface_stats_rx_pkt(h12)
-        rx_stats_h2_2  = self.get_iface_stats_rx_pkt(h2)
-        rx_stats_h3_2  = self.get_iface_stats_rx_pkt(h3)
+        rx_stats_h2_2 = self.get_iface_stats_rx_pkt(h2)
+        rx_stats_h3_2 = self.get_iface_stats_rx_pkt(h3)
 
         assert rx_stats_h11_2 > rx_stats_h11 \
-                and rx_stats_h12_2 > rx_stats_h12 \
-                and rx_stats_h2_2 > rx_stats_h2 \
-                and rx_stats_h3_2 > rx_stats_h3
+            and rx_stats_h12_2 > rx_stats_h12 \
+            and rx_stats_h2_2 > rx_stats_h2 \
+            and rx_stats_h3_2 > rx_stats_h3
 
     def test_010_disable_of_lldp(self):
         """ Test if the disabling OF LLDP in an interface worked properly. """
@@ -102,18 +103,18 @@ class TestE2EOfLLDP:
         h11, h12, h2, h3 = self.net.net.get('h11', 'h12', 'h2', 'h3')
         rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
         rx_stats_h12 = self.get_iface_stats_rx_pkt(h12)
-        rx_stats_h2  = self.get_iface_stats_rx_pkt(h2)
-        rx_stats_h3  = self.get_iface_stats_rx_pkt(h3)
+        rx_stats_h2 = self.get_iface_stats_rx_pkt(h2)
+        rx_stats_h3 = self.get_iface_stats_rx_pkt(h3)
         time.sleep(10)
         rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
         rx_stats_h12_2 = self.get_iface_stats_rx_pkt(h12)
-        rx_stats_h2_2  = self.get_iface_stats_rx_pkt(h2)
-        rx_stats_h3_2  = self.get_iface_stats_rx_pkt(h3)
+        rx_stats_h2_2 = self.get_iface_stats_rx_pkt(h2)
+        rx_stats_h3_2 = self.get_iface_stats_rx_pkt(h3)
 
         assert rx_stats_h11_2 == rx_stats_h11 \
-                and rx_stats_h12_2 == rx_stats_h12 \
-                and rx_stats_h2_2 == rx_stats_h2 \
-                and rx_stats_h3_2 == rx_stats_h3
+            and rx_stats_h12_2 == rx_stats_h12 \
+            and rx_stats_h2_2 == rx_stats_h2 \
+            and rx_stats_h3_2 == rx_stats_h3
 
         # restart kytos and check if lldp remains disabled
         self.net.start_controller(clean_config=False)
@@ -129,7 +130,7 @@ class TestE2EOfLLDP:
         """ Test if enabling OF LLDP in an interface works properly. """
         self.net.restart_kytos_clean()
         time.sleep(5)
-        self.disable_all_of_lldp()
+        TestE2EOfLLDP.disable_all_of_lldp()
 
         payload = {
             "interfaces": [
