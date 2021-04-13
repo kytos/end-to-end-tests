@@ -1,12 +1,10 @@
-import unittest
 import requests
 from tests.helpers import NetworkTest
-import os
 import time
 import json
 
 CONTROLLER = '127.0.0.1'
-KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
+KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 
 class TestE2EMefEline:
@@ -34,14 +32,14 @@ class TestE2EMefEline:
     def teardown_class(cls):
         cls.net.stop()
 
-    def test_001_list_evcs_should_be_empty(self):
+    def test_010_list_evcs_should_be_empty(self):
         """Test if list circuits return 'no circuit stored.'."""
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.get(api_url)
         assert response.status_code == 200
         assert response.json() == {}
 
-    def test_010_create_evc_intra_switch(self):
+    def test_015_create_evc_intra_switch(self):
         """ create an intra-switch EVC e-line with VLAN tag
         (UNIs in the same switch) """
         payload = {
@@ -93,8 +91,7 @@ class TestE2EMefEline:
         h12.cmd('ip link del vlan101')
         self.net.restart_kytos_clean()
 
-    def test_015_create_evc_inter_switch(self):
-        time.sleep(10)
+    def test_020_create_evc_inter_switch(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -124,9 +121,8 @@ class TestE2EMefEline:
         # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
-        print(flows_s1)
         flows_s2 = s2.dpctl('dump-flows')
-        print(flows_s2)
+
         assert len(flows_s1.split('\r\n ')) == 3
         assert len(flows_s2.split('\r\n ')) == 3
 
@@ -152,8 +148,7 @@ class TestE2EMefEline:
         h2.cmd('ip link del vlan15')
         self.net.restart_kytos_clean()
 
-    def test_020_create_evc_different_tags_each_side(self):
-        time.sleep(10)
+    def test_025_create_evc_different_tags_each_side(self):
         payload = {
             "name": "Vlan102_103_Test",
             "enabled": True,
@@ -203,9 +198,7 @@ class TestE2EMefEline:
         h2.cmd('ip link del vlan103')
         self.net.restart_kytos_clean()
 
-    def test_020_create_evc_tag_notag(self):
-        self.net.restart_kytos_clean()
-        time.sleep(10)
+    def test_030_create_evc_tag_notag(self):
         payload = {
             "name": "Vlan104_Test",
             "enabled": True,
@@ -254,10 +247,8 @@ class TestE2EMefEline:
         h2.cmd('ip addr del 104.0.0.2/24 dev %s' % (h2.intfNames()[0]))
         self.net.restart_kytos_clean()
 
-    def test_020_create_evc_same_vid_different_uni(self):
+    def test_035_create_evc_same_vid_different_uni(self):
         # Create circuit 1
-        self.net.restart_kytos_clean()
-        time.sleep(10)
         payload = {
             "name": "Vlan110_Test",
             "enabled": True,
@@ -349,11 +340,9 @@ class TestE2EMefEline:
         h3.cmd('ip link del vlan110')
         self.net.restart_kytos_clean()
 
-    def test_025_disable_circuit_should_remove_openflow_rules(self):
+    def test_040_disable_circuit_should_remove_openflow_rules(self):
         # let's suppose that xyz is the circuit id previously created
         # curl -X PATCH -H "Content-Type: application/json" -d '{"enable": false}' http://172.18.0.2:8181/api/kytos/mef_eline/v2/evc/xyz
-        self.net.restart_kytos_clean()
-        time.sleep(10)
         payload = {
             "name": "Vlan125_Test_evc1",
             "enabled": True,
@@ -404,9 +393,7 @@ class TestE2EMefEline:
         h11.cmd('ip link del vlan125')
         h2.cmd('ip link del vlan125')
 
-    def test_025_create_circuit_reusing_same_vlanid_from_previous_evc(self):
-        self.net.restart_kytos_clean()
-        time.sleep(10)
+    def test_045_create_circuit_reusing_same_vlanid_from_previous_evc(self):
         payload = {
             "name": "Vlan125_Test_evc1",
             "enabled": True,
@@ -481,19 +468,19 @@ class TestE2EMefEline:
         h2.cmd('ip link del vlan125')
         self.net.restart_kytos_clean()
 
-    def test_030_patch_evc_new_name(self):
+    def test_050_patch_evc_new_name(self):
         # TODO
         assert True
 
-    def test_040_patch_evc_new_unis(self):
+    def test_055_patch_evc_new_unis(self):
         # TODO
         assert True
 
-    def test_050_disable_evc(self):
+    def test_060_disable_evc(self):
         # TODO
         assert True
 
-    def test_060_on_primary_path_fail_should_migrate_to_backup(self):
+    def test_065_on_primary_path_fail_should_migrate_to_backup(self):
         # TODO
         assert True
 
