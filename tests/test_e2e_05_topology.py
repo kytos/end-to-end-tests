@@ -18,13 +18,14 @@ class TestE2ETopology:
         # which all elements are disabled in a clean setting
         self.net.start_controller(clean_config=True, enable_all=False)
         self.net.wait_switches_connect()
-        time.sleep(5)
+        time.sleep(10)
 
     @classmethod
     def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.wait_switches_connect()
+        time.sleep(5)
 
     @classmethod
     def teardown_class(cls):
