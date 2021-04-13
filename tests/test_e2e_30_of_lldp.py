@@ -17,6 +17,8 @@ class TestE2EOfLLDP:
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.restart_kytos_clean()
+        cls.net.wait_switches_connect()
+        time.sleep(10)
 
     @classmethod
     def teardown_class(cls):
