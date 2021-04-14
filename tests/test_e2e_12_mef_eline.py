@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import json
 import pytest
 import requests
 import time
@@ -9,13 +8,15 @@ CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 
-class TestE2EMefEline():
+class TestE2EMefEline:
     net = None
 
     @classmethod
     def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
+        cls.net.wait_switches_connect()
+        time.sleep(10)
 
     @classmethod
     def teardown_class(cls):
@@ -24,6 +25,8 @@ class TestE2EMefEline():
     @pytest.fixture()
     def kytos_clean(self):
         self.net.restart_kytos_clean()
+        self.net.wait_switches_connect()
+        time.sleep(10)
 
     @pytest.fixture()
     def circuit_id(self, kytos_clean):
@@ -34,7 +37,7 @@ class TestE2EMefEline():
     def disabled_circuit_id(self, circuit_id):
         self._disable_circuit(circuit_id)
         time.sleep(2)
-        return circuit_id    
+        return circuit_id
 
     def _circuit_exists(self, circuit_id):
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
@@ -73,8 +76,8 @@ class TestE2EMefEline():
         response = requests.patch(api_url, json=payload)
 
         assert response.status_code == 200
-        
-        return 
+
+        return
 
     def test_create_schedule_by_frequency(self, disabled_circuit_id):
         """ Test scheduler creation to enable the circuit by frequency, 
@@ -82,23 +85,23 @@ class TestE2EMefEline():
 
         # Schedule by frequency every minute
         payload = {
-              "circuit_id":disabled_circuit_id,
-              "schedule": {
+            "circuit_id": disabled_circuit_id,
+            "schedule": {
                 "frequency": "* * * * *"
-              }
             }
+        }
 
         # verify if the circuit is really disabled
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
-        json = response.json() 
-        assert json.get("enabled") == False
+        json = response.json()
+        assert json.get("enabled") is False
 
         # create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 201  
-        
+        assert response.status_code == 201
+
         # waiting some time to trigger the scheduler
         time.sleep(62)
 
@@ -107,9 +110,9 @@ class TestE2EMefEline():
         response = requests.get(api_url)
         assert response.status_code == 200
 
-        json = response.json() 
-        assert json.get("enabled") == True
-        
+        json = response.json()
+        assert json.get("enabled") is True
+
         scheduler_frq = json.get("circuit_scheduler")[0].get("frequency")
         payload_frq = payload.get("schedule").get("frequency")
         assert scheduler_frq is not None
@@ -124,23 +127,23 @@ class TestE2EMefEline():
         schedule_time = ts.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
         payload = {
-              "circuit_id":disabled_circuit_id,
-              "schedule": {
+            "circuit_id": disabled_circuit_id,
+            "schedule": {
                 "date": schedule_time
-              }
             }
+        }
 
         # verify if the circuit is really disabled
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
-        json = response.json() 
-        assert json.get("enabled") == False
+        json = response.json()
+        assert json.get("enabled") is False
 
         # create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 201  
-        
+        assert response.status_code == 201
+
         # waiting some time to trigger the scheduler
         time.sleep(62)
 
@@ -149,23 +152,23 @@ class TestE2EMefEline():
         response = requests.get(api_url)
         assert response.status_code == 200
 
-        json = response.json() 
-        assert json.get("enabled") == True
+        json = response.json()
+        assert json.get("enabled") is True
 
         scheduler_date = json.get("circuit_scheduler")[0].get("date")
         payload_date = payload.get("schedule").get("date")
         assert payload_date == scheduler_date
-     
+
     def test_delete_schedule(self, circuit_id):
         """ Test to delete a scheduler. """
 
         # Schedule by frequency every minute
         payload = {
-              "circuit_id":circuit_id,
-              "schedule": {
+            "circuit_id": circuit_id,
+            "schedule": {
                 "frequency": "* * * * *"
-              }
             }
+        }
 
         # create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
@@ -194,11 +197,11 @@ class TestE2EMefEline():
 
         # Schedule by frequency every hour
         payload = {
-              "circuit_id":disabled_circuit_id,
-              "schedule": {
+            "circuit_id": disabled_circuit_id,
+            "schedule": {
                 "frequency": "* 1 * * *"
-              }
             }
+        }
 
         # create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
@@ -213,7 +216,7 @@ class TestE2EMefEline():
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
         json = response.json()
-        assert json.get("enabled") == False
+        assert json.get("enabled") is False
 
         # Schedule by frequency every minute
         payload = {
@@ -234,7 +237,7 @@ class TestE2EMefEline():
         json = response.json()
 
         assert response.status_code == 200
-        assert json.get("enabled") == True
+        assert json.get("enabled") is True
 
         frequency = json.get("circuit_scheduler")[0].get("frequency")
         assert payload.get("frequency") == frequency
