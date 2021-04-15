@@ -692,8 +692,9 @@ class TestE2ETopology:
 
         # Start the controller setting an environment in
         # which all elements are disabled in a clean setting
-        # self.net.start_controller(clean_config=True, enable_all=True)
-        # self.net.wait_switches_connect()
+        self.net.start_controller(clean_config=True, enable_all=True)
+        self.net.wait_switches_connect()
+        time.sleep(5)
 
         # Make sure the switch is disabled
         api_url = KYTOS_API + '/topology/v3/switches'
@@ -710,7 +711,7 @@ class TestE2ETopology:
         # which all elements are disabled in a clean setting
         self.net.start_controller(clean_config=True, enable_all=True)
         self.net.wait_switches_connect()
-        time.sleep(10)
+        time.sleep(5)
 
         # Make sure the interfaces are disabled
         api_url = KYTOS_API + '/topology/v3/interfaces'
