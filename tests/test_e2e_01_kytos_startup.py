@@ -1,5 +1,5 @@
 import time
-
+import shutil
 import requests
 from tests.helpers import NetworkTest
 import re
@@ -31,6 +31,10 @@ class TestE2EKytosServer:
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.wait_switches_connect()
+        # rotate logfile (copytruncate strategy)
+        logfile = '/var/log/syslog'
+        shutil.copy(logfile, logfile + '-' + time.strftime("%Y%m%d%H%M%S"))
+        open(logfile, 'w').close()
 
     @classmethod
     def teardown_class(cls):
