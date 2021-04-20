@@ -170,10 +170,19 @@ class TestE2EMefEline:
             }
         }
 
-        # create circuit schedule
+        # Create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
         assert response.status_code == 201
+
+        # Verify the list of schedules
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+
+        data = response.json()[0]
+        assert data.get("circuit_id") == circuit_id
+        assert len(response.json()) == 1
 
         # Recover schedule id created
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
@@ -181,7 +190,7 @@ class TestE2EMefEline:
         json = response.json()
         schedule_id = json.get("circuit_scheduler")[0].get("id")
 
-        # delete circuit schedule
+        # Delete circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.delete(api_url)
         assert response.status_code == 200
@@ -190,6 +199,14 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.get(api_url)
         assert response.status_code == 405
+
+        # Verify the list of schedules
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data == []
 
     def test_patch_schedule(self, disabled_circuit_id):
         """ Test to modify a scheduler and enable a circuit 
@@ -245,7 +262,8 @@ class TestE2EMefEline:
     def test_delete_circuit_id(self, circuit_id):
         """ Test circuit creation and removal. """
 
-        # Verify the circuit creation
+        # Verify circuit creation by
+        # listing all the circuits stored
         api_url = KYTOS_API + '/mef_eline/v2/evc'
         response = requests.get(api_url)
         assert response.status_code == 200
@@ -259,7 +277,8 @@ class TestE2EMefEline:
         response = requests.delete(api_url)
         assert response.status_code == 200
 
-        # Verify circuit removal
+        # Verify circuit removal by
+        # listing all the circuits stored
         api_url = KYTOS_API + '/mef_eline/v2/evc'
         response = requests.get(api_url)
         assert response.status_code == 200
