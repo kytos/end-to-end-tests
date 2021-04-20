@@ -241,3 +241,27 @@ class TestE2EMefEline:
 
         frequency = json.get("circuit_scheduler")[0].get("frequency")
         assert payload.get("frequency") == frequency
+
+    def test_delete_circuit_id(self, circuit_id):
+        """ Test circuit creation and removal. """
+
+        # Verify the circuit creation
+        api_url = KYTOS_API + '/mef_eline/v2/evc'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        key = next(iter(data))
+        assert data is not {}
+        assert data[key].get("uni_a")["interface_id"] == "00:00:00:00:00:00:00:01:1"
+
+        # Delete the circuit
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
+        response = requests.delete(api_url)
+        assert response.status_code == 200
+
+        # Verify circuit removal
+        api_url = KYTOS_API + '/mef_eline/v2/evc'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        assert data == {}
