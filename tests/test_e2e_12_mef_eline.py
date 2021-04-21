@@ -259,6 +259,24 @@ class TestE2EMefEline:
         frequency = json.get("circuit_scheduler")[0].get("frequency")
         assert payload.get("frequency") == frequency
 
+    def test_list_circuits(self, circuit_id):
+        """ Test circuit listing action. """
+
+        # List all the circuits stored
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        key = next(iter(data))
+        assert data is not {}
+        assert data[key].get("uni_a")["interface_id"] == "00:00:00:00:00:00:00:01:1"
+
+        # Verify that the flow is in the flow table
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
+        # Each switch had 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        assert len(flows_s1.split('\r\n ')) == 3
+
     def test_delete_circuit_id(self, circuit_id):
         """ Test circuit removal action. """
 
@@ -271,13 +289,13 @@ class TestE2EMefEline:
 
         # Verify circuit removal by
         # listing all the circuits stored
-        api_url = KYTOS_API + '/mef_eline/v2/evc'
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.get(api_url)
         assert response.status_code == 200
         data = response.json()
         assert data == {}
 
-        # Verify that the flow is not on the flow table
+        # Verify that the flow is not in the flow table
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
         # Each switch had 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
