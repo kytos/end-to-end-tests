@@ -260,12 +260,14 @@ class TestE2EMefEline:
         assert payload.get("frequency") == frequency
 
     def test_delete_circuit_id(self, circuit_id):
-        """ Test circuit creation and removal. """
+        """ Test circuit removal action. """
 
         # Delete the circuit
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
         response = requests.delete(api_url)
         assert response.status_code == 200
+
+        time.sleep(2)
 
         # Verify circuit removal by
         # listing all the circuits stored
@@ -274,3 +276,10 @@ class TestE2EMefEline:
         assert response.status_code == 200
         data = response.json()
         assert data == {}
+
+        # Verify that the flow is not on the flow table
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
+        # Each switch had 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        # at this point the flow number should be reduced to 1
+        assert len(flows_s1.split('\r\n ')) == 1
