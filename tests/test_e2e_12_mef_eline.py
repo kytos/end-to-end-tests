@@ -170,10 +170,19 @@ class TestE2EMefEline:
             }
         }
 
-        # create circuit schedule
+        # Create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
         assert response.status_code == 201
+
+        # Verify the list of schedules
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+
+        data = response.json()[0]
+        assert data.get("circuit_id") == circuit_id
+        assert len(response.json()) == 1
 
         # Recover schedule id created
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
@@ -181,7 +190,7 @@ class TestE2EMefEline:
         json = response.json()
         schedule_id = json.get("circuit_scheduler")[0].get("id")
 
-        # delete circuit schedule
+        # Delete circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.delete(api_url)
         assert response.status_code == 200
@@ -190,6 +199,14 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.get(api_url)
         assert response.status_code == 405
+
+        # Verify the list of schedules
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data == []
 
     def test_patch_schedule(self, disabled_circuit_id):
         """ Test to modify a scheduler and enable a circuit 
@@ -241,3 +258,46 @@ class TestE2EMefEline:
 
         frequency = json.get("circuit_scheduler")[0].get("frequency")
         assert payload.get("frequency") == frequency
+
+    def test_list_circuits(self, circuit_id):
+        """ Test circuit listing action. """
+
+        # List all the circuits stored
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        key = next(iter(data))
+        assert data is not {}
+        assert data[key].get("uni_a")["interface_id"] == "00:00:00:00:00:00:00:01:1"
+
+        # Verify that the flow is in the flow table
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
+        # Each switch had 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        assert len(flows_s1.split('\r\n ')) == 3
+
+    def test_delete_circuit_id(self, circuit_id):
+        """ Test circuit removal action. """
+
+        # Delete the circuit
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
+        response = requests.delete(api_url)
+        assert response.status_code == 200
+
+        time.sleep(2)
+
+        # Verify circuit removal by
+        # listing all the circuits stored
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        assert data == {}
+
+        # Verify that the flow is not in the flow table
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
+        # Each switch had 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        # at this point the flow number should be reduced to 1
+        assert len(flows_s1.split('\r\n ')) == 1
