@@ -5,6 +5,14 @@ Kytos End-2-End-Tests
 Overview
 ########
 
+**WARNING: As previously announced on our communication channels, the Kytos
+project will enter the "shutdown" phase on May 31, 2021. After this date,
+only critical patches (security and core bug fixes) will be accepted, and the
+project will be in "critical-only" mode for another six months (until November
+30, 2021). For more information visit the FAQ at <https://kytos.io/faq>. We'll
+have eternal gratitude to the entire community of developers and users that made
+the project so far.**
+
 The purpose of this repository is to eventually house all the End-to-End code necessary to test the entirety of the Kytos SDN Controller.
 As of today, the E2E code available analyzes the mef_eline, topology, and maintenance Napps, as well as it ensures the proper start of Kytos without errors.
 All tests are based on simple Mininet topologies (which are provided in the helpers.py file), and they are executed within a docker container that holds the 
