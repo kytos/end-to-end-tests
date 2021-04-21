@@ -262,16 +262,6 @@ class TestE2EMefEline:
     def test_delete_circuit_id(self, circuit_id):
         """ Test circuit creation and removal. """
 
-        # Verify circuit creation by
-        # listing all the circuits stored
-        api_url = KYTOS_API + '/mef_eline/v2/evc'
-        response = requests.get(api_url)
-        assert response.status_code == 200
-        data = response.json()
-        key = next(iter(data))
-        assert data is not {}
-        assert data[key].get("uni_a")["interface_id"] == "00:00:00:00:00:00:00:01:1"
-
         # Delete the circuit
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
         response = requests.delete(api_url)
