@@ -285,7 +285,7 @@ class TestE2EMefEline:
         response = requests.delete(api_url)
         assert response.status_code == 200
 
-        time.sleep(2)
+        time.sleep(10)
 
         # Verify circuit removal by
         # listing all the circuits stored
