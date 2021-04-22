@@ -31,9 +31,25 @@ class TestE2ETopology:
     def teardown_class(cls):
         cls.net.stop()
 
-    def test_010_list_switches(self):
+    def test_005_list_topology(self):
         """
         Test /api/kytos/topology/v3/ on GET
+        """
+        api_url = KYTOS_API + '/topology/v3/'
+        response = requests.get(api_url)
+        data = response.json()
+
+        assert response.status_code == 200
+        assert 'topology' in data
+        assert 'switches' in data['topology']
+        assert len(data['topology']['switches']) == 3
+        assert '00:00:00:00:00:00:00:01' in data['topology']['switches']
+        assert '00:00:00:00:00:00:00:02' in data['topology']['switches']
+        assert '00:00:00:00:00:00:00:03' in data['topology']['switches']
+
+    def test_010_list_switches(self):
+        """
+        Test /api/kytos/topology/v3/switches on GET
         """
         api_url = KYTOS_API + '/topology/v3/switches'
         response = requests.get(api_url)
