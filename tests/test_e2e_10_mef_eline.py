@@ -415,10 +415,9 @@ class TestE2EMefEline:
         evc1 = data['circuit_id']
         time.sleep(20)
 
-        # disable the circuit
-        payload = {"enable": False}
+        # Delete the circuit
         api_url += evc1
-        response = requests.patch(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        response = requests.delete(api_url)
         assert response.status_code == 200
         time.sleep(20)
 
