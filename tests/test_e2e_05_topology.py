@@ -39,13 +39,31 @@ class TestE2ETopology:
         response = requests.get(api_url)
         data = response.json()
 
+        topology = {'00:00:00:00:00:00:00:01':
+                        ['00:00:00:00:00:00:00:01:1', '00:00:00:00:00:00:00:01:2', '00:00:00:00:00:00:00:01:3',
+                         '00:00:00:00:00:00:00:01:4', '00:00:00:00:00:00:00:01:4294967294'],
+                    '00:00:00:00:00:00:00:02':
+                        ['00:00:00:00:00:00:00:02:1', '00:00:00:00:00:00:00:02:2', '00:00:00:00:00:00:00:02:3',
+                         '00:00:00:00:00:00:00:02:4294967294'],
+                    '00:00:00:00:00:00:00:03':
+                        ['00:00:00:00:00:00:00:03:1', '00:00:00:00:00:00:00:03:2', '00:00:00:00:00:00:00:03:3',
+                         '00:00:00:00:00:00:00:03:4294967294'],
+                    }
+
         assert response.status_code == 200
         assert 'topology' in data
         assert 'switches' in data['topology']
         assert len(data['topology']['switches']) == 3
-        assert '00:00:00:00:00:00:00:01' in data['topology']['switches']
-        assert '00:00:00:00:00:00:00:02' in data['topology']['switches']
-        assert '00:00:00:00:00:00:00:03' in data['topology']['switches']
+
+        for switch in data['topology']['switches']:
+            # switches validation
+            assert switch in topology
+            # interfaces validation
+            assert topology[switch].sort() == \
+                   list(map(str, data['topology']['switches'][str(switch)]['interfaces'])).sort()
+            # links validation
+            for link in data['topology']['switches'][str(switch)]['interfaces']:
+                assert 'link' in data['topology']['switches'][str(switch)]['interfaces'][link]
 
     def test_010_list_switches(self):
         """
