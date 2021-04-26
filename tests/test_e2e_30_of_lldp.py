@@ -180,7 +180,8 @@ class TestE2EOfLLDP:
 
         h11 = self.net.net.get('h11')
         rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
-        time.sleep(31)
+        lldp_wait = 31
+        time.sleep(lldp_wait)
         rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
 
         # the delta pps should be around 10, because the interface is every 3s
@@ -195,7 +196,7 @@ class TestE2EOfLLDP:
         assert data["polling_time"] == 1
 
         rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
-        time.sleep(31)
+        time.sleep(lldp_wait)
         rx_stats_h11_2 = self.get_iface_stats_rx_pkt(h11)
 
         delta_pps_2 = rx_stats_h11_2 - rx_stats_h11

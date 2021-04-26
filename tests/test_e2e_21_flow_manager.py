@@ -113,7 +113,7 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         # OVS does not have a way to actually restart the switch
         # so to simulate that, we just delete all flows
@@ -121,7 +121,7 @@ class TestE2EFlowManager:
         s1.dpctl('del-flows')
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
         assert len(flows_s1.split('\r\n ')) == 2
