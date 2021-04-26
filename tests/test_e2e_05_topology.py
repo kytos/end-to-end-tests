@@ -264,45 +264,7 @@ class TestE2ETopology:
         data = response.json()
         assert data['interfaces'][interface_id]['enabled'] is True
 
-    def test_060_enabling_all_interfaces_on_a_switch_persistent(self):
-        """
-        Test /api/kytos/topology/v3/interfaces/switch/{dpid}/enable on POST
-        supported by
-            /api/kytos/topology/v3/switches on GET
-        """
-
-        switch_id = "00:00:00:00:00:00:00:01"
-
-        # Make sure all the interfaces belonging to the target switch are disabled
-        api_url = KYTOS_API + '/topology/v3/switches'
-        response = requests.get(api_url)
-        data = response.json()
-
-        for interface in data['switches'][switch_id]['interfaces']:
-            assert data['switches'][switch_id]['interfaces'][interface]['enabled'] is False
-
-        # Enabling all the interfaces
-        api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % switch_id
-        response = requests.post(api_url)
-        assert response.status_code == 200
-
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait 10s to kytos execute LLDP
-        time.sleep(10)
-
-        # Make sure all the interfaces belonging to the target switch are enabled
-        api_url = KYTOS_API + '/topology/v3/switches'
-        response = requests.get(api_url)
-        data = response.json()
-
-        for interface in data['switches'][switch_id]['interfaces']:
-            assert data['switches'][switch_id]['interfaces'][interface]['enabled'] is True
-
-    def test_065_disabling_all_interfaces_on_a_switch_persistent(self):
+    def test_060_enabling_and_disabling_all_interfaces_on_a_switch_persistent(self):
         """
         Test /api/kytos/topology/v3/interfaces/switch/{dpid}/disable on POST
         supported by
