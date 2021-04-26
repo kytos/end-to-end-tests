@@ -44,10 +44,10 @@ class TestE2EMaintenance:
                 }
             },
             "primary_path": [
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:02:2"}},
-                {"endpoint_a": {"interface_id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"interface_id": "00:00:00:00:00:00:00:03:2"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
             ],
         }
         api_url = KYTOS_API+'/mef_eline/v2/evc/'
@@ -63,14 +63,16 @@ class TestE2EMaintenance:
         self.create_circuit(100)
         time.sleep(20)
 
-        start = datetime.now() + timedelta(seconds=60)
-        end = start + timedelta(seconds=60)
+        mw_start_delay = 60
+        mw_duration = 60
+        start = datetime.now() + timedelta(seconds=mw_start_delay)
+        end = start + timedelta(seconds=mw_duration)
         payload = {
             "description": "my MW on switch 2",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
-                "00:00:00:00:00:00:02"
+                "00:00:00:00:00:00:00:02"
             ]
         }
         api_url = KYTOS_API+'/maintenance'
@@ -80,7 +82,7 @@ class TestE2EMaintenance:
         assert 'mw_id' in data
 
         # wait the MW to begin
-        time.sleep(80)
+        time.sleep(mw_start_delay+5)
 
         # switch 1 and 3 should have 3 flows, switch 2 should have only 1 flow
         s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
@@ -110,7 +112,7 @@ class TestE2EMaintenance:
         assert ', 0% packet loss,' in result
 
         # wait more 60s to the MW to finish and check if the path returned to pass through sw2
-        time.sleep(60)
+        time.sleep(mw_duration)
 
         flows_s2 = s2.dpctl('dump-flows')
         assert len(flows_s2.split('\r\n ')) == 3
