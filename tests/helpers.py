@@ -33,7 +33,7 @@ class RingTopo( Topo ):
         self.addLink( s2, s3 )
         self.addLink( s3, s1 )
 
-class DanielaTopo( Topo ):
+class Ring4Topo( Topo ):
     """Create a network from semi-scratch with multiple controllers."""
     def build(self):
         #("*** Creating switches\n")
@@ -60,25 +60,23 @@ class DanielaTopo( Topo ):
         self.addLink(s3, s4)
         self.addLink(s4, s1)
 
-class TopologyFactory():
-    def create(self, type):
-        if type == "RingTopo":
-            return RingTopo()
-        elif type == "DanielaTopo":
-            return DanielaTopo()
+# you can run any of the topologies above by doing:
+#   mn --custom tests/helpers.py --topo ring --controller=remote,ip=127.0.0.1
+topos = {
+    'ring': ( lambda: RingTopo() ),
+    'ring4': ( lambda: Ring4Topo() ),
+}
 
 class NetworkTest():
-    def __init__(self, controller_ip, topo_name='RingTopo'):
+    def __init__(self, controller_ip, topo_name='ring'):
         # Create an instance of our topology
         mininet.clean.cleanup()
-        factory = TopologyFactory()
-        topo = factory.create(topo_name)
 
         # Create a network based on the topology using OVS and controlled by
         # a remote controller.
         patch('mininet.util.fixLimits', side_effect=None)
         self.net = Mininet(
-            topo=topo,
+            topo=topos.get(topo_name, ( lambda : RingTopo()))(),
             controller=lambda name: RemoteController(
                                         name, ip=controller_ip, port=6653),
             switch=OVSSwitch,
