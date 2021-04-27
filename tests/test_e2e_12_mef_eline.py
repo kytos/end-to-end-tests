@@ -103,7 +103,8 @@ class TestE2EMefEline:
         assert response.status_code == 201
 
         # waiting some time to trigger the scheduler
-        time.sleep(62)
+        sched_wait = 62
+        time.sleep(sched_wait)
 
         # Verify if the circuit is enabled 
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
@@ -145,7 +146,8 @@ class TestE2EMefEline:
         assert response.status_code == 201
 
         # waiting some time to trigger the scheduler
-        time.sleep(62)
+        sched_wait = 62
+        time.sleep(sched_wait)
 
         # Verify if the circuit is enabled 
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
@@ -246,7 +248,8 @@ class TestE2EMefEline:
         assert response.status_code == 200
 
         # waiting to trigger the scheduler
-        time.sleep(62)
+        sched_wait = 62
+        time.sleep(sched_wait)
 
         # Verify if the circuit is enabled
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id

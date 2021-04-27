@@ -65,7 +65,7 @@ class TestE2EMefEline:
         assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
-        time.sleep(20)
+        time.sleep(10)
 
         h11, h12 = self.net.net.get('h11', 'h12')
         h11.cmd('ip link add link %s name vlan101 type vlan id 101' % (h11.intfNames()[0]))
@@ -116,7 +116,7 @@ class TestE2EMefEline:
         assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
-        time.sleep(20)
+        time.sleep(10)
 
         # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
@@ -167,7 +167,7 @@ class TestE2EMefEline:
         assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
-        time.sleep(20)
+        time.sleep(10)
 
         # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
@@ -216,7 +216,7 @@ class TestE2EMefEline:
         assert response.status_code == 201
         data = response.json()
         assert 'circuit_id' in data
-        time.sleep(20)
+        time.sleep(10)
 
         # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
@@ -268,7 +268,7 @@ class TestE2EMefEline:
         data = response.json()
         assert 'circuit_id' in data
         evc1 = data['circuit_id']
-        time.sleep(20)
+        time.sleep(10)
 
         # Create circuit 2: same vlan id but in different UNIs
         payload = {
@@ -291,7 +291,7 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         evc2 = data['circuit_id']
         assert evc1 != evc2
-        time.sleep(20)
+        time.sleep(10)
 
         # The switch 1 should have 5 flows: 01 for LLDP + 02 for evc1 + 02 for evc2
         # The switches 2 and 3 should have 3 flows: 01 for LLDP + 02 for each evc
@@ -362,14 +362,14 @@ class TestE2EMefEline:
         data = response.json()
         assert 'circuit_id' in data
         evc1 = data['circuit_id']
-        time.sleep(20)
+        time.sleep(10)
 
         # disable the circuit
         payload = {"enable": False}
         api_url += evc1
         response = requests.patch(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 200
-        time.sleep(20)
+        time.sleep(10)
 
         # Each switch should have only one flow: LLDP
         s1, s2 = self.net.net.get('s1', 's2')
@@ -413,13 +413,13 @@ class TestE2EMefEline:
         data = response.json()
         assert 'circuit_id' in data
         evc1 = data['circuit_id']
-        time.sleep(20)
+        time.sleep(10)
 
         # Delete the circuit
         api_url += evc1
         response = requests.delete(api_url)
         assert response.status_code == 200
-        time.sleep(20)
+        time.sleep(10)
 
         # try to reuse the vlan id
         payload = {
@@ -442,7 +442,7 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         evc2 = data['circuit_id']
         assert evc1 != evc2
-        time.sleep(20)
+        time.sleep(10)
 
         # The switches should have 3 flows: 01 for LLDP + 02 for each evc
         s1, s2 = self.net.net.get('s1', 's2')

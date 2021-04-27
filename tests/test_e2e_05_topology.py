@@ -105,7 +105,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Check if the switches are enabled
@@ -119,7 +119,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Check if the switches are still enabled and now with the links
@@ -147,7 +147,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Check if the switch is enabled
@@ -168,7 +168,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         api_url = KYTOS_API + '/topology/v3/switches'
@@ -199,7 +199,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Verify that the metadata is inserted
@@ -219,7 +219,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Make sure the metadata is removed
@@ -255,8 +255,8 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 15s to kytos execute LLDP
-        time.sleep(15)
+        # Wait a few seconds to kytos execute LLDP
+        time.sleep(10)
 
         # Check if the interface is enabled
         api_url = KYTOS_API + '/topology/v3/interfaces'
@@ -291,8 +291,8 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 20s to kytos execute LLDP
-        time.sleep(20)
+        # Wait a few seconds to kytos execute LLDP
+        time.sleep(10)
 
         # Make sure all the interfaces belonging to the target switch are enabled
         api_url = KYTOS_API + '/topology/v3/switches'
@@ -312,7 +312,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Make sure all the interfaces belonging to the target switch are enabled
@@ -343,7 +343,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Check if the interface is enabled
@@ -362,7 +362,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         api_url = KYTOS_API + '/topology/v3/interfaces'
@@ -391,7 +391,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Make sure all the interfaces belonging to the target switch are enabled
@@ -427,7 +427,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Verify that the metadata is inserted
@@ -447,7 +447,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Make sure the metadata is removed
@@ -492,7 +492,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # now all the links should stay disabled
@@ -518,8 +518,8 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 15s to kytos execute LLDP
-        time.sleep(15)
+        # Wait a few seconds to kytos execute LLDP
+        time.sleep(10)
 
         # check if the links are now enabled
         api_url = KYTOS_API + '/topology/v3/links'
@@ -564,7 +564,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # now all the links should stay disabled
@@ -595,7 +595,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # check if the links are still enabled and now with the links
@@ -613,7 +613,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # check if the links are still enabled and now with the links
@@ -651,7 +651,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Get the link_id
@@ -675,7 +675,7 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 10s to kytos execute LLDP
+        # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
         # Insert link metadata
@@ -691,8 +691,8 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 15s to kytos execute LLDP
-        time.sleep(15)
+        # Wait a few seconds to kytos execute LLDP
+        time.sleep(10)
 
         # Verify that the metadata is inserted
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1
@@ -711,8 +711,8 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
-        # Wait 15s to kytos execute LLDP
-        time.sleep(15)
+        # Wait a few seconds to kytos execute LLDP
+        time.sleep(10)
 
         # Make sure the metadata is removed
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1

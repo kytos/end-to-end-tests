@@ -62,12 +62,12 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
 
-        time.sleep(20)
+        time.sleep(10)
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
@@ -105,12 +105,12 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
 
-        time.sleep(20)
+        time.sleep(10)
 
         for sw_name in ['s1', 's2', 's3']:
             sw = self.net.net.get(sw_name)
@@ -149,7 +149,7 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         # delete the flow
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
@@ -160,12 +160,12 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be deleted
-        time.sleep(20)
+        time.sleep(10)
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
 
-        time.sleep(20)
+        time.sleep(10)
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
@@ -203,7 +203,7 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         # delete the flow
         api_url = KYTOS_API + '/flow_manager/v2/flows'
@@ -214,12 +214,12 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be deleted
-        time.sleep(20)
+        time.sleep(10)
 
         # restart controller keeping configuration
         self.net.start_controller(del_flows=True)
 
-        time.sleep(20)
+        time.sleep(10)
 
         for sw_name in ['s1', 's2', 's3']:
             sw = self.net.net.get(sw_name)
@@ -231,7 +231,7 @@ class TestE2EFlowManager:
         """Test if after a match is modified outside kytos, the original
            flow is restored."""
         # self.net.restart_kytos_clean()
-        # time.sleep(5)
+        # time.sleep(10)
 
         payload = {
             "flows": [
@@ -260,7 +260,7 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         s1 = self.net.net.get('s1')
         s1.dpctl('del-flows', 'in_port=1')
@@ -270,7 +270,7 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller()
 
-        time.sleep(60)
+        time.sleep(10)
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
@@ -312,7 +312,7 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         # Verify the flow
         s1 = self.net.net.get('s1')
@@ -330,7 +330,7 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller()
 
-        time.sleep(62)
+        time.sleep(10)
 
         # Check that the flow keeps the original setting
         s1 = self.net.net.get('s1')
@@ -371,7 +371,7 @@ class TestE2EFlowManager:
         assert 'FlowMod Messages Sent' in data['response']
 
         # wait for the flow to be installed
-        time.sleep(20)
+        time.sleep(10)
 
         # Verify the flow
         s1 = self.net.net.get('s1')
@@ -385,7 +385,7 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller()
 
-        time.sleep(62)
+        time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
         assert len(flows_s1.split('\r\n ')) == 2
@@ -408,7 +408,7 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller()
 
-        time.sleep(60)
+        time.sleep(10)
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
@@ -431,7 +431,7 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller()
 
-        time.sleep(60)
+        time.sleep(10)
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
