@@ -31,9 +31,43 @@ class TestE2ETopology:
     def teardown_class(cls):
         cls.net.stop()
 
-    def test_010_list_switches(self):
+    def test_005_list_topology(self):
         """
         Test /api/kytos/topology/v3/ on GET
+        """
+        api_url = KYTOS_API + '/topology/v3/'
+        response = requests.get(api_url)
+        data = response.json()
+
+        topology = {'00:00:00:00:00:00:00:01':
+                        ['00:00:00:00:00:00:00:01:1', '00:00:00:00:00:00:00:01:2', '00:00:00:00:00:00:00:01:3',
+                         '00:00:00:00:00:00:00:01:4', '00:00:00:00:00:00:00:01:4294967294'],
+                    '00:00:00:00:00:00:00:02':
+                        ['00:00:00:00:00:00:00:02:1', '00:00:00:00:00:00:00:02:2', '00:00:00:00:00:00:00:02:3',
+                         '00:00:00:00:00:00:00:02:4294967294'],
+                    '00:00:00:00:00:00:00:03':
+                        ['00:00:00:00:00:00:00:03:1', '00:00:00:00:00:00:00:03:2', '00:00:00:00:00:00:00:03:3',
+                         '00:00:00:00:00:00:00:03:4294967294'],
+                    }
+
+        assert response.status_code == 200
+        assert 'topology' in data
+        assert 'switches' in data['topology']
+        assert len(data['topology']['switches']) == 3
+
+        for switch in data['topology']['switches']:
+            # switches validation
+            assert switch in topology
+            # interfaces validation
+            assert topology[switch].sort() == \
+                   list(map(str, data['topology']['switches'][str(switch)]['interfaces'])).sort()
+            # links validation
+            for link in data['topology']['switches'][str(switch)]['interfaces']:
+                assert 'link' in data['topology']['switches'][str(switch)]['interfaces'][link]
+
+    def test_010_list_switches(self):
+        """
+        Test /api/kytos/topology/v3/switches on GET
         """
         api_url = KYTOS_API + '/topology/v3/switches'
         response = requests.get(api_url)
@@ -230,9 +264,9 @@ class TestE2ETopology:
         data = response.json()
         assert data['interfaces'][interface_id]['enabled'] is True
 
-    def test_060_enabling_all_interfaces_on_a_switch_persistent(self):
+    def test_060_enabling_and_disabling_all_interfaces_on_a_switch_persistent(self):
         """
-        Test /api/kytos/topology/v3/interfaces/switch/{dpid}/enable on POST
+        Test /api/kytos/topology/v3/interfaces/switch/{dpid}/disable on POST
         supported by
             /api/kytos/topology/v3/switches on GET
         """
@@ -257,6 +291,27 @@ class TestE2ETopology:
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
 
+        # Wait 20s to kytos execute LLDP
+        time.sleep(20)
+
+        # Make sure all the interfaces belonging to the target switch are enabled
+        api_url = KYTOS_API + '/topology/v3/switches'
+        response = requests.get(api_url)
+        data = response.json()
+
+        for interface in data['switches'][switch_id]['interfaces']:
+            assert data['switches'][switch_id]['interfaces'][interface]['enabled'] is True
+
+        # Disabling all the interfaces
+        api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/disable' % switch_id
+        response = requests.post(api_url)
+        assert response.status_code == 200
+
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=False, enable_all=False)
+        self.net.wait_switches_connect()
+
         # Wait 10s to kytos execute LLDP
         time.sleep(10)
 
@@ -266,7 +321,7 @@ class TestE2ETopology:
         data = response.json()
 
         for interface in data['switches'][switch_id]['interfaces']:
-            assert data['switches'][switch_id]['interfaces'][interface]['enabled'] is True
+            assert data['switches'][switch_id]['interfaces'][interface]['enabled'] is False
 
     def test_070_disabling_interface_persistent(self):
         """
