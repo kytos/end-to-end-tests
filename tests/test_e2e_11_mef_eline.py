@@ -14,7 +14,7 @@ class TestE2EMefEline(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.net = NetworkTest(CONTROLLER, topo_name='DanielaTopo')
+        cls.net = NetworkTest(CONTROLLER, topo_name='ring4')
         cls.net.start()
         cls.net.restart_kytos_clean()
 
