@@ -41,6 +41,14 @@ class TestE2ETopology:
         # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
+    @staticmethod
+    def agent(action, url):
+        actions = ['get', 'post', 'delete', 'patch']
+        if action.lower() in actions:
+            method = getattr(requests, action)
+            print(method)
+            return method(url)
+        assert False
 
     def test_005_list_topology(self):
         """
@@ -298,13 +306,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Check if the interface is enabled
         api_url = KYTOS_API + '/topology/v3/interfaces'
@@ -317,13 +319,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         api_url = KYTOS_API + '/topology/v3/interfaces'
         response = requests.get(api_url)
