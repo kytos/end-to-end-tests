@@ -32,7 +32,6 @@ class TestE2EOfLLDP:
         switches = data.get("switches", {})
         for sw in switches.keys():
             response = requests.post(KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % sw)
-            assert response.status_code == 200
 
     @staticmethod
     def disable_all_of_lldp():
@@ -85,8 +84,10 @@ class TestE2EOfLLDP:
 
     def test_010_disable_of_lldp(self):
         """ Test if the disabling OF LLDP in an interface worked properly. """
-        self.net.restart_kytos_clean()
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
         time.sleep(5)
+        self.enable_all_interfaces()
 
         # disabling all the UNI interfaces
         payload = {
@@ -128,7 +129,7 @@ class TestE2EOfLLDP:
             and rx_stats_h3_2 == rx_stats_h3
 
         # restart kytos and check if lldp remains disabled
-        self.net.start_controller(clean_config=False)
+        self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
         time.sleep(5)
 
