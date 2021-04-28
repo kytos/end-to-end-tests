@@ -65,7 +65,8 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         # restart controller keeping configuration
-        self.net.start_controller(del_flows=True)
+        self.net.start_controller(enable_all=True, del_flows=True)
+        self.net.wait_switches_connect()
 
         time.sleep(10)
 
@@ -108,7 +109,8 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         # restart controller keeping configuration
-        self.net.start_controller(del_flows=True)
+        self.net.start_controller(enable_all=True, del_flows=True)
+        self.net.wait_switches_connect()
 
         time.sleep(10)
 
@@ -163,7 +165,8 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         # restart controller keeping configuration
-        self.net.start_controller(del_flows=True)
+        self.net.start_controller(enable_all=True, del_flows=True)
+        self.net.wait_switches_connect()
 
         time.sleep(10)
 
@@ -217,7 +220,8 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         # restart controller keeping configuration
-        self.net.start_controller(del_flows=True)
+        self.net.start_controller(enable_all=True, del_flows=True)
+        self.net.wait_switches_connect()
 
         time.sleep(10)
 
@@ -268,7 +272,8 @@ class TestE2EFlowManager:
                              'dl_vlan=324,actions=output:1')
         if restart_kytos:
             # restart controller keeping configuration
-            self.net.start_controller()
+            self.net.start_controller(enable_all=True)
+            self.net.wait_switches_connect()
 
         time.sleep(10)
 
@@ -328,7 +333,8 @@ class TestE2EFlowManager:
 
         if restart_kytos:
             # restart controller keeping configuration
-            self.net.start_controller()
+            self.net.start_controller(enable_all=True)
+            self.net.wait_switches_connect()
 
         time.sleep(10)
 
@@ -383,7 +389,8 @@ class TestE2EFlowManager:
 
         if restart_kytos:
             # restart controller keeping configuration
-            self.net.start_controller()
+            self.net.start_controller(enable_all=True)
+            self.net.wait_switches_connect()
 
         time.sleep(10)
 
@@ -406,7 +413,8 @@ class TestE2EFlowManager:
         s1.dpctl('add-flow', 'table=2,in_port=1,actions=output:2')
         if restart_kytos:
             # restart controller keeping configuration
-            self.net.start_controller()
+            self.net.start_controller(enable_all=True)
+            self.net.wait_switches_connect()
 
         time.sleep(10)
 
@@ -429,7 +437,8 @@ class TestE2EFlowManager:
 
         if restart_kytos:
             # restart controller keeping configuration
-            self.net.start_controller()
+            self.net.start_controller(enable_all=True)
+            self.net.wait_switches_connect()
 
         time.sleep(10)
 

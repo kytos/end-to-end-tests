@@ -77,6 +77,8 @@ class TestE2EOfLLDP:
     def test_010_disable_of_lldp(self):
         """ Test if the disabling OF LLDP in an interface worked properly. """
         self.net.restart_kytos_clean()
+        time.sleep(5)
+
         # disabling all the UNI interfaces
         payload = {
             "interfaces": [
@@ -170,13 +172,15 @@ class TestE2EOfLLDP:
     def test_030_change_polling_interval(self):
         """ Test if changing the polling interval works works properly. """
         self.net.restart_kytos_clean()
+        time.sleep(5)
 
+        default_polling_time = 3
         api_url = KYTOS_API + '/of_lldp/v1/polling_time'
         response = requests.get(api_url)
         assert response.status_code == 200
         data = response.json()
         assert "polling_time" in data
-        assert data["polling_time"] == 3
+        assert data["polling_time"] == default_polling_time
 
         h11 = self.net.net.get('h11')
         rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
@@ -194,6 +198,9 @@ class TestE2EOfLLDP:
         response = requests.get(api_url)
         data = response.json()
         assert data["polling_time"] == 1
+
+        # wait a few seconds to let the last polling time schedule finish
+        time.sleep(default_polling_time)
 
         rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
         time.sleep(lldp_wait)
