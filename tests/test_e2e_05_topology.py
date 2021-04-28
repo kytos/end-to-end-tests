@@ -147,19 +147,7 @@ class TestE2ETopology:
 
         # Enable the switch
         api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % switch_id
-        # response = requests.post(api_url)
         requests.post(api_url)
-        # assert response.status_code == 201
-
-        # self.restart()
-        #
-        # # Check if the switch is enabled
-        # api_url = KYTOS_API + '/topology/v3/switches'
-        # response = requests.get(api_url)
-        # data = response.json()
-        #
-        # assert response.status_code == 200
-        # assert data['switches'][switch_id]['enabled'] is True
 
         # Disable the switch
         api_url = KYTOS_API + '/topology/v3/switches/%s/disable' % switch_id
