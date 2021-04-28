@@ -25,7 +25,7 @@ class TestE2ETopology:
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.wait_switches_connect()
-        time.sleep(5)
+        time.sleep(10)
 
     @classmethod
     def teardown_class(cls):
