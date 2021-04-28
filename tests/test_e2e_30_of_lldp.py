@@ -25,6 +25,14 @@ class TestE2EOfLLDP:
         rx_pkts = host.cmd("ip -s link show dev %s | grep RX: -A 1 | tail -n1 | awk '{print $2}'" % (host.intfNames()[0]))
         return int(rx_pkts.strip())
 
+    def enable_all_interfaces(self):
+        api_url = KYTOS_API + '/topology/v3/switches/'
+        response = requests.get(api_url)
+        data = response.json()
+        switches = data.get("switches", {})
+        for sw in switches.keys():
+            response = requests.post(KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % sw)
+
     @staticmethod
     def disable_all_of_lldp():
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
@@ -76,7 +84,11 @@ class TestE2EOfLLDP:
 
     def test_010_disable_of_lldp(self):
         """ Test if the disabling OF LLDP in an interface worked properly. """
-        self.net.restart_kytos_clean()
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
+        time.sleep(5)
+        self.enable_all_interfaces()
+
         # disabling all the UNI interfaces
         payload = {
             "interfaces": [
@@ -117,7 +129,7 @@ class TestE2EOfLLDP:
             and rx_stats_h3_2 == rx_stats_h3
 
         # restart kytos and check if lldp remains disabled
-        self.net.start_controller(clean_config=False)
+        self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
         time.sleep(5)
 
@@ -128,8 +140,10 @@ class TestE2EOfLLDP:
 
     def test_020_enable_of_lldp(self):
         """ Test if enabling OF LLDP in an interface works properly. """
-        self.net.restart_kytos_clean()
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
         time.sleep(5)
+        self.enable_all_interfaces()
         TestE2EOfLLDP.disable_all_of_lldp()
 
         payload = {
@@ -158,7 +172,7 @@ class TestE2EOfLLDP:
         assert rx_stats_h11_2 > rx_stats_h11
 
         # restart kytos and check if lldp remains disabled
-        self.net.start_controller(clean_config=False)
+        self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
         time.sleep(5)
 
@@ -170,13 +184,15 @@ class TestE2EOfLLDP:
     def test_030_change_polling_interval(self):
         """ Test if changing the polling interval works works properly. """
         self.net.restart_kytos_clean()
+        time.sleep(5)
 
+        default_polling_time = 3
         api_url = KYTOS_API + '/of_lldp/v1/polling_time'
         response = requests.get(api_url)
         assert response.status_code == 200
         data = response.json()
         assert "polling_time" in data
-        assert data["polling_time"] == 3
+        assert data["polling_time"] == default_polling_time
 
         h11 = self.net.net.get('h11')
         rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
@@ -194,6 +210,9 @@ class TestE2EOfLLDP:
         response = requests.get(api_url)
         data = response.json()
         assert data["polling_time"] == 1
+
+        # wait a few seconds to let the last polling time schedule finish
+        time.sleep(default_polling_time)
 
         rx_stats_h11 = self.get_iface_stats_rx_pkt(h11)
         time.sleep(lldp_wait)
