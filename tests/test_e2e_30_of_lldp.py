@@ -25,6 +25,15 @@ class TestE2EOfLLDP:
         rx_pkts = host.cmd("ip -s link show dev %s | grep RX: -A 1 | tail -n1 | awk '{print $2}'" % (host.intfNames()[0]))
         return int(rx_pkts.strip())
 
+    def enable_all_interfaces(self):
+        api_url = KYTOS_API + '/topology/v3/switches/'
+        response = requests.get(api_url)
+        data = response.json()
+        switches = data.get("switches", {})
+        for sw in switches.keys():
+            response = requests.post(KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % sw)
+            assert response.status_code == 200
+
     @staticmethod
     def disable_all_of_lldp():
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
@@ -132,6 +141,7 @@ class TestE2EOfLLDP:
         """ Test if enabling OF LLDP in an interface works properly. """
         self.net.restart_kytos_clean()
         time.sleep(5)
+        self.enable_all_interfaces()
         TestE2EOfLLDP.disable_all_of_lldp()
 
         payload = {
