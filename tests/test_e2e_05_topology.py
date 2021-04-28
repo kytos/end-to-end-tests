@@ -41,15 +41,6 @@ class TestE2ETopology:
         # Wait a few seconds to kytos execute LLDP
         time.sleep(10)
 
-    @staticmethod
-    def agent(action, url):
-        actions = ['get', 'post', 'delete', 'patch']
-        if action.lower() in actions:
-            method = getattr(requests, action)
-            print(method)
-            return method(url)
-        assert False
-
     def test_005_list_topology(self):
         """
         Test /api/kytos/topology/v3/ on GET
