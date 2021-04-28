@@ -171,7 +171,7 @@ class TestE2EOfLLDP:
         assert rx_stats_h11_2 > rx_stats_h11
 
         # restart kytos and check if lldp remains disabled
-        self.net.start_controller(clean_config=False)
+        self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
         time.sleep(5)
 
