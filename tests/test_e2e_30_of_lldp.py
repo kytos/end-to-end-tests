@@ -139,7 +139,8 @@ class TestE2EOfLLDP:
 
     def test_020_enable_of_lldp(self):
         """ Test if enabling OF LLDP in an interface works properly. """
-        self.net.restart_kytos_clean()
+        self.net.start_controller(clean_config=True, enable_all=False)
+        self.net.wait_switches_connect()
         time.sleep(5)
         self.enable_all_interfaces()
         TestE2EOfLLDP.disable_all_of_lldp()
