@@ -142,8 +142,7 @@ class TestE2EMaintenance:
         mw_id = json_data["mw_id"]
         # 3. Provide mw_id to API call to delete said mw_id
         mw_api_url = KYTOS_API + '/maintenance/' + mw_id
-        delete_response = requests.delete(mw_api_url, data=json.dumps(payload),
-                                          headers={'Content-type': 'application/json'})
+        delete_response = requests.delete(mw_api_url)
         # 4. Verify that code 200(success) is given back
         assert delete_response.status_code == 200
         # 5. Request the deleted maintenance window, and verify that the mw_id is not found therefore causing a 404.
