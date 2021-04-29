@@ -222,7 +222,5 @@ class TestE2EMaintenance:
         ended_api_url = KYTOS_API + '/maintenance/' + mw_id
         req = requests.get(ended_api_url)
         # Status may be PENDING when starting, RUNNING when its running, and FINISHED when ended.
-        if req['status'] == "FINISHED":
-            return
-        else:
-            raise Exception("Maintenance window did not end properly")
+        assert req['status'] == "FINISHED"
+        
