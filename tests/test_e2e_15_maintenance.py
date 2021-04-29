@@ -189,8 +189,7 @@ class TestE2EMaintenance:
         req = requests.get(mw_api_url)
         json_data = req.json()
         for attribute in json_data:
-            if attribute['end'] == new_time:
-                print("Maintenance window CHANGED correctly")
+            asssert attribute['end'] == new_time
 
     def test_013_patch_end_mw_on_switch(self):
         """Send request to finish a maintenance window right now"""
