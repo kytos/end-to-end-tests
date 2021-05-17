@@ -173,7 +173,10 @@ class TestE2EMaintenance:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """The Api call is returning 201 when should be 400"""
+    """
+    The Api call is returning 201 when should be 400
+    Issue #43
+    """
     @pytest.mark.xfail
     def test_024_create_mw_on_switch_should_fail_items_empty(self):
         """Tests to create maintenance with the wrong payload
@@ -203,7 +206,10 @@ class TestE2EMaintenance:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """The Api call is returning 500 when should be 400"""
+    """
+    The Api call is returning 500 when should be 400
+    Issue #43
+    """
     @pytest.mark.xfail
     def test_026_create_mw_on_switch_should_fail_no_items_field_on_payload(self):
         """Tests to create maintenance with the wrong payload
@@ -249,7 +255,10 @@ class TestE2EMaintenance:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 415
 
-    """The execution breaks when should be returning a 415"""
+    """
+    The execution breaks when should be returning a 415
+    Issue #43
+    """
     @pytest.mark.xfail
     def test_029_create_mw_on_switch_should_fail_wrong_payload(self):
         """Tests to create maintenance with the wrong payload
@@ -457,7 +466,10 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
-    """The Api call is returning 201 when should be 400"""
+    """
+    The Api call is returning 201 when should be 400
+    Issue #44
+    """
     @pytest.mark.xfail
     def test_036_patch_mw_on_switch_should_fail_wrong_payload_items_empty(self):
         """
@@ -512,7 +524,10 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
-    """The Api call is returning 201 when should be 400"""
+    """
+    The Api call is returning 201 when should be 400
+    Issue #44
+    """
     @pytest.mark.xfail
     def test_038_patch_mw_on_switch_should_fail_wrong_payload_no_items_field(self):
         """
@@ -564,7 +579,10 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
-    """The execution breaks when should be returning a 400"""
+    """
+    The execution breaks when should be returning a 400
+    Issue #44
+    """
     @pytest.mark.xfail
     def test_039_patch_mw_on_switch_should_fail_wrong_payload(self):
         """
@@ -911,7 +929,10 @@ class TestE2EMaintenance:
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 400
 
-    """The END Api call is returning 200 when should be 201"""
+    """
+    The END Api call is returning 200 when should be 201
+    Issue #35
+    """
     @pytest.mark.xfail
     def test_080_end_running_mw_on_switch(self):
         """Tests the maintenance window ending process on a running MW
