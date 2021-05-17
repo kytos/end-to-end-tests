@@ -931,7 +931,7 @@ class TestE2EMaintenance:
 
     """
     The END Api call is returning 200 when should be 201
-    Issue #35
+    Issue https://github.com/kytos/maintenance/issues/35
     """
     @pytest.mark.xfail
     def test_080_end_running_mw_on_switch(self):
