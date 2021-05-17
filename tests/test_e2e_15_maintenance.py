@@ -257,7 +257,7 @@ class TestE2EMaintenance:
 
     """
     The execution breaks when should be returning a 415
-    Issue #43
+    Issue https://github.com/kytos/maintenance/issues/43
     """
     @pytest.mark.xfail
     def test_029_create_mw_on_switch_should_fail_wrong_payload(self):
