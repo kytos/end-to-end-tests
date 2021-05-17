@@ -581,7 +581,7 @@ class TestE2EMaintenance:
 
     """
     The execution breaks when should be returning a 400
-    Issue #44
+    Issue https://github.com/kytos/maintenance/issues/44
     """
     @pytest.mark.xfail
     def test_039_patch_mw_on_switch_should_fail_wrong_payload(self):
