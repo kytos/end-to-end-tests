@@ -25,11 +25,21 @@ class TestE2ETopology:
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
         cls.net.wait_switches_connect()
-        time.sleep(5)
+        time.sleep(10)
 
     @classmethod
     def teardown_class(cls):
         cls.net.stop()
+
+    def restart(self, _clean_config=False, _enable_all=False):
+
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=_clean_config, enable_all=_enable_all)
+        self.net.wait_switches_connect()
+
+        # Wait a few seconds to kytos execute LLDP
+        time.sleep(10)
 
     def test_005_list_topology(self):
         """
@@ -39,16 +49,17 @@ class TestE2ETopology:
         response = requests.get(api_url)
         data = response.json()
 
-        topology = {'00:00:00:00:00:00:00:01':
-                        ['00:00:00:00:00:00:00:01:1', '00:00:00:00:00:00:00:01:2', '00:00:00:00:00:00:00:01:3',
-                         '00:00:00:00:00:00:00:01:4', '00:00:00:00:00:00:00:01:4294967294'],
-                    '00:00:00:00:00:00:00:02':
-                        ['00:00:00:00:00:00:00:02:1', '00:00:00:00:00:00:00:02:2', '00:00:00:00:00:00:00:02:3',
-                         '00:00:00:00:00:00:00:02:4294967294'],
-                    '00:00:00:00:00:00:00:03':
-                        ['00:00:00:00:00:00:00:03:1', '00:00:00:00:00:00:00:03:2', '00:00:00:00:00:00:00:03:3',
-                         '00:00:00:00:00:00:00:03:4294967294'],
-                    }
+        topology = {
+            '00:00:00:00:00:00:00:01':
+                ['00:00:00:00:00:00:00:01:1', '00:00:00:00:00:00:00:01:2', '00:00:00:00:00:00:00:01:3',
+                 '00:00:00:00:00:00:00:01:4', '00:00:00:00:00:00:00:01:4294967294'],
+            '00:00:00:00:00:00:00:02':
+                ['00:00:00:00:00:00:00:02:1', '00:00:00:00:00:00:00:02:2', '00:00:00:00:00:00:00:02:3',
+                 '00:00:00:00:00:00:00:02:4294967294'],
+            '00:00:00:00:00:00:00:03':
+                ['00:00:00:00:00:00:00:03:1', '00:00:00:00:00:00:00:03:2', '00:00:00:00:00:00:00:03:3',
+                 '00:00:00:00:00:00:00:03:4294967294'],
+        }
 
         assert response.status_code == 200
         assert 'topology' in data
@@ -56,12 +67,12 @@ class TestE2ETopology:
         assert len(data['topology']['switches']) == 3
 
         for switch in data['topology']['switches']:
-            # switches validation
+            # Switches validation
             assert switch in topology
-            # interfaces validation
+            # Interfaces validation
             assert topology[switch].sort() == \
                    list(map(str, data['topology']['switches'][str(switch)]['interfaces'])).sort()
-            # links validation
+            # Links validation
             for link in data['topology']['switches'][str(switch)]['interfaces']:
                 assert 'link' in data['topology']['switches'][str(switch)]['interfaces'][link]
 
@@ -100,27 +111,15 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 201
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
+        self.restart()
 
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
-
-        # Check if the switches are enabled
+        # Check if the switch is enabled
         api_url = KYTOS_API + '/topology/v3/switches'
         response = requests.get(api_url)
         data = response.json()
         assert data['switches'][switch_id]['enabled'] is True
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Check if the switches are still enabled and now with the links
         api_url = KYTOS_API + '/topology/v3/switches'
@@ -139,38 +138,16 @@ class TestE2ETopology:
 
         # Enable the switch
         api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % switch_id
-        response = requests.post(api_url)
-        assert response.status_code == 201
+        requests.post(api_url)
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
-
-        # Check if the switch is enabled
-        api_url = KYTOS_API + '/topology/v3/switches'
-        response = requests.get(api_url)
-        data = response.json()
-
-        assert response.status_code == 200
-        assert data['switches'][switch_id]['enabled'] is True
-
-        # Disable the switch and check if the switch is really disabled
+        # Disable the switch
         api_url = KYTOS_API + '/topology/v3/switches/%s/disable' % switch_id
         response = requests.post(api_url)
         assert response.status_code == 201
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
+        self.restart()
 
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
-
+        # Check if the switch is disabled
         api_url = KYTOS_API + '/topology/v3/switches'
         response = requests.get(api_url)
         data = response.json()
@@ -194,13 +171,7 @@ class TestE2ETopology:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Verify that the metadata is inserted
         api_url = KYTOS_API + '/topology/v3/switches/%s/metadata' % switch_id
@@ -214,13 +185,7 @@ class TestE2ETopology:
         response = requests.delete(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Make sure the metadata is removed
         api_url = KYTOS_API + '/topology/v3/switches/%s/metadata' % switch_id
@@ -250,13 +215,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Check if the interface is enabled
         api_url = KYTOS_API + '/topology/v3/interfaces'
@@ -286,13 +245,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Make sure all the interfaces belonging to the target switch are enabled
         api_url = KYTOS_API + '/topology/v3/switches'
@@ -307,13 +260,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Make sure all the interfaces belonging to the target switch are enabled
         api_url = KYTOS_API + '/topology/v3/switches'
@@ -338,13 +285,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Check if the interface is enabled
         api_url = KYTOS_API + '/topology/v3/interfaces'
@@ -357,13 +298,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         api_url = KYTOS_API + '/topology/v3/interfaces'
         response = requests.get(api_url)
@@ -386,13 +321,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Make sure all the interfaces belonging to the target switch are enabled
         api_url = KYTOS_API + '/topology/v3/switches'
@@ -422,13 +351,7 @@ class TestE2ETopology:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Verify that the metadata is inserted
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id
@@ -442,13 +365,7 @@ class TestE2ETopology:
         response = requests.delete(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Make sure the metadata is removed
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id
@@ -487,13 +404,7 @@ class TestE2ETopology:
             response = requests.post(api_url)
             assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # now all the links should stay disabled
         api_url = KYTOS_API + '/topology/v3/links'
@@ -513,13 +424,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 201
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # check if the links are now enabled
         api_url = KYTOS_API + '/topology/v3/links'
@@ -559,13 +464,7 @@ class TestE2ETopology:
             response = requests.post(api_url)
             assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # now all the links should stay disabled
         api_url = KYTOS_API + '/topology/v3/links'
@@ -646,13 +545,7 @@ class TestE2ETopology:
             response = requests.post(api_url)
             assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Get the link_id
         api_url = KYTOS_API + '/topology/v3/links'
@@ -670,13 +563,7 @@ class TestE2ETopology:
         response = requests.post(api_url)
         assert response.status_code == 201
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Insert link metadata
         payload = {"tmp_key": "tmp_value"}
@@ -686,13 +573,7 @@ class TestE2ETopology:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Verify that the metadata is inserted
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1
@@ -706,13 +587,7 @@ class TestE2ETopology:
         response = requests.delete(api_url)
         assert response.status_code == 200
 
-        # Start the controller setting an environment in which the setting is
-        # preserved (persistence) and avoid the default enabling of all elements
-        self.net.start_controller(clean_config=False, enable_all=False)
-        self.net.wait_switches_connect()
-
-        # Wait a few seconds to kytos execute LLDP
-        time.sleep(10)
+        self.restart()
 
         # Make sure the metadata is removed
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1
