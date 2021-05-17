@@ -468,7 +468,7 @@ class TestE2EMaintenance:
 
     """
     The Api call is returning 201 when should be 400
-    Issue #44
+    Issue https://github.com/kytos/maintenance/issues/44
     """
     @pytest.mark.xfail
     def test_036_patch_mw_on_switch_should_fail_wrong_payload_items_empty(self):
