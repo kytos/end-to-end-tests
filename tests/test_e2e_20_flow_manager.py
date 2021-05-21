@@ -32,8 +32,8 @@ class TestE2EFlowManager:
         cls.net.stop()
 
     def test_010_install_flow(self):
-        """Test if, after kytos restart, a flow installed to a switch will
-           still be installed."""
+        """Test if, after kytos restart, a flow installed
+        to a switch will still be installed."""
 
         payload = {
             "flows": [
@@ -234,8 +234,6 @@ class TestE2EFlowManager:
     def modify_match(self, restart_kytos=False):
         """Test if after a match is modified outside kytos, the original
            flow is restored."""
-        # self.net.restart_kytos_clean()
-        # time.sleep(10)
 
         payload = {
             "flows": [
@@ -451,4 +449,3 @@ class TestE2EFlowManager:
 
     def test_075_flow_table_0_restarting(self):
         self.flow_table_0(restart_kytos=True)
-
