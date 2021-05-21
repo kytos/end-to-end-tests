@@ -451,3 +451,4 @@ class TestE2EFlowManager:
 
     def test_075_flow_table_0_restarting(self):
         self.flow_table_0(restart_kytos=True)
+
