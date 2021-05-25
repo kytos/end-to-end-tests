@@ -240,7 +240,7 @@ class TestE2EFlowManager:
     @pytest.mark.xfail
     def test_014_retrieve_flow_from_non_existent_switch_should_fail(self):
         """Test if the flow retrieving process of an unknown
-        path behaves as expected (404 Error)."""
+        switch behaves as expected (404 Error)."""
 
         switch_id = '00:00:00:00:00:00:00:05'
 
