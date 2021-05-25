@@ -126,7 +126,7 @@ class TestE2EFlowManager:
         assert data[switch_id]["flows"][1]["idle_timeout"] == payload["flows"][0]["idle_timeout"]
         assert data[switch_id]["flows"][1]["hard_timeout"] == payload["flows"][0]["hard_timeout"]
 
-    def test_012_install_flow_on_non_existent_path_should_fail(self):
+    def test_012_install_flow_on_non_existent_switch_should_fail(self):
         """Test if the flow installation process on an
         unknown path behaves as expected (404 Error)."""
 
