@@ -128,7 +128,7 @@ class TestE2EFlowManager:
 
     def test_012_install_flow_on_non_existent_switch_should_fail(self):
         """Test if the flow installation process on an
-        unknown path behaves as expected (404 Error)."""
+        invalid switch behaves as expected (404 Error)."""
 
         payload = {
             "flows": [
