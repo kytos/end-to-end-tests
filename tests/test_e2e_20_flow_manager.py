@@ -430,7 +430,7 @@ class TestE2EFlowManager:
 
     def test_021_delete_flow_on_non_existent_switch_should_fail(self):
         """Test if the flow deletion process specifying an invalid
-        path behaves as expected (404 Error)."""
+        switch behaves as expected (404 Error)."""
 
         payload = {
             "flows": [
