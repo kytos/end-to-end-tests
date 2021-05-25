@@ -126,9 +126,9 @@ class TestE2EFlowManager:
         assert data[switch_id]["flows"][1]["idle_timeout"] == payload["flows"][0]["idle_timeout"]
         assert data[switch_id]["flows"][1]["hard_timeout"] == payload["flows"][0]["hard_timeout"]
 
-    def test_012_install_flow_on_non_existent_path_should_fail(self):
+    def test_012_install_flow_on_non_existent_switch_should_fail(self):
         """Test if the flow installation process on an
-        unknown path behaves as expected (404 Error)."""
+        invalid switch behaves as expected (404 Error)."""
 
         payload = {
             "flows": [
@@ -238,9 +238,9 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/131
     """
     @pytest.mark.xfail
-    def test_014_retrieve_flow_from_non_existent_path_should_fail(self):
-        """Test if the flow retrieving process of an unknown
-        path behaves as expected (404 Error)."""
+    def test_014_retrieve_flow_from_non_existent_switch_should_fail(self):
+        """Test if the flow retrieving process of an invalid
+        switch behaves as expected (404 Error)."""
 
         switch_id = '00:00:00:00:00:00:00:05'
 
@@ -428,9 +428,9 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 1
         assert 'actions=output:"s1-eth2"' not in flows_s1
 
-    def test_021_delete_flow_on_non_existent_path_should_fail(self):
-        """Test if the flow deletion process specifying an unknown
-        path behaves as expected (404 Error)."""
+    def test_021_delete_flow_on_non_existent_switch_should_fail(self):
+        """Test if the flow deletion process specifying an invalid
+        switch behaves as expected (404 Error)."""
 
         payload = {
             "flows": [
