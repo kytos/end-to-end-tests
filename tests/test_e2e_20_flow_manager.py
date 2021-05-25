@@ -238,7 +238,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/131
     """
     @pytest.mark.xfail
-    def test_014_retrieve_flow_from_non_existent_path_should_fail(self):
+    def test_014_retrieve_flow_from_non_existent_switch_should_fail(self):
         """Test if the flow retrieving process of an unknown
         path behaves as expected (404 Error)."""
 
