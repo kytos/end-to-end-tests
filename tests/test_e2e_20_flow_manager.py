@@ -428,7 +428,7 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 1
         assert 'actions=output:"s1-eth2"' not in flows_s1
 
-    def test_021_delete_flow_on_non_existent_path_should_fail(self):
+    def test_021_delete_flow_on_non_existent_switch_should_fail(self):
         """Test if the flow deletion process specifying an unknown
         path behaves as expected (404 Error)."""
 
