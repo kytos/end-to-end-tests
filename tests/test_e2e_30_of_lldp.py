@@ -131,7 +131,7 @@ class TestE2EOfLLDP:
         # restart kytos and check if lldp remains disabled
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
-        time.sleep(5)
+        time.sleep(10)
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
         response = requests.get(api_url)
@@ -174,7 +174,7 @@ class TestE2EOfLLDP:
         # restart kytos and check if lldp remains disabled
         self.net.start_controller(clean_config=False, enable_all=False)
         self.net.wait_switches_connect()
-        time.sleep(5)
+        time.sleep(10)
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
         response = requests.get(api_url)
