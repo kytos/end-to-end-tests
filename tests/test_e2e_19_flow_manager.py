@@ -139,11 +139,6 @@ class TestE2EFlowManager:
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 500 when should be 404
-    Issue https://github.com/kytos/flow_manager/issues/131
-    """
-    @pytest.mark.xfail
     def test_035_retrieve_flow_from_non_existent_switch_should_fail(self):
         """Test if the flow retrieving process of an invalid
         switch behaves as expected (404 Error)."""
