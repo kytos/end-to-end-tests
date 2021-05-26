@@ -32,7 +32,7 @@ class TestE2EFlowManager:
     def teardown_class(cls):
         cls.net.stop()
 
-    def test_012_install_flow_on_non_existent_switch_should_fail(self):
+    def test_010_install_flow_on_non_existent_switch_should_fail(self):
         """Test if the flow installation process on an
         invalid switch behaves as expected (404 Error)."""
 
@@ -65,7 +65,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/134
     """
     @pytest.mark.xfail
-    def test_0131_install_flow_should_fail(self):
+    def test_015_install_flow_should_fail(self):
         """Test if the flow installation process specifying an empty
         payload behaves as expected (400 Error)."""
 
@@ -81,7 +81,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/134
     """
     @pytest.mark.xfail
-    def test_0132_install_flow_should_fail(self):
+    def test_020_install_flow_should_fail(self):
         """Test if the flow installation process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
 
@@ -100,7 +100,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/134
     """
     @pytest.mark.xfail
-    def test_0133_install_flow_should_fail(self):
+    def test_025_install_flow_should_fail(self):
         """Test if the flow installation process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
 
@@ -122,7 +122,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/134
     """
     @pytest.mark.xfail
-    def test_0134_install_flow_should_fail(self):
+    def test_030_install_flow_should_fail(self):
         """Test if the flow installation process specifying a
         wrong datatype payload behaves as expected (400 Error)."""
 
@@ -144,7 +144,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/131
     """
     @pytest.mark.xfail
-    def test_014_retrieve_flow_from_non_existent_switch_should_fail(self):
+    def test_035_retrieve_flow_from_non_existent_switch_should_fail(self):
         """Test if the flow retrieving process of an invalid
         switch behaves as expected (404 Error)."""
 
@@ -160,7 +160,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/132
     """
     @pytest.mark.xfail
-    def test_016_install_flows_should_fail(self):
+    def test_040_install_flows_should_fail(self):
         """Test if the flow installation process specifying an empty
         payload behaves as expected (400 Error)."""
 
@@ -176,7 +176,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/132
     """
     @pytest.mark.xfail
-    def test_017_install_flows_should_fail(self):
+    def test_045_install_flows_should_fail(self):
         """Test if the flow installation process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
 
@@ -195,7 +195,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/132
     """
     @pytest.mark.xfail
-    def test_018_install_flows_should_fail(self):
+    def test_050_install_flows_should_fail(self):
         """Test if the flow installation process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
 
@@ -217,7 +217,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/132
     """
     @pytest.mark.xfail
-    def test_019_install_flows_should_fail(self):
+    def test_055_install_flows_should_fail(self):
         """Test if the flow installation process specifying a
         wrong datatype payload behaves as expected (400 Error)."""
 
@@ -234,7 +234,7 @@ class TestE2EFlowManager:
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    def test_021_delete_flow_on_non_existent_switch_should_fail(self):
+    def test_060_delete_flow_on_non_existent_switch_should_fail(self):
         """Test if the flow deletion process specifying an invalid
         switch behaves as expected (404 Error)."""
 
@@ -268,7 +268,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/136
     """
     @pytest.mark.xfail
-    def test_022_delete_flow_should_fail(self):
+    def test_065_delete_flow_should_fail(self):
         """Test if the flow deletion process specifying an empty
         payload behaves as expected (400 Error)."""
 
@@ -285,7 +285,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/136
     """
     @pytest.mark.xfail
-    def test_023_delete_flow_should_fail(self):
+    def test_070_delete_flow_should_fail(self):
         """Test if the flow deletion process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
 
@@ -305,7 +305,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/136
     """
     @pytest.mark.xfail
-    def test_024_delete_flow_should_fail(self):
+    def test_075_delete_flow_should_fail(self):
         """Test if the flow deletion process specifying an an empty
         flow data on the payload behaves as expected (400 Error)."""
 
@@ -328,7 +328,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/136
     """
     @pytest.mark.xfail
-    def test_0241_delete_flow_should_fail(self):
+    def test_080_delete_flow_should_fail(self):
         """Test if the flow deletion process specifying a
         wrong datatype payload behaves as expected (400 Error)."""
 
@@ -351,7 +351,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/135
     """
     @pytest.mark.xfail
-    def test_026_delete_flows_should_fail(self):
+    def test_085_delete_flows_should_fail(self):
         """Test if the flow deletion process specifying an empty
         payload behaves as expected (400 Error)."""
 
@@ -368,7 +368,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/135
     """
     @pytest.mark.xfail
-    def test_027_delete_flows_should_fail(self):
+    def test_090_delete_flows_should_fail(self):
         """Test if the flow deletion process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
 
@@ -388,7 +388,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/135
     """
     @pytest.mark.xfail
-    def test_028_delete_flows_should_fail(self):
+    def test_095_delete_flows_should_fail(self):
         """Test if the flow deletion process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
 
@@ -411,7 +411,7 @@ class TestE2EFlowManager:
     Issue https://github.com/kytos/flow_manager/issues/135
     """
     @pytest.mark.xfail
-    def test_029_delete_flows_should_fail(self):
+    def test_100_delete_flows_should_fail(self):
         """Test if the flow deletion process specifying a
         wrong datatype payload behaves as expected (400 Error)."""
 

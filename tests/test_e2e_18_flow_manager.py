@@ -32,7 +32,7 @@ class TestE2EFlowManager:
     def teardown_class(cls):
         cls.net.stop()
 
-    def test_010_install_flow(self):
+    def test_005_install_flow(self):
         """Test if, after kytos restart, a flow installed
         to a switch will still be installed."""
 
@@ -76,7 +76,7 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 2
         assert 'actions=output:"s1-eth2"' in flows_s1
 
-    def test_014_install_flow_and_retrieve_it_back(self):
+    def test_010_install_flow_and_retrieve_it_back(self):
         """Test the flow status through the
         API's call after its installation."""
 
@@ -126,7 +126,7 @@ class TestE2EFlowManager:
         assert data[switch_id]["flows"][1]["idle_timeout"] == payload["flows"][0]["idle_timeout"]
         assert data[switch_id]["flows"][1]["hard_timeout"] == payload["flows"][0]["hard_timeout"]
 
-    def test_018_install_flows(self):
+    def test_015_install_flows(self):
         """Test if, after kytos restart, a flow installed to all switches will
            still be installed."""
 
