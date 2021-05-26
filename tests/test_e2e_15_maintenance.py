@@ -102,7 +102,7 @@ class TestE2EMaintenance:
         assert 'mw_id' in data
 
         # Waits for the MW to start
-        time.sleep(mw_start_delay+5)
+        time.sleep(mw_start_delay+10)
 
         # Switch 1 and 3 should have 3 flows; Switch 2 should have only 1 flow.
         s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
