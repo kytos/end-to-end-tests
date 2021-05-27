@@ -60,11 +60,6 @@ class TestE2EFlowManager:
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 404
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/134
-    """
-    @pytest.mark.xfail
     def test_015_install_flow_should_fail(self):
         """Test if the flow installation process specifying an empty
         payload behaves as expected (400 Error)."""
@@ -76,11 +71,6 @@ class TestE2EFlowManager:
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/134
-    """
-    @pytest.mark.xfail
     def test_020_install_flow_should_fail(self):
         """Test if the flow installation process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
@@ -95,11 +85,6 @@ class TestE2EFlowManager:
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/134
-    """
-    @pytest.mark.xfail
     def test_025_install_flow_should_fail(self):
         """Test if the flow installation process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
@@ -150,11 +135,6 @@ class TestE2EFlowManager:
         response = requests.get(api_url)
         assert response.status_code == 404
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/132
-    """
-    @pytest.mark.xfail
     def test_040_install_flows_should_fail(self):
         """Test if the flow installation process specifying an empty
         payload behaves as expected (400 Error)."""
@@ -166,11 +146,6 @@ class TestE2EFlowManager:
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/132
-    """
-    @pytest.mark.xfail
     def test_045_install_flows_should_fail(self):
         """Test if the flow installation process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
@@ -185,11 +160,6 @@ class TestE2EFlowManager:
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/132
-    """
-    @pytest.mark.xfail
     def test_050_install_flows_should_fail(self):
         """Test if the flow installation process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
@@ -258,11 +228,6 @@ class TestE2EFlowManager:
                                    headers={'Content-type': 'application/json'})
         assert response.status_code == 404
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/136
-    """
-    @pytest.mark.xfail
     def test_065_delete_flow_should_fail(self):
         """Test if the flow deletion process specifying an empty
         payload behaves as expected (400 Error)."""
@@ -275,11 +240,6 @@ class TestE2EFlowManager:
                                    headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/136
-    """
-    @pytest.mark.xfail
     def test_070_delete_flow_should_fail(self):
         """Test if the flow deletion process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
@@ -295,11 +255,6 @@ class TestE2EFlowManager:
                                    headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/136
-    """
-    @pytest.mark.xfail
     def test_075_delete_flow_should_fail(self):
         """Test if the flow deletion process specifying an an empty
         flow data on the payload behaves as expected (400 Error)."""
@@ -341,11 +296,6 @@ class TestE2EFlowManager:
                                    headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/135
-    """
-    @pytest.mark.xfail
     def test_085_delete_flows_should_fail(self):
         """Test if the flow deletion process specifying an empty
         payload behaves as expected (400 Error)."""
@@ -358,11 +308,6 @@ class TestE2EFlowManager:
                                    headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/135
-    """
-    @pytest.mark.xfail
     def test_090_delete_flows_should_fail(self):
         """Test if the flow deletion process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
@@ -378,11 +323,6 @@ class TestE2EFlowManager:
                                    headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 200 when should be 400
-    Issue https://github.com/kytos/flow_manager/issues/135
-    """
-    @pytest.mark.xfail
     def test_095_delete_flows_should_fail(self):
         """Test if the flow deletion process specifying an empty
         flow data on the payload behaves as expected (400 Error)."""
