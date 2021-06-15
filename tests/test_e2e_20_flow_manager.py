@@ -33,7 +33,7 @@ class TestE2EFlowManager:
         cls.net.stop()
 
     def test_005_install_flow(self):
-        """Test if, after kytos restart, a flow installed
+        """Tests if, after kytos restart, a flow installed
         to a switch will still be installed."""
 
         payload = {
@@ -77,7 +77,7 @@ class TestE2EFlowManager:
         assert 'actions=output:"s1-eth2"' in flows_s1
 
     def test_010_install_flow_and_retrieve_it_back(self):
-        """Test the flow status through the
+        """Tests the flow status through the
         API's call after its installation."""
 
         switch_id = '00:00:00:00:00:00:00:01'
@@ -127,8 +127,8 @@ class TestE2EFlowManager:
         assert data[switch_id]["flows"][1]["hard_timeout"] == payload["flows"][0]["hard_timeout"]
 
     def test_015_install_flows(self):
-        """Test if, after kytos restart, a flow installed to all switches will
-           still be installed."""
+        """Tests if, after kytos restart, a flow installed
+        to all switches will still be installed."""
 
         payload = {
             "flows": [
@@ -172,8 +172,8 @@ class TestE2EFlowManager:
             assert 'actions=output:"%s-eth2"' % sw_name in flows_sw
 
     def test_020_delete_flow(self):
-        """Test if, after kytos restart, a flow deleted from a switch will
-           still be deleted."""
+        """Tests if, after kytos restart, a flow deleted
+        from a switch will still be deleted."""
 
         payload = {
             "flows": [
@@ -195,11 +195,8 @@ class TestE2EFlowManager:
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload),
-                                 headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
-        data = response.json()
-        assert 'FlowMod Messages Sent' in data['response']
+        requests.post(api_url, data=json.dumps(payload),
+                      headers={'Content-type': 'application/json'})
 
         # wait for the flow to be installed
         time.sleep(10)
@@ -227,8 +224,8 @@ class TestE2EFlowManager:
         assert 'actions=output:"s1-eth2"' not in flows_s1
 
     def test_025_delete_flows(self):
-        """Test if, after kytos restart, a flow deleted from all switches will
-           still be deleted."""
+        """Tests if, after kytos restart, a flow deleted
+        from all switches will still be deleted."""
 
         payload = {
             "flows": [
@@ -250,11 +247,8 @@ class TestE2EFlowManager:
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows'
-        response = requests.post(api_url, data=json.dumps(payload),
-                                 headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
-        data = response.json()
-        assert 'FlowMod Messages Sent' in data['response']
+        requests.post(api_url, data=json.dumps(payload),
+                      headers={'Content-type': 'application/json'})
 
         # wait for the flow to be installed
         time.sleep(10)
@@ -283,8 +277,8 @@ class TestE2EFlowManager:
             assert 'actions=output:"%s-eth2"' % sw_name not in flows_sw
 
     def modify_match(self, restart_kytos=False):
-        """Test if after a match is modified outside kytos, the original
-           flow is restored."""
+        """Tests if after a match is modified outside
+        kytos, the original flow is restored."""
 
         payload = {
             "flows": [
@@ -306,11 +300,8 @@ class TestE2EFlowManager:
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload),
-                                 headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
-        data = response.json()
-        assert 'FlowMod Messages Sent' in data['response']
+        requests.post(api_url, data=json.dumps(payload),
+                      headers={'Content-type': 'application/json'})
 
         # wait for the flow to be installed
         time.sleep(10)
@@ -359,11 +350,8 @@ class TestE2EFlowManager:
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload),
-                                 headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
-        data = response.json()
-        assert 'FlowMod Messages Sent' in data['response']
+        requests.post(api_url, data=json.dumps(payload),
+                      headers={'Content-type': 'application/json'})
 
         # wait for the flow to be installed
         time.sleep(10)
@@ -419,11 +407,8 @@ class TestE2EFlowManager:
         }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
-        response = requests.post(api_url, data=json.dumps(payload),
-                                 headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
-        data = response.json()
-        assert 'FlowMod Messages Sent' in data['response']
+        requests.post(api_url, data=json.dumps(payload),
+                      headers={'Content-type': 'application/json'})
 
         # wait for the flow to be installed
         time.sleep(10)
@@ -455,8 +440,8 @@ class TestE2EFlowManager:
         self.add_action_flow(restart_kytos=True)
 
     def flow_another_table(self, restart_kytos=False):
-        """Test if, after adding a flow in another table outside kytos, the
-            flow is removed."""
+        """Tests if, after adding a flow in another
+        table outside kytos, the flow is removed."""
 
         s1 = self.net.net.get('s1')
         s1.dpctl('add-flow', 'table=2,in_port=1,actions=output:2')
@@ -478,8 +463,8 @@ class TestE2EFlowManager:
         self.flow_another_table(restart_kytos=True)
 
     def flow_table_0(self, restart_kytos=False):
-        """Test if, after adding a flow in another table outside kytos, the
-            flow is removed."""
+        """Tests if, after adding a flow in another
+        table outside kytos, the flow is removed."""
 
         s1 = self.net.net.get('s1')
         s1.dpctl('add-flow', 'table=0,in_port=1,actions=output:2')
