@@ -120,7 +120,9 @@ class TestE2EFlowManager:
         assert response.status_code == 200
         data = response.json()
         assert len(data[switch_id]["flows"]) == 2
-        assert data[switch_id]["flows"][1]["actions"] == payload["flows"][0]["actions"]
+        # print(data[switch_id]["flows"][1]['instructions'][0]["actions"])
+        assert data[switch_id]["flows"][1]['instructions'][0]["actions"] == payload["flows"][0]["actions"]
+        # assert data[switch_id]["flows"][1]["actions"] == payload["flows"][0]["actions"]
         assert data[switch_id]["flows"][1]["match"] == payload["flows"][0]["match"]
         assert data[switch_id]["flows"][1]["priority"] == payload["flows"][0]["priority"]
         assert data[switch_id]["flows"][1]["idle_timeout"] == payload["flows"][0]["idle_timeout"]
