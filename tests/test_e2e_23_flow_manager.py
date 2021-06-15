@@ -4,9 +4,6 @@ import requests
 from tests.helpers import NetworkTest
 import time
 
-import multiprocessing
-# import os
-
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
@@ -35,6 +32,7 @@ class TestE2EFlowManager:
     def teardown_class(cls):
         cls.net.stop()
 
+    @pytest.mark.xfail
     @pytest.mark.parametrize('execution_number', range(10))
     def test_005_install_flow(self, execution_number):
         """
@@ -131,7 +129,7 @@ class TestE2EFlowManager:
         assert 'actions=drop' in flows_s1
 
     def test_010_install_flow(self):
-        """Test the inclusion of multiple flows with
+        """Tests the inclusion of multiple flows with
         the same priority and different and different
         matches and actions on the same payload"""
 
@@ -1016,6 +1014,7 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 4
         assert 'actions=drop' in flows_s1
 
+    @pytest.mark.xfail
     def test_065_install_flow(self):
         """
         Tests the performance and race condition
@@ -1041,4 +1040,46 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
+        assert len(flows_s1.split('\r\n ')) == 101
+
+    def create_flow(self, vlan_id):
+        payload = {
+            "flows": [{
+                "priority": 10,
+                "match": {
+                    "in_port": 1,
+                    "dl_vlan": vlan_id
+                },
+                "actions": [{
+                    "action_type": "output",
+                    "port": 2
+                }]
+            }]
+        }
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers = {'Content-type': 'application/json'})
+
+        assert response.status_code == 200
+        data = response.json()
+        assert 'FlowMod Messages Sent' in data['response']
+
+    @pytest.mark.xfail
+    def test_070_install_flow(self):
+        """
+        Tests the performance and race condition with
+        the creation of multiple flows using threading
+        """
+        import threading
+        threads = list()
+        for vlan_id in range(100, 200):
+            t = threading.Thread(target=self.create_flow, args=(vlan_id,))
+            threads.append(t)
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        s1 = self.net.net.get('s1')
+        flows_s1 = s1.dpctl('dump-flows')
         assert len(flows_s1.split('\r\n ')) == 101
