@@ -79,6 +79,8 @@ class TestE2EFlowManager:
         flows_s1 = s1.dpctl('dump-flows')
         assert len(flows_s1.split('\r\n ')) == 2
         for flow in flows_s1.split('\r\n '):
+            # Check all flows but the of_lldp, which is reinstalled
+            if 'dl_vlan=3799,dl_type=0x88cc' in flow: continue
             match = re.search("duration=([0-9.]+)", flow)
             duration = float(match.group(1))
             assert duration >= wait_time + delta
