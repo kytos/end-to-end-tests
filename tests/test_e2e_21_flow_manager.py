@@ -83,7 +83,7 @@ class TestE2EFlowManager:
             if 'dl_vlan=3799,dl_type=0x88cc' in flow: continue
             match = re.search("duration=([0-9.]+)", flow)
             duration = float(match.group(1))
-            assert duration >= wait_time + delta
+            assert duration + 1 >= wait_time + delta
 
     def test_031_on_switch_restart_kytos_should_recreate_flows(self):
         """Test if, after kytos restart, the flows are preserved on the switch 
