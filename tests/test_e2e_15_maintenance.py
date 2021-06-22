@@ -1,9 +1,11 @@
-import requests
-import pytest
-from tests.helpers import NetworkTest
-import time
 import json
+import time
 from datetime import datetime, timedelta
+
+import pytest
+import requests
+
+from tests.helpers import NetworkTest
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
@@ -431,6 +433,7 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
+    @pytest.mark.xfail
     def test_050_patch_mw_on_switch_should_fail_wrong_payload_items_empty(self):
         """
         400 response calling
@@ -869,6 +872,7 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
+    @pytest.mark.xfail
     def test_095_extend_running_mw_on_switch(self):
 
         self.restart_and_create_circuit()
@@ -965,6 +969,7 @@ class TestE2EMaintenance:
         h11.cmd('ip link del vlan100')
         h3.cmd('ip link del vlan100')
 
+    @pytest.mark.xfail
     def test_100_extend_no_running_mw_on_switch_should_fail(self):
         self.restart_and_create_circuit()
 
@@ -1000,6 +1005,7 @@ class TestE2EMaintenance:
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_105_extend_unknown_mw_on_switch_should_fail(self):
         self.restart_and_create_circuit()
 
@@ -1013,6 +1019,7 @@ class TestE2EMaintenance:
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 404
 
+    @pytest.mark.xfail
     def test_110_extend_running_mw_on_switch_under_unknown_tag_should_fail(self):
         self.restart_and_create_circuit()
 
