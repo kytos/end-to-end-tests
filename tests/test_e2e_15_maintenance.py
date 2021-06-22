@@ -25,7 +25,8 @@ class TestE2EMaintenance:
     def teardown_class(cls):
         cls.net.stop()
 
-    def create_circuit(self, vlan_id):
+    @staticmethod
+    def create_circuit(vlan_id):
         payload = {
             "name": "my evc1",
             "enabled": True,
