@@ -2,6 +2,7 @@ import requests
 from tests.helpers import NetworkTest
 import time
 import json
+import re
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
@@ -500,3 +501,68 @@ class TestE2EMefEline:
     def create_evc_with_scheduled_times_for_provisioning_and_ending(self):
         # TODO
         assert True
+
+    def test_080_create_and_remove_ten_circuits_ten_times(self):
+        """ Tests the creation and removal of ten circuits many times. """
+        for x in range(1, 10):
+            evcs = {}
+            for i in range(400, 410):
+                payload = {
+                    "name": "evc_%s" % i,
+                    "enabled": True,
+                    "dynamic_backup_path": True,
+                    "uni_a": {
+                        "interface_id": "00:00:00:00:00:00:00:01:1",
+                        "tag": {"tag_type": 1, "value": i}
+                    },
+                    "uni_z": {
+                        "interface_id": "00:00:00:00:00:00:00:02:1",
+                        "tag": {"tag_type": 1, "value": i}
+                    }
+                }
+                api_url = KYTOS_API + '/mef_eline/v2/evc/'
+                response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+                assert response.status_code == 201
+                data = response.json()
+                assert 'circuit_id' in data
+                evcs[i] = data['circuit_id']
+
+            time.sleep(10)
+
+            # make sure the evcs are active and the flows were created
+            s1, s2 = self.net.net.get('s1', 's2')
+            flows_s1 = s1.dpctl('dump-flows')
+            flows_s2 = s2.dpctl('dump-flows')
+            for vid in evcs:
+                evc_id = evcs[vid]
+                api_url = KYTOS_API + '/mef_eline/v2/evc/' + evc_id
+                response = requests.get(api_url)
+                assert response.status_code == 200
+                evc = response.json()
+                #should be active
+                assert evc["active"] is True
+                # search for the vlan id
+                assert "dl_vlan=%s" % vid in flows_s1
+                assert "dl_vlan=%s" % vid in flows_s2
+                # search for the cookie, should have two flows
+                assert len(re.findall(evc['id'], flows_s1, flags=re.IGNORECASE)) == 2, "round=%d - should have 2 flows but had: \n%s" % (x, flows_s1)
+                assert len(re.findall(evc['id'], flows_s2, flags=re.IGNORECASE)) == 2, "round=%d - should have 2 flows but had: \n%s" % (x, flows_s2)
+
+            # Delete the circuits
+            for vid in evcs:
+                evc_id = evcs[vid]
+                api_url = KYTOS_API + '/mef_eline/v2/evc/' + evc_id
+                response = requests.delete(api_url)
+                assert response.status_code == 200
+
+            time.sleep(10)
+
+            # make sure the circuits were deleted
+            api_url = KYTOS_API + '/mef_eline/v2/evc/'
+            response = requests.get(api_url)
+            assert response.status_code == 200
+            assert response.json() == {}
+            flows_s1 = s1.dpctl('dump-flows')
+            flows_s2 = s2.dpctl('dump-flows')
+            assert len(flows_s1.split('\r\n ')) == 1, "round=%d - should have only 1 flow but had: \n%s" % (x, flows_s1)
+            assert len(flows_s2.split('\r\n ')) == 1, "round=%d - should have only 1 flow but had: \n%s" % (x, flows_s2)
