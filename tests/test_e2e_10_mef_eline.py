@@ -33,6 +33,25 @@ class TestE2EMefEline:
     def teardown_class(cls):
         cls.net.stop()
 
+    def create_evc(self, vlan_id):
+        payload = {
+            "name": "Vlan_%s" % vlan_id,
+            "enabled": True,
+            "dynamic_backup_path": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {"tag_type": 1, "value": vlan_id}
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:02:1",
+                "tag": {"tag_type": 1, "value": vlan_id}
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        data = response.json()
+        return  data['circuit_id']
+
     def test_010_list_evcs_should_be_empty(self):
         """Test if list circuits return 'no circuit stored.'."""
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -483,6 +502,30 @@ class TestE2EMefEline:
     def test_065_on_primary_path_fail_should_migrate_to_backup(self):
         # TODO
         assert True
+
+    def test_070_delete_evc_after_restart_kytos_and_no_switch_reconnected(self)
+        evc1 = self.create_evc(100)
+
+        # restart the controller and change the port on purpose to avoid switches to connect
+        self.net.start_controller(clean_config=False, enable_all=True, port=9999)
+        time.sleep(10)
+
+        # Delete the circuit
+        response = requests.delete(api_url + evc1)
+        assert response.status_code == 200
+        time.sleep(10)
+
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        assert evc1 not in data
+
+        response = requests.get(api_url, params={'archived': True})
+        assert response.status_code == 200
+        data = response.json()
+        assert evc1 in data
+        assert data[evc1]['archived'] is True
+        assert data[evc1]['active'] is False
 
     def patch_evc_by_changing_unis_from_interface_to_another(self):
         # TODO

@@ -96,7 +96,7 @@ class NetworkTest:
         self.net.start()
         self.start_controller(clean_config=True)
 
-    def start_controller(self, clean_config=False, enable_all=False, del_flows=False):
+    def start_controller(self, clean_config=False, enable_all=False, del_flows=False, port=None):
         # Restart kytos and check if the napp is still disabled
         try:
             os.system('pkill kytosd')
@@ -118,6 +118,8 @@ class NetworkTest:
                 sw.dpctl('del-flows')
 
         daemon = 'kytosd'
+        if port:
+            daemon += ' --port %s' % port
         if enable_all:
             daemon += ' -E'
         os.system(daemon)
