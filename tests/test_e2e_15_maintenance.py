@@ -1,9 +1,11 @@
-import requests
-import pytest
-from tests.helpers import NetworkTest
-import time
 import json
+import time
 from datetime import datetime, timedelta
+
+import pytest
+import requests
+
+from tests.helpers import NetworkTest
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
@@ -25,7 +27,8 @@ class TestE2EMaintenance:
     def teardown_class(cls):
         cls.net.stop()
 
-    def create_circuit(self, vlan_id):
+    @staticmethod
+    def create_circuit(vlan_id):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -51,10 +54,16 @@ class TestE2EMaintenance:
                  "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
             ],
         }
-        api_url = KYTOS_API+'/mef_eline/v2/evc/'
-        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
 
-    def test_010_list_mw_should_be_empty(self):
+    def restart_and_create_circuit(self):
+        self.net.restart_kytos_clean()
+        time.sleep(5)
+        self.create_circuit(100)
+        time.sleep(20)
+
+    def test_005_list_mw_should_be_empty(self):
         """Tests if the maintenances list is empty at the beginning
         Test:
             /api/kytos/maintenance/ on GET
@@ -67,16 +76,13 @@ class TestE2EMaintenance:
         json_data = response.json()
         assert json_data == []
 
-    def test_020_create_mw_on_switch_should_move_evc(self):
+    def test_010_create_mw_on_switch_should_move_evc(self):
         """Tests the EVC behaviors during maintenance
         Test:
             /api/kytos/maintenance on POST
         """
 
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
+        self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
         mw_start_delay = 60
@@ -86,7 +92,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "my MW on switch 2",
+            "description": "mw for test 010",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -102,7 +108,7 @@ class TestE2EMaintenance:
         assert 'mw_id' in data
 
         # Waits for the MW to start
-        time.sleep(mw_start_delay+10)
+        time.sleep(mw_start_delay + 10)
 
         # Switch 1 and 3 should have 3 flows; Switch 2 should have only 1 flow.
         s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
@@ -143,7 +149,7 @@ class TestE2EMaintenance:
         h11.cmd('ip link del vlan100')
         h3.cmd('ip link del vlan100')
 
-    def test_022_create_mw_on_switch_should_fail_dates_error(self):
+    def test_015_create_mw_on_switch_should_fail_dates_error(self):
         """Tests to create maintenance with the wrong payload
         Test:
             400 response calling
@@ -160,7 +166,7 @@ class TestE2EMaintenance:
 
         # Sets up a wrong maintenance window data
         payload = {
-            "description": "my MW on switch 2",
+            "description": "mw for test 015",
             "start": end.strftime(TIME_FMT),
             "end": start.strftime(TIME_FMT),
             "items": [
@@ -173,12 +179,7 @@ class TestE2EMaintenance:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 201 when should be 400
-    Issue https://github.com/kytos/maintenance/issues/43
-    """
-    @pytest.mark.xfail
-    def test_024_create_mw_on_switch_should_fail_items_empty(self):
+    def test_020_create_mw_on_switch_should_fail_items_empty(self):
         """Tests to create maintenance with the wrong payload
         Test:
             400 response calling
@@ -195,7 +196,7 @@ class TestE2EMaintenance:
 
         # Sets up a wrong maintenance window data
         payload = {
-            "description": "my MW on switch 2",
+            "description": "mw for test 020",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": []
@@ -206,12 +207,7 @@ class TestE2EMaintenance:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """
-    The Api call is returning 500 when should be 400
-    Issue https://github.com/kytos/maintenance/issues/43
-    """
-    @pytest.mark.xfail
-    def test_026_create_mw_on_switch_should_fail_no_items_field_on_payload(self):
+    def test_025_create_mw_on_switch_should_fail_no_items_field_on_payload(self):
         """Tests to create maintenance with the wrong payload
         Test:
             400 response calling
@@ -228,7 +224,7 @@ class TestE2EMaintenance:
 
         # Sets up a wrong maintenance window data
         payload = {
-            "description": "my MW on switch 2",
+            "description": "mw for test 025",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT)
         }
@@ -238,7 +234,7 @@ class TestE2EMaintenance:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    def test_028_create_mw_on_switch_should_fail_payload_empty(self):
+    def test_030_create_mw_on_switch_should_fail_payload_empty(self):
         """Tests to create maintenance with the wrong payload
         Test:
             415 response calling
@@ -255,29 +251,7 @@ class TestE2EMaintenance:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 415
 
-    """
-    The execution breaks when should be returning a 415
-    Issue https://github.com/kytos/maintenance/issues/43
-    """
-    @pytest.mark.xfail
-    def test_029_create_mw_on_switch_should_fail_wrong_payload(self):
-        """Tests to create maintenance with the wrong payload
-        Test:
-            415 response calling
-            /api/kytos/maintenance on POST
-        """
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-
-        # Sets up a wrong maintenance window data
-        payload = {"a"}
-
-        # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
-        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 415
-
-    def test_030_create_mw_on_switch_and_patch_new_end(self):
+    def test_035_create_mw_on_switch_and_patch_new_end(self):
         """Tests the maintenance window data update
         process through MW Id focused on the end time
         Test:
@@ -286,21 +260,17 @@ class TestE2EMaintenance:
         supported by
             /api/kytos/maintenance on GET
         """
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
+        self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
         mw_start_delay = 60
         mw_duration = 60
-
         start = datetime.now() + timedelta(seconds=mw_start_delay)
         end = start + timedelta(seconds=mw_duration)
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 030",
+            "description": "mw for test 035",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -357,6 +327,7 @@ class TestE2EMaintenance:
         assert 'dl_vlan=100' not in flows_s2
         assert len(flows_s2.split('\r\n ')) == 1
 
+        # Checks connectivity during maintenance
         h11, h3 = self.net.net.get('h11', 'h3')
         h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
         h11.cmd('ip link set up vlan100')
@@ -380,7 +351,7 @@ class TestE2EMaintenance:
         h11.cmd('ip link del vlan100')
         h3.cmd('ip link del vlan100')
 
-    def test_032_patch_non_existent_mw_on_switch_should_fail(self):
+    def test_040_patch_non_existent_mw_on_switch_should_fail(self):
         """
         404 response calling
             /api/kytos/maintenance/{mw_id} on PATCH
@@ -398,7 +369,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload1 = {
-            "description": "mw for test 030",
+            "description": "mw for test 040",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -410,27 +381,23 @@ class TestE2EMaintenance:
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 404
 
-    def test_034_patch_mw_on_switch_should_fail_wrong_payload_on_dates(self):
+    def test_045_patch_mw_on_switch_should_fail_wrong_payload_on_dates(self):
         """
         400 response calling
             /api/kytos/maintenance/{mw_id} on PATCH
         """
 
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
+        self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
         mw_start_delay = 60
         mw_duration = 60
-
         start = datetime.now() + timedelta(seconds=mw_start_delay)
         end = start + timedelta(seconds=mw_duration)
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 030",
+            "description": "mw for test 045",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -466,31 +433,23 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
-    """
-    The Api call is returning 201 when should be 400
-    Issue https://github.com/kytos/maintenance/issues/44
-    """
     @pytest.mark.xfail
-    def test_036_patch_mw_on_switch_should_fail_wrong_payload_items_empty(self):
+    def test_050_patch_mw_on_switch_should_fail_wrong_payload_items_empty(self):
         """
         400 response calling
             /api/kytos/maintenance/{mw_id} on PATCH
         """
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
+        self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
         mw_start_delay = 60
         mw_duration = 60
-
         start = datetime.now() + timedelta(seconds=mw_start_delay)
         end = start + timedelta(seconds=mw_duration)
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 030",
+            "description": "mw for test 050",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -524,14 +483,9 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
-    """
-    The Api call is returning 201 when should be 400
-    Issue https://github.com/kytos/maintenance/issues/44
-    """
-    @pytest.mark.xfail
-    def test_038_patch_mw_on_switch_should_fail_wrong_payload_no_items_field(self):
+    def test_055_patch_mw_on_switch_should_fail_empty_payload(self):
         """
-        400 response calling
+        415 response calling
             /api/kytos/maintenance/{mw_id} on PATCH
         """
         self.net.restart_kytos_clean()
@@ -546,7 +500,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 030",
+            "description": "mw for test 060",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -563,75 +517,80 @@ class TestE2EMaintenance:
         mw_id = data["mw_id"]
 
         # Sets up a new maintenance window data
+        payload1 = {}
+
+        # Updates the maintenance window information
+        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
+        request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
+        assert request.status_code == 415
+
+        # Deletes the maintenance by its id
+        api_url = KYTOS_API + '/maintenance/' + mw_id
+        requests.delete(api_url)
+
+    def test_060_patch_mw_on_switch_should_fail_on_running_mw(self):
+        """
+        Tests the patching process over a running maintenance
+        400 response calling
+            /api/kytos/maintenance/{mw_id} on PATCH
+        """
+        self.net.restart_kytos_clean()
+        time.sleep(5)
+
+        # Sets up maintenance window information
+        mw_start_delay = 60
+        mw_duration = 60
         mw_new_end_time = 30
+        start = datetime.now() + timedelta(seconds=mw_start_delay)
+        end = start + timedelta(seconds=mw_duration)
+
+        # Sets up a maintenance window data
+        payload = {
+            "description": "mw for test 065",
+            "start": start.strftime(TIME_FMT),
+            "end": end.strftime(TIME_FMT),
+            "items": [
+                "00:00:00:00:00:00:00:02"
+            ]
+        }
+
+        # Creates a new maintenance window
+        api_url = KYTOS_API + '/maintenance'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201
+        data = response.json()
+        assert 'mw_id' in data
+
+        # Extracts the maintenance window id from the JSON structure
+        assert len(data) == 1
+        mw_id = data["mw_id"]
+
+        # Gets the maintenance schema
+        api_url = KYTOS_API + '/maintenance/' + mw_id
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        json_data = response.json()
+        assert json_data['id'] == mw_id
+
+        # Sets up a new maintenance window data
         new_time = end + timedelta(seconds=mw_new_end_time)
         payload1 = {
             "start": start.strftime(TIME_FMT),
-            "end": new_time.strftime(TIME_FMT)
-        }
-
-        # Updates the maintenance window information
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
-        request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
-        assert request.status_code == 400
-
-        # Deletes the maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
-        requests.delete(api_url)
-
-    """
-    The execution breaks when should be returning a 400
-    Issue https://github.com/kytos/maintenance/issues/44
-    """
-    @pytest.mark.xfail
-    def test_039_patch_mw_on_switch_should_fail_wrong_payload(self):
-        """
-        400 response calling
-            /api/kytos/maintenance/{mw_id} on PATCH
-        """
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-
-        # Sets up the maintenance window information
-        mw_start_delay = 60
-        mw_duration = 60
-
-        start = datetime.now() + timedelta(seconds=mw_start_delay)
-        end = start + timedelta(seconds=mw_duration)
-
-        # Sets up the maintenance window data
-        payload = {
-            "description": "mw for test 030",
-            "start": start.strftime(TIME_FMT),
-            "end": end.strftime(TIME_FMT),
+            "end": new_time.strftime(TIME_FMT),
             "items": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
 
-        # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
-        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        data = response.json()
+        # Waits for the MW to start
+        time.sleep(mw_start_delay + 5)
 
-        # Extracts the maintenance window id from the JSON structure
-        mw_id = data["mw_id"]
-
-        # Sets up a new maintenance window data
-        payload1 = {
-            "description"
-        }
-
-        # Updates the maintenance window information
+        # Updates a running maintenance
         mw_api_url = KYTOS_API + '/maintenance/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 400
 
-        # Deletes the maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
-        requests.delete(api_url)
-
-    def test_040_create_mw_on_switch_and_patch_new_start_delaying_mw(self):
+    def test_065_patch_mw_on_switch_new_start_delaying_mw(self):
         """Tests the maintenance window data update
         process through MW's ID focused on the start time
         Test:
@@ -639,10 +598,7 @@ class TestE2EMaintenance:
             /api/kytos/maintenance/{mw_id} on GET, and
             /api/kytos/maintenance/{mw_id} on PATCH
         """
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
+        self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
         mw_start_delay = 30
@@ -652,7 +608,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 040",
+            "description": "mw for test 070",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -742,7 +698,7 @@ class TestE2EMaintenance:
         h11.cmd('ip link del vlan100')
         h3.cmd('ip link del vlan100')
 
-    def test_050_delete_running_mw_on_switch_should_fail(self):
+    def test_070_delete_running_mw_on_switch_should_fail(self):
         """Tests the maintenance window removing process on a running MW
         Test:
             /api/kytos/maintenance/ on POST and
@@ -751,10 +707,7 @@ class TestE2EMaintenance:
             400 response calling
             /api/kytos/maintenance/{mw_id} on DELETE
         """
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
+        self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
         mw_start_delay = 60
@@ -764,7 +717,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 50",
+            "description": "mw for test 075",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -786,17 +739,14 @@ class TestE2EMaintenance:
         delete_response = requests.delete(api_url)
         assert delete_response.status_code == 400
 
-    def test_060_delete_future_mw_on_switch(self):
+    def test_075_delete_future_mw_on_switch(self):
         """Tests the maintenance window removing process on a scheduled MW
         Test:
             /api/kytos/maintenance/ on POST and
             /api/kytos/maintenance/{mw_id} on DELETE
         """
 
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
+        self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
         mw_start_delay = 60
@@ -806,7 +756,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 60",
+            "description": "mw for test 080",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -852,7 +802,7 @@ class TestE2EMaintenance:
         h11.cmd('ip link del vlan100')
         h3.cmd('ip link del vlan100')
 
-    def test_062_delete_non_existent_mw_on_switch_should_fail(self):
+    def test_080_delete_non_existent_mw_on_switch_should_fail(self):
         """
         404 response calling
             /api/kytos/maintenance/{mw_id} on DELETE
@@ -867,138 +817,7 @@ class TestE2EMaintenance:
         delete_response = requests.delete(api_url)
         assert delete_response.status_code == 404
 
-    def test_070_patch_running_mw_on_switch_should_fail(self):
-        """
-        Tests the patching process over a running maintenance
-        400 response calling
-            /api/kytos/maintenance/{mw_id} on PATCH
-        """
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-
-        # Sets up maintenance window information
-        mw_start_delay = 60
-        mw_duration = 60
-        mw_new_end_time = 30
-        start = datetime.now() + timedelta(seconds=mw_start_delay)
-        end = start + timedelta(seconds=mw_duration)
-
-        # Sets up a maintenance window data
-        payload = {
-            "description": "mw for test 070",
-            "start": start.strftime(TIME_FMT),
-            "end": end.strftime(TIME_FMT),
-            "items": [
-                "00:00:00:00:00:00:00:02"
-            ]
-        }
-
-        # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
-        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
-        data = response.json()
-        assert 'mw_id' in data
-
-        # Extracts the maintenance window id from the JSON structure
-        assert len(data) == 1
-        mw_id = data["mw_id"]
-
-        # Gets the maintenance schema
-        api_url = KYTOS_API + '/maintenance/' + mw_id
-        response = requests.get(api_url)
-        assert response.status_code == 200
-        json_data = response.json()
-        assert json_data['id'] == mw_id
-
-        # Sets up a new maintenance window data
-        new_time = end + timedelta(seconds=mw_new_end_time)
-        payload1 = {
-            "start": start.strftime(TIME_FMT),
-            "end": new_time.strftime(TIME_FMT),
-            "items": [
-                "00:00:00:00:00:00:00:02"
-            ]
-        }
-
-        # Waits for the MW to start
-        time.sleep(mw_start_delay + 5)
-
-        # Updates the a running maintenance
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
-        request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
-        assert request.status_code == 400
-
-    """
-    The END Api call is returning 200 when should be 201
-    Issue https://github.com/kytos/maintenance/issues/35
-    """
-    @pytest.mark.xfail
-    def test_080_end_running_mw_on_switch(self):
-        """Tests the maintenance window ending process on a running MW
-        Test:
-            /api/kytos/maintenance/ on POST and
-            /api/kytos/maintenance/{mw_id} on DELETE
-        """
-
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
-
-        # Sets up the maintenance window information
-        mw_start_delay = 60
-        mw_duration = 60
-        start = datetime.now() + timedelta(seconds=mw_start_delay)
-        end = start + timedelta(seconds=mw_duration)
-
-        # Sets up the maintenance window data
-        payload = {
-            "description": "mw for test 80",
-            "start": start.strftime(TIME_FMT),
-            "end": end.strftime(TIME_FMT),
-            "items": [
-                "00:00:00:00:00:00:02"
-            ]
-        }
-
-        # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance/'
-        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        json_data = response.json()
-        mw_id = json_data["mw_id"]
-
-        # Waits for the MW to start
-        time.sleep(mw_start_delay + 5)
-
-        # Ends a running maintenance
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/end'
-        end_response = requests.patch(api_url)
-        assert end_response.status_code == 201 # It is returning 200
-
-        # Waits for a time in which the MW should be running (but it is deleted)
-        time.sleep(mw_duration/2)
-
-        # Verifies the flow behavior
-        s2 = self.net.net.get('s2')
-        h11, h3 = self.net.net.get('h11', 'h3')
-        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
-        h11.cmd('ip link set up vlan100')
-        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
-        h3.cmd('ip link add link %s name vlan100 type vlan id 100' % (h3.intfNames()[0]))
-        h3.cmd('ip link set up vlan100')
-        h3.cmd('ip addr add 100.0.0.2/24 dev vlan100')
-
-        flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s2.split('\r\n ')) == 3
-        result = h11.cmd('ping -c1 100.0.0.2')
-        assert ', 0% packet loss,' in result
-
-        # Cleans up
-        h11.cmd('ip link del vlan100')
-        h3.cmd('ip link del vlan100')
-
-    def test_082_end_non_existent_running_mw_on_switch_should_fail(self):
+    def test_085_end_non_existent_running_mw_on_switch_should_fail(self):
         """
         404 response calling
             /api/kytos/maintenance/{mw_id}/end on PATCH
@@ -1013,17 +832,14 @@ class TestE2EMaintenance:
         end_response = requests.patch(api_url)
         assert end_response.status_code == 404
 
-    def test_084_end_not_running_mw_on_switch_should_fail(self):
+    def test_090_end_not_running_mw_on_switch_should_fail(self):
         """Tests the maintenance window ending process on a not running MW
         Test:
             400 response calling
             /api/kytos/maintenance/{mw_id}/end on PATCH
         """
 
-        self.net.restart_kytos_clean()
-        time.sleep(5)
-        self.create_circuit(100)
-        time.sleep(20)
+        self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
         mw_start_delay = 60
@@ -1033,7 +849,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 80",
+            "description": "mw for test 100",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -1056,5 +872,188 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
-    # def test_090_extend_running_mw_on_switch(self):
-    #     pass
+    @pytest.mark.xfail
+    def test_095_extend_running_mw_on_switch(self):
+
+        self.restart_and_create_circuit()
+
+        # Sets up the maintenance window information
+        mw_start_delay = 30
+        mw_duration = 60
+        mw_extension = 1
+        start = datetime.now() + timedelta(seconds=mw_start_delay)
+        end = start + timedelta(seconds=mw_duration)
+
+        # Sets up the maintenance window data
+        payload = {
+            "description": "mw for test 105",
+            "start": start.strftime(TIME_FMT),
+            "end": end.strftime(TIME_FMT),
+            "items": [
+                "00:00:00:00:00:00:00:02"
+            ]
+        }
+
+        # Creates a new maintenance window
+        api_url = KYTOS_API + '/maintenance'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        data = response.json()
+
+        # Extracts the maintenance window id from the JSON structure
+        mw_id = data["mw_id"]
+
+        # Gets the maintenance schema
+        api_url = KYTOS_API + '/maintenance/' + mw_id
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        json_data = response.json()
+        assert json_data['id'] == mw_id
+
+        # Waits for the MW to start
+        time.sleep(mw_start_delay + 5)
+
+        # Verifies the flow behavior during the maintenance
+        s2 = self.net.net.get('s2')
+        flows_s2 = s2.dpctl('dump-flows')
+        assert 'dl_vlan=100' not in flows_s2
+        assert len(flows_s2.split('\r\n ')) == 1
+
+        # Checks connectivity during maintenance
+        h11, h3 = self.net.net.get('h11', 'h3')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
+        h3.cmd('ip link add link %s name vlan100 type vlan id 100' % (h3.intfNames()[0]))
+        h3.cmd('ip link set up vlan100')
+        h3.cmd('ip addr add 100.0.0.2/24 dev vlan100')
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+        payload2 = {'minutes': mw_extension}
+
+        # extend the maintenance window information
+        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
+        assert response.status_code == 200
+
+        # Waits to the time that the MW should be ended but instead will be running (extended)
+        time.sleep(mw_duration + 5)
+
+        # Verifies the flow behavior during the maintenance
+        s2 = self.net.net.get('s2')
+        flows_s2 = s2.dpctl('dump-flows')
+        assert 'dl_vlan=100' not in flows_s2
+        assert len(flows_s2.split('\r\n ')) == 1
+
+        # Checks connectivity during maintenance
+        h11, h3 = self.net.net.get('h11', 'h3')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
+        h3.cmd('ip link add link %s name vlan100 type vlan id 100' % (h3.intfNames()[0]))
+        h3.cmd('ip link set up vlan100')
+        h3.cmd('ip addr add 100.0.0.2/24 dev vlan100')
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+        # Waits for the MW to finish and check if the path returns to the initial configuration
+        time.sleep(mw_extension*60)
+
+        # Verifies the flows behavior after the maintenance
+        flows_s2 = s2.dpctl('dump-flows')
+        assert len(flows_s2.split('\r\n ')) == 3
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+        # Cleans up
+        h11.cmd('ip link del vlan100')
+        h3.cmd('ip link del vlan100')
+
+    @pytest.mark.xfail
+    def test_100_extend_no_running_mw_on_switch_should_fail(self):
+        self.restart_and_create_circuit()
+
+        # Sets up the maintenance window information
+        mw_start_delay = 30
+        mw_duration = 60
+        mw_extension = 30
+        start = datetime.now() + timedelta(seconds=mw_start_delay)
+        end = start + timedelta(seconds=mw_duration)
+
+        # Sets up the maintenance window data
+        payload = {
+            "description": "mw for test 105",
+            "start": start.strftime(TIME_FMT),
+            "end": end.strftime(TIME_FMT),
+            "items": [
+                "00:00:00:00:00:00:00:02"
+            ]
+        }
+
+        # Creates a new maintenance window
+        api_url = KYTOS_API + '/maintenance'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        data = response.json()
+
+        # Extracts the maintenance window id from the JSON structure
+        mw_id = data["mw_id"]
+
+        payload2 = {'seconds': mw_extension}
+
+        # extend the maintenance window information
+        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
+        assert response.status_code == 400
+
+    @pytest.mark.xfail
+    def test_105_extend_unknown_mw_on_switch_should_fail(self):
+        self.restart_and_create_circuit()
+
+        # Sets up the maintenance window extension information
+        mw_extension = 1
+        mw_id = "c16f5bbc4d004f018a76b22f677f8c2a"
+        payload2 = {'minutes': 1}
+
+        # extend the maintenance window information
+        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
+        assert response.status_code == 404
+
+    @pytest.mark.xfail
+    def test_110_extend_running_mw_on_switch_under_unknown_tag_should_fail(self):
+        self.restart_and_create_circuit()
+
+        # Sets up the maintenance window information
+        mw_start_delay = 30
+        mw_duration = 60
+        mw_extension = 1
+        start = datetime.now() + timedelta(seconds=mw_start_delay)
+        end = start + timedelta(seconds=mw_duration)
+
+        # Sets up the maintenance window data
+        payload = {
+            "description": "mw for test 105",
+            "start": start.strftime(TIME_FMT),
+            "end": end.strftime(TIME_FMT),
+            "items": [
+                "00:00:00:00:00:00:00:02"
+            ]
+        }
+
+        # Creates a new maintenance window
+        api_url = KYTOS_API + '/maintenance'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        data = response.json()
+
+        # Extracts the maintenance window id from the JSON structure
+        mw_id = data["mw_id"]
+
+        # Waits for the MW to start
+        time.sleep(mw_start_delay + 5)
+
+        payload2 = {'second': mw_extension}
+
+        # extend the maintenance window information
+        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
+        assert response.status_code == 400
