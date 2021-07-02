@@ -1057,3 +1057,42 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
+
+    @pytest.mark.xfail
+    def test_115_extend_ended_mw_on_switch_should_fail(self):
+        self.restart_and_create_circuit()
+
+        # Sets up the maintenance window information
+        mw_start_delay = 30
+        mw_duration = 30
+        mw_extension = 1
+        start = datetime.now() + timedelta(seconds=mw_start_delay)
+        end = start + timedelta(seconds=mw_duration)
+
+        # Sets up the maintenance window data
+        payload = {
+            "description": "mw for test 115",
+            "start": start.strftime(TIME_FMT),
+            "end": end.strftime(TIME_FMT),
+            "items": [
+                "00:00:00:00:00:00:00:02"
+            ]
+        }
+
+        # Creates a new maintenance window
+        api_url = KYTOS_API + '/maintenance'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        data = response.json()
+
+        # Extracts the maintenance window id from the JSON structure
+        mw_id = data["mw_id"]
+
+        # Waits for the MW to start
+        time.sleep(mw_start_delay + mw_duration + 5)
+
+        payload2 = {'minutes': mw_extension}
+
+        # extend the maintenance window information
+        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
+        assert response.status_code == 400
