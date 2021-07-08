@@ -1,8 +1,9 @@
 import json
-import pytest
-import requests
-from tests.helpers import NetworkTest
 import time
+
+import requests
+
+from tests.helpers import NetworkTest
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
@@ -115,8 +116,7 @@ class TestE2EFlowManager:
 
         time.sleep(10)
 
-        response = requests.get(api_url, data=json.dumps(payload),
-                                headers={'Content-type': 'application/json'})
+        response = requests.get(api_url)
         assert response.status_code == 200
         data = response.json()
         assert len(data[switch_id]["flows"]) == 2
@@ -486,3 +486,16 @@ class TestE2EFlowManager:
 
     def test_075_flow_table_0_restarting(self):
         self.flow_table_0(restart_kytos=True)
+
+    def test_080_retrieve_flows(self):
+        api_url = KYTOS_API + '/flow_manager/v2/flows'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 3
+        assert "00:00:00:00:00:00:00:01" in data.keys()
+        assert "00:00:00:00:00:00:00:02" in data.keys()
+        assert "00:00:00:00:00:00:00:03" in data.keys()
+        assert len(data["00:00:00:00:00:00:00:01"]["flows"]) == 1
+        assert len(data["00:00:00:00:00:00:00:02"]["flows"]) == 1
+        assert len(data["00:00:00:00:00:00:00:03"]["flows"]) == 1
