@@ -1,8 +1,10 @@
-import requests
-from tests.helpers import NetworkTest
-import time
 import json
 import re
+import time
+
+import requests
+
+from tests.helpers import NetworkTest
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
@@ -503,7 +505,8 @@ class TestE2EMefEline:
         # TODO
         assert True
 
-    def test_070_delete_evc_after_restart_kytos_and_no_switch_reconnected(self)
+    def test_070_delete_evc_after_restart_kytos_and_no_switch_reconnected(self):
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
         # restart the controller and change the port on purpose to avoid switches to connect
@@ -609,3 +612,4 @@ class TestE2EMefEline:
             flows_s2 = s2.dpctl('dump-flows')
             assert len(flows_s1.split('\r\n ')) == 1, "round=%d - should have only 1 flow but had: \n%s" % (x, flows_s1)
             assert len(flows_s2.split('\r\n ')) == 1, "round=%d - should have only 1 flow but had: \n%s" % (x, flows_s2)
+
