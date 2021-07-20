@@ -499,7 +499,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 060",
+            "description": "mw for test 055",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -545,7 +545,7 @@ class TestE2EMaintenance:
 
         # Sets up a maintenance window data
         payload = {
-            "description": "mw for test 065",
+            "description": "mw for test 060",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -607,7 +607,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 070",
+            "description": "mw for test 065",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -716,7 +716,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 075",
+            "description": "mw for test 070",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -755,7 +755,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 080",
+            "description": "mw for test 075",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -903,7 +903,7 @@ class TestE2EMaintenance:
         end_response = requests.patch(api_url)
         assert end_response.status_code == 404
 
-    def test_090_end_not_running_mw_on_switch_should_fail(self):
+    def test_095_end_not_running_mw_on_switch_should_fail(self):
         """Tests the maintenance window ending process on a not running MW
         Test:
             400 response calling
@@ -920,7 +920,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 100",
+            "description": "mw for test 95",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -957,7 +957,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 105",
+            "description": "mw for test 100",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -1040,7 +1040,7 @@ class TestE2EMaintenance:
         h11.cmd('ip link del vlan100')
         h3.cmd('ip link del vlan100')
 
-    def test_100_extend_no_running_mw_on_switch_should_fail(self):
+    def test_105_extend_no_running_mw_on_switch_should_fail(self):
         self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
@@ -1075,7 +1075,7 @@ class TestE2EMaintenance:
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    def test_105_extend_unknown_mw_on_switch_should_fail(self):
+    def test_110_extend_unknown_mw_on_switch_should_fail(self):
         self.restart_and_create_circuit()
 
         # Sets up the maintenance window extension information
@@ -1088,7 +1088,7 @@ class TestE2EMaintenance:
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 404
 
-    def test_110_extend_running_mw_on_switch_under_unknown_tag_should_fail(self):
+    def test_115_extend_running_mw_on_switch_under_unknown_tag_should_fail(self):
         self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
@@ -1100,7 +1100,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 105",
+            "description": "mw for test 115",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
@@ -1126,7 +1126,7 @@ class TestE2EMaintenance:
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    def test_115_extend_ended_mw_on_switch_should_fail(self):
+    def test_120_extend_ended_mw_on_switch_should_fail(self):
         self.restart_and_create_circuit()
 
         # Sets up the maintenance window information
@@ -1138,7 +1138,7 @@ class TestE2EMaintenance:
 
         # Sets up the maintenance window data
         payload = {
-            "description": "mw for test 115",
+            "description": "mw for test 120",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
             "items": [
