@@ -2,6 +2,7 @@ import json
 import time
 from datetime import datetime, timedelta
 
+import pytest
 import requests
 
 from tests.helpers import NetworkTest
@@ -942,7 +943,8 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
-    def test_095_extend_running_mw_on_switch(self):
+    @pytest.mark.xfail
+    def test_100_extend_running_mw_on_switch(self):
 
         self.restart_and_create_circuit()
 
@@ -1003,7 +1005,7 @@ class TestE2EMaintenance:
         # extend the maintenance window information
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 201
 
         # Waits to the time that the MW should be ended but instead will be running (extended)
         time.sleep(mw_duration + 5)
