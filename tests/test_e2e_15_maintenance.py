@@ -876,7 +876,7 @@ class TestE2EMaintenance:
         assert end_response.status_code == 201
 
         # Waits just a couple of seconds to give kytos enough time to restore the flows
-        time.sleep(10)
+        time.sleep(3)
 
         # Verifies the flow behavior and connectivity after ending the maintenance
         flows_s2 = s2.dpctl('dump-flows')
