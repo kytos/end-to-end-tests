@@ -875,7 +875,7 @@ class TestE2EMaintenance:
         end_response = requests.patch(api_url)
         assert end_response.status_code == 201
 
-        # Waits to the time that the MW should be ended but instead will be running (extended)
+        # Waits just a couple of seconds to give kytos enough time to restore the flows
         time.sleep(10)
 
         # Verifies the flow behavior and connectivity after ending the maintenance
