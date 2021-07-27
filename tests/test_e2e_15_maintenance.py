@@ -310,7 +310,7 @@ class TestE2EMaintenance:
         # Updates the maintenance window information
         mw_api_url = KYTOS_API + '/maintenance/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
-        assert request.status_code == 201
+        assert request.status_code == 200
 
         # Gets the maintenance window schema
         api_url = KYTOS_API + '/maintenance/' + mw_id
@@ -646,7 +646,7 @@ class TestE2EMaintenance:
         # Updates the maintenance window information
         mw_api_url = KYTOS_API + '/maintenance/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
-        assert request.status_code == 201
+        assert request.status_code == 200
 
         # Gets the maintenance window schema
         api_url = KYTOS_API + '/maintenance/' + mw_id
@@ -873,7 +873,7 @@ class TestE2EMaintenance:
         # Ends the maintenance window information
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/end'
         end_response = requests.patch(api_url)
-        assert end_response.status_code == 201
+        assert end_response.status_code == 200
 
         # Waits to the time that the MW should be ended but instead will be running (extended)
         time.sleep(10)
@@ -1005,7 +1005,7 @@ class TestE2EMaintenance:
         # extend the maintenance window information
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 200
 
         # Waits to the time that the MW should be ended but instead will be running (extended)
         time.sleep(mw_duration + 5)
