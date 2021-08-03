@@ -1004,8 +1004,8 @@ class TestE2EMefEline:
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data['primary_path'][0]['endpoint_a']['id'] == payload2['primary_path'][0]['endpoint_a']['id']
-        assert data['primary_path'][0]['endpoint_b']['id'] == payload2['primary_path'][0]['endpoint_b']['id']
+        assert data['primary_path'][0]['endpoint_a']['id'] == payload1['primary_path'][0]['endpoint_a']['id']
+        assert data['primary_path'][0]['endpoint_b']['id'] == payload1['primary_path'][0]['endpoint_b']['id']
         assert data['active'] is True
 
     def test_140_patch_backup_path(self):
