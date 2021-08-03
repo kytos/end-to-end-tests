@@ -85,8 +85,8 @@ class TestE2EMefEline:
 
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
-        data = response.json()
-        assert data['primary_path'] == primary_path
+        data2 = response.json()
+        assert data == data2
 
     def test_010_patch_an_empty_uni_a(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -1075,7 +1075,7 @@ class TestE2EMefEline:
 
     """It is returning Response 201, should be 400"""
     @pytest.mark.xfail
-    def test_215_on_none_dynamic_backup_path_and_empty_primary_path(self):
+    def test_215_post_on_none_dynamic_backup_path_and_empty_primary_path(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
