@@ -1046,15 +1046,15 @@ class TestE2EMefEline:
 
         time.sleep(10)
 
-        payload = {
+        payload2 = {
             "backup_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:01:4"}}
             ]
         }
 
         # It sets a new circuit's backup_path
-        requests.patch(api_url + evc1, data=json.dumps(payload),
+        requests.patch(api_url + evc1, data=json.dumps(payload2),
                        headers={'Content-type': 'application/json'})
 
         time.sleep(10)
