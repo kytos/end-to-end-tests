@@ -815,6 +815,7 @@ class TestE2EMefEline:
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
+
         time.sleep(10)
 
         # It verifies EVC's data
@@ -830,6 +831,11 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        creation_time = data['creation_time']
+
         start = datetime.now()
         payload = {
             "creation_time": start.strftime(TIME_FMT)
@@ -839,6 +845,12 @@ class TestE2EMefEline:
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
+
+        time.sleep(10)
+
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['creation_time'] == creation_time
 
     def test_155_patch_evc_active(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
