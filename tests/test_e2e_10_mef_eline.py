@@ -109,6 +109,7 @@ class TestE2EMefEline:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
+
         # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         assert len(flows_s1.split('\r\n ')) == 3
 
@@ -400,7 +401,6 @@ class TestE2EMefEline:
 
         # It disables the circuit
         payload = {"enable": False}
-        # api_url += evc1
         response = requests.patch(api_url + evc1, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         time.sleep(10)
@@ -506,7 +506,7 @@ class TestE2EMefEline:
         h2.cmd('ip link del vlan125')
         self.net.restart_kytos_clean()
 
-    def test_060_on_primary_path_fail_should_migrate_to_backup(self):
+    def test_050_on_primary_path_fail_should_migrate_to_backup(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -585,7 +585,7 @@ class TestE2EMefEline:
     """It is returning Response 500, should be 200
         on delete circuit action"""
     @pytest.mark.xfail
-    def test_065_delete_evc_after_restart_kytos_and_no_switch_reconnected(self):
+    def test_055_delete_evc_after_restart_kytos_and_no_switch_reconnected(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
@@ -800,7 +800,7 @@ class TestE2EMefEline:
         data = response.json()
         assert data['uni_a']['interface_id'] == "00:00:00:00:00:00:00:01:2"
 
-    # Error (Patch returns: uni_a can't be be updated.)
+    # Error (Patch returns: uni_z can't be be updated.)
     @pytest.mark.xfail
     def test_100_patch_evc_new_unis(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -822,7 +822,7 @@ class TestE2EMefEline:
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data['uni_a']['interface_id'] == "00:00:00:00:00:00:00:02:2"
+        assert data['uni_z']['interface_id'] == "00:00:00:00:00:00:00:02:2"
 
     def test_105_patch_start_date(self):
 
@@ -1097,11 +1097,6 @@ class TestE2EMefEline:
 
         time.sleep(10)
 
-        # # It verifies EVC's data
-        # response = requests.get(api_url + evc1)
-        # data = response.json()
-        # assert data['backup_links'] == []
-
         payload = {
             "backup_links": [
                 {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
@@ -1114,7 +1109,6 @@ class TestE2EMefEline:
         # It sets a new circuit's backup_links
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        # print(response)
         assert response.status_code == 200
 
         time.sleep(10)
