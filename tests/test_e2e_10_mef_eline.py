@@ -1190,7 +1190,7 @@ class TestE2EMefEline:
         assert data['primary_links'][0]['endpoint_a'] == payload['primary_links'][0]['endpoint_a']
         assert data['primary_links'][0]['endpoint_b'] == payload['primary_links'][0]['endpoint_b']
 
-    def test_155_patch_on_dynamic_backup_path_and_primary_path(self):
+    def test_155_current_path_value_given_dynamic_backup_path_and_primary_path_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -1241,7 +1241,7 @@ class TestE2EMefEline:
 
         assert paths == current_path
 
-    def test_160_patch_on_dynamic_backup_path_and_empty_primary_and_backup_path(self):
+    def test_160_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -1302,7 +1302,7 @@ class TestE2EMefEline:
 
         assert paths == current_path
 
-    def test_165_on_false_dynamic_backup_path_and_primary_pat(self):
+    def test_165_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -1341,4 +1341,6 @@ class TestE2EMefEline:
         # Command to up/down links to test if back-up path is taken
         self.net.net.configLinkStatus('s1', 's2', 'up')
 
+        assert data['active'] is False
+        assert data['enabled'] is True
         assert data['current_path'] == []
