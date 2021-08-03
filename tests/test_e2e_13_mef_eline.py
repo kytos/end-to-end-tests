@@ -1007,15 +1007,13 @@ class TestE2EMefEline:
                                  headers={'Content-type': 'application/json'})
         assert response.status_code == 409
 
-    """It is returning Response 404, should be 400"""
-    @pytest.mark.xfail
     def test_195_get_unknown_circuit(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
         # It verifies EVC's data
         response = requests.get(api_url + evc1 + "A")
-        assert response.status_code == 400
+        assert response.status_code == 404
 
     """It is returning Response 500, should be 400"""
     @pytest.mark.xfail
