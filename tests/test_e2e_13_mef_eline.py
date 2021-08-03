@@ -109,7 +109,7 @@ class TestE2EMefEline:
 
         payload = {
             "uni_a": {
-                "interface_id": "00:00:00:00:00:00:00:04:1"
+                "interface_id": "00:00:00:00:00:00:00:99:1"
             }
         }
 
