@@ -922,12 +922,14 @@ class TestE2EMefEline:
         assert 'priority=100' in flows_s1
         assert 'priority=100' in flows_s2
 
+    """It does not contain the queue information in the flow description"""
+    @pytest.mark.xfail
     def test_125_patch_queue_id(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
-        queue_id = 100
+        queue_id = 3
         payload = {
             "queue_id": queue_id
         }
@@ -942,6 +944,13 @@ class TestE2EMefEline:
         response = requests.get(api_url + evc1)
         data = response.json()
         assert data['queue_id'] == queue_id
+
+        s1, s2 = self.net.net.get('s1', 's2')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+
+        assert 'set_queue:3' in flows_s1
+        assert 'set_queue:3' in flows_s2
 
     def test_130_patch_dynamic_backup_path(self):
 
