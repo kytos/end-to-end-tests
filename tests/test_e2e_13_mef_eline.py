@@ -496,8 +496,8 @@ class TestE2EMefEline:
                 "interface_id": "00:00:00:00:00:00:00:02:1"
             },
             "primary_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}
             ]
         }
         response = requests.post(api_url, data=json.dumps(payload1),
@@ -507,8 +507,8 @@ class TestE2EMefEline:
 
         payload2 = {
             "primary_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:1"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:1"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}
             ]
         }
 
@@ -623,8 +623,8 @@ class TestE2EMefEline:
                 "interface_id": "00:00:00:00:00:00:00:02:1"
             },
             "backup_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}
             ]
         }
         response = requests.post(api_url, data=json.dumps(payload1),
@@ -634,8 +634,8 @@ class TestE2EMefEline:
 
         payload2 = {
             "backup_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:1"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:1"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}
             ]
         }
 
@@ -709,8 +709,8 @@ class TestE2EMefEline:
                 "interface_id": "00:00:00:00:00:00:00:02:1"
             },
             "primary_links": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}
             ]
         }
         response = requests.post(api_url, data=json.dumps(payload1),
@@ -720,8 +720,8 @@ class TestE2EMefEline:
 
         payload2 = {
             "primary_links": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:1"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:1"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}
             ]
         }
 
@@ -795,8 +795,8 @@ class TestE2EMefEline:
                 "interface_id": "00:00:00:00:00:00:00:02:1"
             },
             "backup_links": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}
             ]
         }
         response = requests.post(api_url, data=json.dumps(payload1),
@@ -806,8 +806,8 @@ class TestE2EMefEline:
 
         payload2 = {
             "backup_links": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:1"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:1"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}
             ]
         }
 
