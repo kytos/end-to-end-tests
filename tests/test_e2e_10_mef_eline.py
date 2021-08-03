@@ -916,6 +916,12 @@ class TestE2EMefEline:
         data = response.json()
         assert data['priority'] == priority
 
+        s1, s2 = self.net.net.get('s1', 's2')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        assert 'priority=100' in flows_s1
+        assert 'priority=100' in flows_s2
+
     def test_125_patch_queue_id(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
