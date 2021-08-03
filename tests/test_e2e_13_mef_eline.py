@@ -939,9 +939,23 @@ class TestE2EMefEline:
         time.sleep(10)
 
         payload2 = {
-            "current_path": [{
-                "enabled": False
-            }]
+            "current_path": [
+                {"enabled": True,
+                 "endpoint_a":
+                     {"lldp": True, "name": "s1-eth3", "nni": True, "type": "interface", "enabled": True,
+                      "switch": "00:00:00:00:00:00:00:01", "mac": "86:d5:a8:af:83:a",
+                      "link": "78282c4d5b579265f04ebadc4405ca1b49628eb1d684bb45e5d0607fa8b713d0", "uni": False,
+                      "active": True, "port_number": 3, "speed": 1250000000.0, "id": "00:00:00:00:00:00:00:01:3",
+                      "metadata": {}},
+                 "endpoint_b":
+                     {"lldp": True, "name": "s2-eth2", "nni": True, "type": "interface", "enabled": True,
+                      "switch": "00:00:00:00:00:00:00:02", "mac": "c6:30:da:40:aa:fa",
+                      "link": "78282c4d5b579265f04ebadc4405ca1b49628eb1d684bb45e5d0607fa8b713d0", "uni": False,
+                      "active": True, "port_number": 2, "speed": 1250000000.0, "id": "00:00:00:00:00:00:00:02:2",
+                      "metadata": {}},
+                 "active": False,
+                 "id": "78282c4d5b579265f04ebadc4405ca1b49628eb1d684bb45e5d0607fa8b713d0",
+                 "metadata": {"s_vlan": {"value": 43, "tag_type": 1}}}]
         }
 
         # It sets a new circuit's creation_time
@@ -954,7 +968,7 @@ class TestE2EMefEline:
         # It verifies EVC's current_path
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data["current_path"]['enabled'] is True
+        assert data["current_path"][0]["active"] is True
 
     def test_170_post_invalid_json(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
