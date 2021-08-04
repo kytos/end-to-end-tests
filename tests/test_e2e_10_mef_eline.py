@@ -985,10 +985,10 @@ class TestE2EMefEline:
                 "interface_id": "00:00:00:00:00:00:00:01:1",
             },
             "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:02:1"
+                "interface_id": "00:00:00:00:00:00:00:03:1"
             },
             "primary_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
                  "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
             ]
         }
@@ -1000,7 +1000,9 @@ class TestE2EMefEline:
         payload2 = {
             "primary_path": [
                 {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
             ]
         }
         # It sets a new circuit's primary_path
@@ -1013,8 +1015,13 @@ class TestE2EMefEline:
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data['primary_path'][0]['endpoint_a']['id'] == payload1['primary_path'][0]['endpoint_a']['id']
-        assert data['primary_path'][0]['endpoint_b']['id'] == payload1['primary_path'][0]['endpoint_b']['id']
+
+        paths = []
+        for _path in data['primary_path']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        assert paths == payload2["primary_path"]
         assert data['active'] is True
 
     def test_140_patch_backup_path(self):
