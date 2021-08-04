@@ -1071,8 +1071,8 @@ class TestE2EMefEline:
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data['backup_path'][0]['endpoint_a']['id'] == payload['backup_path'][0]['endpoint_a']['id']
-        assert data['backup_path'][0]['endpoint_b']['id'] == payload['backup_path'][0]['endpoint_b']['id']
+        assert data['backup_path'][0]['endpoint_a']['id'] == payload2['backup_path'][0]['endpoint_a']['id']
+        assert data['backup_path'][0]['endpoint_b']['id'] == payload2['backup_path'][0]['endpoint_b']['id']
 
         requests.delete(api_url + evc1)
 
