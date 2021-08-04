@@ -1128,7 +1128,7 @@ class TestE2EMefEline:
 
         time.sleep(10)
 
-        payload = {
+        payload2 = {
             "backup_links": [
                 {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
                  "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
@@ -1138,7 +1138,7 @@ class TestE2EMefEline:
         }
 
         # It sets a new circuit's backup_links
-        response = requests.patch(api_url + evc1, data=json.dumps(payload),
+        response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 200
 
@@ -1147,8 +1147,14 @@ class TestE2EMefEline:
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data['backup_links'][0]['endpoint_a'] == payload['backup_links'][0]['endpoint_a']
-        assert data['backup_links'][0]['endpoint_b'] == payload['backup_links'][0]['endpoint_b']
+
+        paths = []
+        for _path in data['backup_links']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        assert paths == payload2["backup_links"]
+        assert data['active'] is True
 
     """It is returning Response 500, should be 200"""
     @pytest.mark.xfail
