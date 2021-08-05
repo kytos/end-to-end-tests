@@ -558,6 +558,11 @@ class TestE2EMefEline:
         # Wait just a few seconds to give time to the controller receive and process the linkDown event
         time.sleep(10)
 
+        # # Check on the virtual switches directly for flows
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
+
         # Nodes should be able to ping each other
         h11, h3 = self.net.net.get('h11', 'h3')
         h11.cmd('ip link add link %s name vlan101 type vlan id 101' % (h11.intfNames()[0]))
