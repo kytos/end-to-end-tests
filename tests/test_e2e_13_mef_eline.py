@@ -620,8 +620,13 @@ class TestE2EMefEline:
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data['backup_path'][0]['endpoint_a']['id'] == payload1['backup_path'][0]['endpoint_a']['id']
-        assert data['backup_path'][0]['endpoint_b']['id'] == payload1['backup_path'][0]['endpoint_b']['id']
+
+        paths = []
+        for _path in data['backup_path']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        assert paths == payload1["backup_path"]
         assert data['active'] is True
 
     """It is returning Response [200], should be 400"""
@@ -669,8 +674,13 @@ class TestE2EMefEline:
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data['backup_path'][0]['endpoint_a']['id'] == payload1['backup_path'][0]['endpoint_a']['id']
-        assert data['backup_path'][0]['endpoint_b']['id'] == payload1['backup_path'][0]['endpoint_b']['id']
+
+        paths = []
+        for _path in data['backup_path']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        assert paths == payload1["backup_path"]
         assert data['active'] is True
 
     """It is returning Response [500], should be 400"""
