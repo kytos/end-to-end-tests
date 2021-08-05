@@ -573,17 +573,12 @@ class TestE2EMefEline:
         h11.cmd('ip link del vlan101')
         h3.cmd('ip link del vlan101')
 
-        # # Check on the virtual switches directly for flows
-        flows_s1 = s1.dpctl('dump-flows')
-        flows_s2 = s2.dpctl('dump-flows')
-        flows_s3 = s3.dpctl('dump-flows')
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'up')
 
         assert len(flows_s1.split('\r\n ')) == 3
         assert len(flows_s2.split('\r\n ')) == 1
         assert len(flows_s3.split('\r\n ')) == 3
-
-        # Command to up/down links to test if back-up path is taken
-        self.net.net.configLinkStatus('s1', 's2', 'up')
 
     """It is returning Response 500, should be 200
         on delete circuit action"""
