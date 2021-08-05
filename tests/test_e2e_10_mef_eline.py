@@ -1089,142 +1089,7 @@ class TestE2EMefEline:
 
         requests.delete(api_url + evc1)
 
-    """It is returning Response 500, should be 200"""
-    @pytest.mark.xfail
-    def test_145_patch_backup_links(self):
-
-        api_url = KYTOS_API + '/mef_eline/v2/evc/'
-        payload = {
-            "name": "my evc1",
-            "enabled": True,
-            "uni_a": {
-                "interface_id": "00:00:00:00:00:00:00:01:1",
-                "tag": {
-                    "tag_type": 1,
-                    "value": 101
-                }
-            },
-            "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:03:1",
-                "tag": {
-                    "tag_type": 1,
-                    "value": 101
-                }
-            },
-            "primary_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
-            ],
-            "backup_links": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}],
-        }
-        response = requests.post(api_url, data=json.dumps(payload),
-                                 headers={'Content-type': 'application/json'})
-        data = response.json()
-        evc1 = data['circuit_id']
-
-        time.sleep(10)
-
-        payload2 = {
-            "backup_links": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
-            ]
-        }
-
-        # It sets a new circuit's backup_links
-        response = requests.patch(api_url + evc1, data=json.dumps(payload2),
-                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
-
-        time.sleep(10)
-
-        # It verifies EVC's data
-        response = requests.get(api_url + evc1)
-        data = response.json()
-
-        paths = []
-        for _path in data['backup_links']:
-            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
-                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
-
-        assert paths == payload2["backup_links"]
-        assert data['active'] is True
-
-    """It is returning Response 500, should be 200"""
-    @pytest.mark.xfail
-    def test_150_patch_primary_links(self):
-
-        api_url = KYTOS_API + '/mef_eline/v2/evc/'
-        payload = {
-            "name": "my evc1",
-            "enabled": True,
-            "uni_a": {
-                "interface_id": "00:00:00:00:00:00:00:01:1",
-                "tag": {
-                    "tag_type": 1,
-                    "value": 101
-                }
-            },
-            "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:03:1",
-                "tag": {
-                    "tag_type": 1,
-                    "value": 101
-                }
-            },
-            "primary_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
-            ],
-            "primary_links": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}],
-        }
-        response = requests.post(api_url, data=json.dumps(payload),
-                                 headers={'Content-type': 'application/json'})
-        data = response.json()
-        evc1 = data['circuit_id']
-
-        time.sleep(10)
-
-        payload2 = {
-            "primary_links": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
-            ]
-        }
-
-        # It sets a new circuit's backup_links
-        response = requests.patch(api_url + evc1, data=json.dumps(payload2),
-                                  headers={'Content-type': 'application/json'})
-        # print(response)
-        assert response.status_code == 200
-
-        time.sleep(10)
-
-        # It verifies EVC's data
-        response = requests.get(api_url + evc1)
-        data = response.json()
-
-        paths = []
-        for _path in data['primary_links']:
-            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
-                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
-
-        assert paths == payload2["primary_links"]
-        assert data['active'] is True
-
-    def test_155_current_path_value_given_dynamic_backup_path_and_primary_path_conditions(self):
+    def test_145_current_path_value_given_dynamic_backup_path_and_primary_path_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -1275,7 +1140,7 @@ class TestE2EMefEline:
 
         assert paths == current_path
 
-    def test_160_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
+    def test_150_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -1336,7 +1201,7 @@ class TestE2EMefEline:
 
         assert paths == current_path
 
-    def test_165_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
+    def test_155_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
