@@ -7,6 +7,7 @@ from tests.helpers import NetworkTest
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
+TIME_FMT = "%Y-%m-%dT%H:%M:%S+0000"
 
 class TestE2EMefEline:
     net = None
@@ -279,6 +280,80 @@ class TestE2EMefEline:
         flows_s1 = s1.dpctl('dump-flows')
         # Each switch had 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         assert len(flows_s1.split('\r\n ')) == 3
+
+    """Error, start_date should be patched only if the Evc
+    has been created under the scheduler action
+    It returns 200"""
+    @pytest.mark.xfail
+    def test_patch_start_date_in_no_scheduled_cirtuit(self, circuit_id):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        start_delay = 60
+        start = datetime.now() + timedelta(minutes=start_delay)
+
+        # It gets EVC's data
+        response = requests.get(api_url + circuit_id)
+        data = response.json()
+        start_date = data['start_date']
+
+        payload = {
+            "start_date": start.strftime(TIME_FMT)
+        }
+
+        # It tries to set a new circuit's start_date
+        response = requests.patch(api_url + circuit_id, json=payload)
+        assert response.status_code == 400
+
+        time.sleep(10)
+
+        # It gets EVC's data
+        response = requests.get(api_url + circuit_id)
+        data = response.json()
+        assert start_date == data['start_date']
+
+    """Error, start_date remains with the same value,
+    despite the Patch action"""
+    @pytest.mark.xfail
+    def test_patch_start_date_in_scheduled_circuit(self, disabled_circuit_id):
+
+        # Schedule by date to next minute
+        ts = datetime.now() + timedelta(seconds=60)
+        schedule_time = ts.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+        payload = {
+            "circuit_id": disabled_circuit_id,
+            "schedule": {
+                "date": schedule_time
+            }
+        }
+
+        # create circuit schedule
+        api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/'
+        requests.post(api_url, json=payload)
+
+        # It verifies circuit schedule data
+        response = requests.get(api_url)
+        data = response.json()
+        schedule_id = data[0]['schedule_id']
+
+        start_delay = 180
+        start = datetime.now() + timedelta(minutes=start_delay)
+
+        payload2 = {
+            "start_date": start.strftime(TIME_FMT)
+        }
+
+        # It sets a new circuit's start_date
+        response = requests.patch(api_url + schedule_id, json=payload2)
+        assert response.status_code == 200
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.get(api_url + disabled_circuit_id)
+        data = response.json()
+        assert data['start_date'] == start.strftime(TIME_FMT)
 
     def test_delete_circuit_id(self, circuit_id):
         """ Test circuit removal action. """
