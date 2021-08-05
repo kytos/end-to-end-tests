@@ -300,7 +300,7 @@ class TestE2EMefEline:
             },
             "primary_path": [
                 {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}
             ],
             "dynamic_backup_path": True,
             "active": True,
