@@ -856,7 +856,7 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
-        end_delay = 60
+        end_delay = 1
         end_date = datetime.now() + timedelta(minutes=end_delay)
 
         payload = {
@@ -872,6 +872,15 @@ class TestE2EMefEline:
         response = requests.get(api_url + evc1)
         data = response.json()
         assert data['end_date'] == end_date.strftime(TIME_FMT)
+
+        # waiting to reach the new end timing
+        time.sleep(end_delay*60+5)
+
+        # Verify if the circuit is active
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + evc1
+        response = requests.get(api_url)
+        data = response.json()
+        assert data["active"] is False
 
     def test_115_patch_bandwidth(self):
 
