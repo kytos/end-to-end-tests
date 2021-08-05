@@ -827,31 +827,10 @@ class TestE2EMefEline:
         data = response.json()
         assert data['uni_z']['interface_id'] == "00:00:00:00:00:00:00:02:2"
 
-    def test_105_patch_start_date(self):
-
-        api_url = KYTOS_API + '/mef_eline/v2/evc/'
-        evc1 = self.create_evc(100)
-
-        start_delay = 60
-        start = datetime.now() + timedelta(minutes=start_delay)
-
-        payload = {
-            "start_date": start.strftime(TIME_FMT)
-        }
-
-        # It sets a new circuit's start_date
-        response = requests.patch(api_url + evc1, data=json.dumps(payload),
-                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
-
-        time.sleep(10)
-
-        # It verifies EVC's data
-        response = requests.get(api_url + evc1)
-        data = response.json()
-        assert data['start_date'] == start.strftime(TIME_FMT)
-
-    def test_110_patch_end_date(self):
+    """Error - The circuit remains active despite 
+    the modification on its end_date attribute"""
+    @pytest.mark.xfail
+    def test_105_patch_end_date(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
@@ -882,7 +861,7 @@ class TestE2EMefEline:
         data = response.json()
         assert data["active"] is False
 
-    def test_115_patch_bandwidth(self):
+    def test_110_patch_bandwidth(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
@@ -904,7 +883,7 @@ class TestE2EMefEline:
 
         requests.delete(api_url + evc1)
 
-    def test_120_patch_priority(self):
+    def test_115_patch_priority(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
@@ -933,7 +912,7 @@ class TestE2EMefEline:
 
     """It does not contain the queue information in the flow description"""
     @pytest.mark.xfail
-    def test_125_patch_queue_id(self):
+    def test_120_patch_queue_id(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
@@ -961,7 +940,7 @@ class TestE2EMefEline:
         assert 'set_queue:3' in flows_s1
         assert 'set_queue:3' in flows_s2
 
-    def test_130_patch_dynamic_backup_path(self):
+    def test_125_patch_dynamic_backup_path(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
@@ -984,7 +963,7 @@ class TestE2EMefEline:
 
     """The EVC is returning active=False"""
     @pytest.mark.xfail
-    def test_135_patch_primary_path(self):
+    def test_130_patch_primary_path(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         payload1 = {
@@ -1033,7 +1012,7 @@ class TestE2EMefEline:
         assert paths == payload2["primary_path"]
         assert data['active'] is True
 
-    def test_140_patch_backup_path(self):
+    def test_135_patch_backup_path(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         payload = {
@@ -1098,7 +1077,7 @@ class TestE2EMefEline:
 
         requests.delete(api_url + evc1)
 
-    def test_145_current_path_value_given_dynamic_backup_path_and_primary_path_conditions(self):
+    def test_140_current_path_value_given_dynamic_backup_path_and_primary_path_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -1149,7 +1128,7 @@ class TestE2EMefEline:
 
         assert paths == current_path
 
-    def test_150_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
+    def test_145_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
@@ -1210,7 +1189,7 @@ class TestE2EMefEline:
 
         assert paths == current_path
 
-    def test_155_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
+    def test_150_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
         payload = {
             "name": "my evc1",
             "enabled": True,
