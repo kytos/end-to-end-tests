@@ -572,7 +572,6 @@ class TestE2EMefEline:
         h3.cmd('ip link set up vlan101')
         h3.cmd('ip addr add 101.0.0.3/24 dev vlan101')
         result = h11.cmd('ping -c1 101.0.0.3')
-        assert ', 0% packet loss,' in result
 
         # Clean up
         h11.cmd('ip link del vlan101')
@@ -581,6 +580,7 @@ class TestE2EMefEline:
         # Command to up/down links to test if back-up path is taken
         self.net.net.configLinkStatus('s1', 's2', 'up')
 
+        assert ', 0% packet loss,' in result
         assert len(flows_s1.split('\r\n ')) == 3
         assert len(flows_s2.split('\r\n ')) == 1
         assert len(flows_s3.split('\r\n ')) == 3
