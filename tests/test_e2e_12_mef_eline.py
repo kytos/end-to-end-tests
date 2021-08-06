@@ -1,7 +1,9 @@
+import time
 from datetime import datetime, timedelta
+
 import pytest
 import requests
-import time
+
 from tests.helpers import NetworkTest
 
 CONTROLLER = '127.0.0.1'
@@ -285,7 +287,7 @@ class TestE2EMefEline:
     has been created under the scheduler action
     It returns 200"""
     @pytest.mark.xfail
-    def test_patch_start_date_in_no_scheduled_cirtuit(self, circuit_id):
+    def test_patch_start_date_in_no_scheduled_circuit(self, circuit_id):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         start_delay = 60
