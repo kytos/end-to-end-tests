@@ -1015,7 +1015,6 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == 4
         assert 'actions=drop' in flows_s1
 
-    @pytest.mark.xfail
     def test_065_install_flow(self):
         """
         Tests the performance and race condition
