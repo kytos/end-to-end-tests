@@ -1,8 +1,10 @@
 import json
+import time
+
 import pytest
 import requests
+
 from tests.helpers import NetworkTest
-import time
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
@@ -306,7 +308,6 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
-        # print(flows_s1)
         assert len(flows_s1.split('\r\n ')) == 5
 
         assert 'actions=output:"s1-eth2"' in flows_s1
