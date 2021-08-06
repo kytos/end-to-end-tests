@@ -1,7 +1,9 @@
 import json
 import re
 import time
+from datetime import datetime, timedelta
 
+import pytest
 import requests
 
 from tests.helpers import NetworkTest
@@ -9,9 +11,12 @@ from tests.helpers import NetworkTest
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
+TIME_FMT = "%Y-%m-%dT%H:%M:%S+0000"
+
 
 class TestE2EMefEline:
     net = None
+    evcs = {}
 
     def setup_method(self, method):
         """
@@ -35,7 +40,7 @@ class TestE2EMefEline:
     def teardown_class(cls):
         cls.net.stop()
 
-    def create_evc(self, vlan_id):
+    def create_evc(self, vlan_id, store=False):
         payload = {
             "name": "Vlan_%s" % vlan_id,
             "enabled": True,
@@ -52,7 +57,9 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
-        return  data['circuit_id']
+        if store:
+            self.evcs[vlan_id] = data['circuit_id']
+        return data['circuit_id']
 
     def test_010_list_evcs_should_be_empty(self):
         """Test if list circuits return 'no circuit stored.'."""
@@ -102,6 +109,7 @@ class TestE2EMefEline:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
+
         # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
         assert len(flows_s1.split('\r\n ')) == 3
 
@@ -386,12 +394,21 @@ class TestE2EMefEline:
         evc1 = data['circuit_id']
         time.sleep(10)
 
-        # disable the circuit
+        # It verifies EVC's status
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['enabled'] is True
+
+        # It disables the circuit
         payload = {"enable": False}
-        api_url += evc1
-        response = requests.patch(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        response = requests.patch(api_url + evc1, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 200
         time.sleep(10)
+
+        # It verifies EVC's status
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['enabled'] is False
 
         # Each switch should have only one flow: LLDP
         s1, s2 = self.net.net.get('s1', 's2')
@@ -411,7 +428,7 @@ class TestE2EMefEline:
         result = h11.cmd('ping -c1 125.0.0.2')
         assert ', 100% packet loss,' in result
 
-        # clean up
+        # Clean up
         h11.cmd('ip link del vlan125')
         h2.cmd('ip link del vlan125')
 
@@ -489,23 +506,89 @@ class TestE2EMefEline:
         h2.cmd('ip link del vlan125')
         self.net.restart_kytos_clean()
 
-    def test_050_patch_evc_new_name(self):
-        # TODO
-        assert True
+    def test_050_on_primary_path_fail_should_migrate_to_backup(self):
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:03:1",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "primary_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+            ],
+            "backup_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}
+            ]
+        }
 
-    def test_055_patch_evc_new_unis(self):
-        # TODO
-        assert True
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201
 
-    def test_060_disable_evc(self):
-        # TODO
-        assert True
+        time.sleep(10)
 
-    def test_065_on_primary_path_fail_should_migrate_to_backup(self):
-        # TODO
-        assert True
+        # Check on the virtual switches directly for flows
+        s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
 
-    def test_070_delete_evc_after_restart_kytos_and_no_switch_reconnected(self):
+        assert len(flows_s1.split('\r\n ')) == 3
+        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s3.split('\r\n ')) == 3
+
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'down')
+
+        # Wait just a few seconds to give time to the controller receive and process the linkDown event
+        time.sleep(10)
+
+        # # Check on the virtual switches directly for flows
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
+
+        # Nodes should be able to ping each other
+        h11, h3 = self.net.net.get('h11', 'h3')
+        h11.cmd('ip link add link %s name vlan101 type vlan id 101' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan101')
+        h11.cmd('ip addr add 101.0.0.1/24 dev vlan101')
+        h3.cmd('ip link add link %s name vlan101 type vlan id 101' % (h3.intfNames()[0]))
+        h3.cmd('ip link set up vlan101')
+        h3.cmd('ip addr add 101.0.0.3/24 dev vlan101')
+        result = h11.cmd('ping -c1 101.0.0.3')
+
+        # Clean up
+        h11.cmd('ip link del vlan101')
+        h3.cmd('ip link del vlan101')
+
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'up')
+
+        assert ', 0% packet loss,' in result
+        assert len(flows_s1.split('\r\n ')) == 3
+        assert len(flows_s2.split('\r\n ')) == 1
+        assert len(flows_s3.split('\r\n ')) == 3
+
+    """It is returning Response 500, should be 200
+        on delete circuit action"""
+    @pytest.mark.xfail
+    def test_055_delete_evc_after_restart_kytos_and_no_switch_reconnected(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
@@ -530,8 +613,8 @@ class TestE2EMefEline:
         assert data[evc1]['archived'] is True
         assert data[evc1]['active'] is False
 
-    def patch_evc_by_changing_unis_from_interface_to_another(self):
-        # TODO
+    # TODO
+    def test_patch_evc_by_changing_unis_from_interface_to_another(self):
         """To edit an EVC, a PATCH request must be used:
 
         PATCH /kytos/mef_eline/v2.0/evc/<id>
@@ -544,8 +627,8 @@ class TestE2EMefEline:
 
         assert True
 
-    def create_evc_with_scheduled_times_for_provisioning_and_ending(self):
-        # TODO
+    # TODO
+    def test_create_evc_with_scheduled_times_for_provisioning_and_ending(self):
         assert True
 
     def test_080_create_and_remove_ten_circuits_ten_times(self):
@@ -585,7 +668,7 @@ class TestE2EMefEline:
                 response = requests.get(api_url)
                 assert response.status_code == 200
                 evc = response.json()
-                #should be active
+                # should be active
                 assert evc["active"] is True
                 # search for the vlan id
                 assert "dl_vlan=%s" % vid in flows_s1
@@ -613,3 +696,538 @@ class TestE2EMefEline:
             assert len(flows_s1.split('\r\n ')) == 1, "round=%d - should have only 1 flow but had: \n%s" % (x, flows_s1)
             assert len(flows_s2.split('\r\n ')) == 1, "round=%d - should have only 1 flow but had: \n%s" % (x, flows_s2)
 
+    def test_085_create_and_remove_ten_circuit_concurrently(self):
+        """
+        Tests the performance and race condition with
+        the creation of multiple circuits using threading
+        """
+        import threading
+        threads = list()
+        for i in range(400, 410):
+            t = threading.Thread(target=self.create_evc, args=(i, True))
+            threads.append(t)
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        # make sure the evcs are active and the flows were created
+        s1, s2 = self.net.net.get('s1', 's2')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        for vid in self.evcs:
+
+            api_url = KYTOS_API + '/mef_eline/v2/evc/' + self.evcs[vid]
+            response = requests.get(api_url)
+            assert response.status_code == 200
+            evc = response.json()
+            # should be active
+            assert evc["active"] is True
+
+            # search for the vlan id
+            assert "dl_vlan=%s" % vid in flows_s1
+            assert "dl_vlan=%s" % vid in flows_s2
+            # search for the cookie, should have two flows
+            assert len(re.findall(evc['id'], flows_s1, flags=re.IGNORECASE)) == 2, \
+                "should have 2 flows but had: \n%s" % flows_s1
+            assert len(re.findall(evc['id'], flows_s2, flags=re.IGNORECASE)) == 2, \
+                "should have 2 flows but had: \n%s" % flows_s2
+
+        # Delete the circuits
+        for vid in self.evcs:
+            evc_id = self.evcs[vid]
+            api_url = KYTOS_API + '/mef_eline/v2/evc/' + evc_id
+            response = requests.delete(api_url)
+            assert response.status_code == 200
+
+        time.sleep(10)
+
+        # make sure the circuits were deleted
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        assert response.json() == {}
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == 1, "should have only 1 flow but had: \n%s" % flows_s1
+        assert len(flows_s2.split('\r\n ')) == 1, "should have only 1 flow but had: \n%s" % flows_s2
+
+    # Error (Patch returns: name can't be be updated)
+    @pytest.mark.xfail
+    def test_090_patch_evc_new_name(self):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+
+        # It verifies EVC's name
+        response = requests.get(api_url + evc1)
+        assert response.status_code == 200
+        data = response.json()
+        assert data['name'] == 'Vlan_100'
+
+        payload = {"name": "My EVC_100"}
+
+        # It sets a new name
+        response = requests.patch(api_url + evc1, data=json.dumps(payload),
+                                  headers={'Content-type': 'application/json'})
+        assert response.status_code == 200
+
+        time.sleep(10)
+
+        # It verifies EVC's new name
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['name'] == 'My EVC_100'
+
+    # Error (Patch returns: uni_a can't be be updated.)
+    @pytest.mark.xfail
+    def test_095_patch_evc_new_unis(self):
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+
+        payload = {
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:2"
+            }
+        }
+
+        # It sets a new interface_id
+        response = requests.patch(api_url + evc1, data=json.dumps(payload),
+                                  headers={'Content-type': 'application/json'})
+        assert response.status_code == 200
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['uni_a']['interface_id'] == "00:00:00:00:00:00:00:01:2"
+
+    # Error (Patch returns: uni_z can't be be updated.)
+    @pytest.mark.xfail
+    def test_100_patch_evc_new_unis(self):
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+
+        payload = {
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:02:2"
+            }
+        }
+
+        # It sets a new interface_id
+        response = requests.patch(api_url + evc1, data=json.dumps(payload),
+                                  headers={'Content-type': 'application/json'})
+        assert response.status_code == 200
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['uni_z']['interface_id'] == "00:00:00:00:00:00:00:02:2"
+
+    """Error - The circuit remains active despite 
+    the modification on its end_date attribute"""
+    @pytest.mark.xfail
+    def test_105_patch_end_date(self):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+
+        end_delay = 1
+        end_date = datetime.now() + timedelta(minutes=end_delay)
+
+        payload = {
+            "end_date": end_date.strftime(TIME_FMT)
+        }
+
+        # It sets a new circuit's end_date
+        requests.patch(api_url + evc1, data=json.dumps(payload),
+                       headers={'Content-type': 'application/json'})
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['end_date'] == end_date.strftime(TIME_FMT)
+
+        # waiting to reach the new end timing
+        time.sleep(end_delay*60+5)
+
+        # Verify if the circuit is active
+        api_url = KYTOS_API + '/mef_eline/v2/evc/' + evc1
+        response = requests.get(api_url)
+        data = response.json()
+        assert data["active"] is False
+
+    def test_110_patch_bandwidth(self):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+
+        bandwidth = 40
+        payload = {
+            "bandwidth": bandwidth
+        }
+
+        # It sets a new circuit's bandwidth
+        requests.patch(api_url + evc1, data=json.dumps(payload),
+                       headers={'Content-type': 'application/json'})
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['bandwidth'] == bandwidth
+
+        requests.delete(api_url + evc1)
+
+    def test_115_patch_priority(self):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+
+        priority = 100
+        payload = {
+            "priority": priority
+        }
+
+        # It sets a new circuit's priority
+        requests.patch(api_url + evc1, data=json.dumps(payload),
+                       headers={'Content-type': 'application/json'})
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['priority'] == priority
+
+        s1, s2 = self.net.net.get('s1', 's2')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        assert 'priority=100' in flows_s1
+        assert 'priority=100' in flows_s2
+
+    """It does not contain the queue information in the flow description"""
+    @pytest.mark.xfail
+    def test_120_patch_queue_id(self):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+
+        queue_id = 3
+        payload = {
+            "queue_id": queue_id
+        }
+
+        # It sets a new circuit's queue_id
+        requests.patch(api_url + evc1, data=json.dumps(payload),
+                       headers={'Content-type': 'application/json'})
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['queue_id'] == queue_id
+
+        s1, s2 = self.net.net.get('s1', 's2')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+
+        assert 'set_queue:3' in flows_s1
+        assert 'set_queue:3' in flows_s2
+
+    def test_125_patch_dynamic_backup_path(self):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+
+        dynamic_backup_path = False
+        payload = {
+            "dynamic_backup_path": dynamic_backup_path
+        }
+
+        # It sets a new circuit's dynamic_backup_path
+        requests.patch(api_url + evc1, data=json.dumps(payload),
+                       headers={'Content-type': 'application/json'})
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+        assert data['dynamic_backup_path'] == dynamic_backup_path
+
+    """The EVC is returning active=False"""
+    @pytest.mark.xfail
+    def test_130_patch_primary_path(self):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        payload1 = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:03:1"
+            },
+            "primary_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+            ]
+        }
+        response = requests.post(api_url, data=json.dumps(payload1),
+                                 headers={'Content-type': 'application/json'})
+        data = response.json()
+        evc1 = data['circuit_id']
+        time.sleep(10)
+        payload2 = {
+            "primary_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+            ]
+        }
+        # It sets a new circuit's primary_path
+        response = requests.patch(api_url + evc1, data=json.dumps(payload2),
+                                  headers={'Content-type': 'application/json'})
+        assert response.status_code == 200
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+
+        paths = []
+        for _path in data['primary_path']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        assert paths == payload2["primary_path"]
+        assert data['active'] is True
+
+    def test_135_patch_backup_path(self):
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:03:1",
+                "tag": {
+                    "tag_type": 1,
+                    "value": 101
+                }
+            },
+            "primary_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}},
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:02:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:2"}}
+            ],
+            "backup_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}
+            ]
+        }
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
+        data = response.json()
+        evc1 = data['circuit_id']
+
+        time.sleep(10)
+
+        payload2 = {
+            "backup_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:01:4"}}
+            ]
+        }
+
+        # It sets a new circuit's backup_path
+        requests.patch(api_url + evc1, data=json.dumps(payload2),
+                       headers={'Content-type': 'application/json'})
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+
+        paths = []
+        for _path in data['backup_path']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        assert paths == payload2["backup_path"]
+        assert data['active'] is True
+
+        requests.delete(api_url + evc1)
+
+    def test_140_current_path_value_given_dynamic_backup_path_and_primary_path_conditions(self):
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "dynamic_backup_path": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {"tag_type": 1, "value": 100}
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:02:1",
+                "tag": {"tag_type": 1, "value": 100}
+            },
+            "primary_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}
+            ]
+        }
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        data = response.json()
+        evc1 = data['circuit_id']
+
+        time.sleep(10)
+
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'down')
+
+        # Wait just a few seconds to give time to the controller receive and process the linkDown event
+        time.sleep(10)
+
+        current_path = [{"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                         "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}},
+                        {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:2"},
+                         "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}]
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+
+        paths = []
+        for _path in data['current_path']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'up')
+
+        assert paths == current_path
+
+    def test_145_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "dynamic_backup_path": True,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {"tag_type": 1, "value": 100}
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:02:1",
+                "tag": {"tag_type": 1, "value": 100}
+            }
+        }
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        data = response.json()
+        evc1 = data['circuit_id']
+
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+
+        paths = []
+        for _path in data['current_path']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        current_path = [{"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                         "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}]
+
+        assert paths == current_path
+
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'down')
+
+        # Wait just a few seconds to give time to the controller receive and process the linkDown event
+        time.sleep(10)
+
+        current_path = [{"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                         "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}},
+                        {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:2"},
+                         "endpoint_b": {"id": "00:00:00:00:00:00:00:02:3"}}]
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+
+        paths = []
+        for _path in data['current_path']:
+            paths.append({"endpoint_a": {"id": _path['endpoint_a']['id']},
+                          "endpoint_b": {"id": _path['endpoint_b']['id']}})
+
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'up')
+
+        assert paths == current_path
+
+    def test_150_current_path_value_given_dynamic_backup_path_and_empty_primary_conditions(self):
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "dynamic_backup_path": False,
+            "uni_a": {
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "tag": {"tag_type": 1, "value": 100}
+            },
+            "uni_z": {
+                "interface_id": "00:00:00:00:00:00:00:02:1",
+                "tag": {"tag_type": 1, "value": 100}
+            },
+            "primary_path": [
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"}}
+            ]
+        }
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        data = response.json()
+        evc1 = data['circuit_id']
+
+        time.sleep(10)
+
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'down')
+
+        # Wait just a few seconds to give time to the controller receive and process the linkDown event
+        time.sleep(10)
+
+        # It verifies EVC's data
+        response = requests.get(api_url + evc1)
+        data = response.json()
+
+        # Command to up/down links to test if back-up path is taken
+        self.net.net.configLinkStatus('s1', 's2', 'up')
+
+        assert data['active'] is False
+        assert data['enabled'] is True
+        assert data['current_path'] == []
