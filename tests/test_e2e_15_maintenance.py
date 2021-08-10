@@ -2,7 +2,6 @@ import json
 import time
 from datetime import datetime, timedelta
 
-import pytest
 import requests
 
 from tests.helpers import NetworkTest
@@ -943,7 +942,6 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/maintenance/' + mw_id
         requests.delete(api_url)
 
-    @pytest.mark.xfail
     def test_100_extend_running_mw_on_switch(self):
 
         self.restart_and_create_circuit()
