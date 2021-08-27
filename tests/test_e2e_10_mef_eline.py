@@ -752,8 +752,6 @@ class TestE2EMefEline:
         assert len(flows_s1.split('\r\n ')) == 1, "should have only 1 flow but had: \n%s" % flows_s1
         assert len(flows_s2.split('\r\n ')) == 1, "should have only 1 flow but had: \n%s" % flows_s2
 
-    # Error (Patch returns: name can't be be updated)
-    @pytest.mark.xfail
     def test_090_patch_evc_new_name(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -779,8 +777,6 @@ class TestE2EMefEline:
         data = response.json()
         assert data['name'] == 'My EVC_100'
 
-    # Error (Patch returns: uni_a can't be be updated.)
-    @pytest.mark.xfail
     def test_095_patch_evc_new_unis(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
@@ -803,8 +799,6 @@ class TestE2EMefEline:
         data = response.json()
         assert data['uni_a']['interface_id'] == "00:00:00:00:00:00:00:01:2"
 
-    # Error (Patch returns: uni_z can't be be updated.)
-    @pytest.mark.xfail
     def test_100_patch_evc_new_unis(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
