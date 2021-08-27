@@ -1064,7 +1064,6 @@ class TestE2EFlowManager:
         data = response.json()
         assert 'FlowMod Messages Sent' in data['response']
 
-    @pytest.mark.xfail
     def test_070_install_flow(self):
         """
         Tests the performance and race condition with
@@ -1079,6 +1078,9 @@ class TestE2EFlowManager:
             thread.start()
         for thread in threads:
             thread.join()
+
+        # wait for the flow to be installed
+        time.sleep(10)
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
