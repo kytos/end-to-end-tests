@@ -34,9 +34,13 @@ class TestE2EFlowManager:
     def teardown_class(cls):
         cls.net.stop()
 
+    #
+    # Issue: https://github.com/kytos-ng/flow_manager/issues/23
+    #
     @pytest.mark.xfail
-    @pytest.mark.parametrize('execution_number', range(10))
-    def test_005_install_flow(self, execution_number):
+    #@pytest.mark.parametrize('execution_number', range(10))
+    #def test_005_install_flow(self, execution_number):
+    def test_005_install_flow(self):
         """
         Tests the inclusion of a flow with matches fields and
         without actions after the creation of a set of flows
