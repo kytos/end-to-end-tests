@@ -156,6 +156,7 @@ class TestE2EMefEline:
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_030_patch_an_inconsistent_uni_a(self):
         """ Valid switch, valid Interface ID, but invalid tag_type (invalid value) """
 
@@ -177,6 +178,7 @@ class TestE2EMefEline:
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_035_patch_an_inconsistent_uni_a(self):
         """ Valid switch, valid Interface ID, valid tag_type, but invalid tag """
 
@@ -198,6 +200,7 @@ class TestE2EMefEline:
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_040_patch_an_inconsistent_uni_a(self):
         """ Valid switch, valid Interface ID, valid tag_type, but invalid tag """
 
@@ -219,6 +222,7 @@ class TestE2EMefEline:
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_045_patch_an_inconsistent_uni_a(self):
         """ Valid switch, valid Interface ID, valid tag_type, but invalid tag """
 
@@ -334,6 +338,7 @@ class TestE2EMefEline:
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_080_patch_an_inconsistent_uni_z(self):
         """ Valid switch, valid Interface ID, but invalid tag_type (invalid value) """
 
@@ -355,6 +360,7 @@ class TestE2EMefEline:
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_085_patch_an_inconsistent_uni_z(self):
         """ Valid switch, valid Interface ID, valid tag_type, but invalid tag """
 
@@ -376,6 +382,7 @@ class TestE2EMefEline:
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_090_patch_an_inconsistent_uni_z(self):
         """ Valid switch, valid Interface ID, valid tag_type, but invalid tag """
 
@@ -397,6 +404,7 @@ class TestE2EMefEline:
                                   headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
+    @pytest.mark.xfail
     def test_095_patch_an_inconsistent_uni_z(self):
         """ Valid switch, valid Interface ID, valid tag_type, but invalid tag """
 
