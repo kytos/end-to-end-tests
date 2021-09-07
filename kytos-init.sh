@@ -5,16 +5,17 @@ set -x
 service syslog-ng start
 service openvswitch-switch start
 
-for napp in storehouse of_core flow_manager topology of_lldp pathfinder \
-            mef_eline maintenance; do
-    git clone https://github.com/kytos/$napp
-    (cd $napp; python3.6 setup.py develop || true)
-done
+## The commands below are no longer necessary, they are already included into
+## amlight/kytos docker image
+#for napp in storehouse of_core flow_manager topology of_lldp pathfinder \
+#            mef_eline maintenance; do
+#    git clone https://github.com/kytos/$napp
+#    (cd $napp; python3.6 setup.py develop || true)
+#done
+#apt-get update
+#apt-get install -y python-pytest python-requests python-mock python-pytest-timeout
 
-apt-get update
-apt-get install -y python-pytest python-requests python-mock python-pytest-timeout
-
-python -m pytest --timeout=60 tests/
+python -m pytest tests/
 
 # only run specific test
 # python -m pytest --timeout=60 tests/test_e2e_10_mef_eline.py::TestE2EMefEline::test_on_primary_path_fail_should_migrate_to_backup
