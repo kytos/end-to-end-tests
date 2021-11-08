@@ -40,6 +40,15 @@ class TestE2EMefEline:
     def teardown_class(cls):
         cls.net.stop()
 
+    def restart(self, _clean_config=False, _enable_all=True):
+        # Start the controller setting an environment in which the setting is
+        # preserved (persistence) and avoid the default enabling of all elements
+        self.net.start_controller(clean_config=_clean_config, enable_all=_enable_all)
+        self.net.wait_switches_connect()
+
+        # Wait a few seconds to kytos execute LLDP
+        time.sleep(10)
+
     def create_evc(self, vlan_id, store=False):
         payload = {
             "name": "Vlan_%s" % vlan_id,
@@ -1225,3 +1234,58 @@ class TestE2EMefEline:
         assert data['active'] is False
         assert data['enabled'] is True
         assert data['current_path'] == []
+
+    def test_155_removing_evc_metadata_persistent(self):
+        """
+        Test /api/kytos/mef_eline/v2/evc/{evc_id}/metadata/{key} on DELETE
+        supported by:
+            /api/kytos/mef_eline/v2/evc/{evc_id}/metadata on POST
+            and
+            /api/kytos/mef_eline/v2/evc/{evc_id}/metadata on GET
+        """
+        evc1 = self.create_evc(100)
+        api_url = KYTOS_API + '/mef_eline/v2/evc/%s/metadata' % evc1
+
+        # Make sure the metadata is initially empty
+        response = requests.get(api_url)
+        assert response.status_code == 200
+        data = response.json()
+        assert 'metadata' in data
+        assert data['metadata'] == {}
+
+        # Insert evc metadata
+        my_key = 'tmp_key'
+        payload = {my_key: "tmp_value", "other": [1, 2, 3]}
+
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 201
+
+        # Make sure the metadata was inserted
+        response = requests.get(api_url)
+        data = response.json()
+        assert data['metadata'] == payload
+
+        self.restart()
+
+        # Make sure the metadata is still there
+        response = requests.get(api_url)
+        data = response.json()
+        assert data['metadata'] == payload
+
+        # Delete the evc metadata
+        response = requests.delete(api_url + '/' + my_key)
+        assert response.status_code == 200
+
+        # Make sure the metadata was deleted
+        response = requests.get(api_url)
+        data = response.json()
+        assert my_key not in data['metadata']
+        assert len(data['metadata']) > 0
+
+        self.restart()
+
+        # Make sure the metadata is still not there
+        response = requests.get(api_url)
+        data = response.json()
+        assert my_key not in data['metadata']
+        assert len(data['metadata']) > 0
