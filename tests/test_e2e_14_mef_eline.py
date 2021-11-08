@@ -1,6 +1,4 @@
-import json
 import time
-from datetime import datetime
 
 import pytest
 import requests
@@ -63,6 +61,10 @@ class TestE2EMefEline:
         data = response.json()
         return data['circuit_id']
 
+    #
+    # Issue: https://github.com/kytos-ng/mef_eline/issues/72
+    #
+    @pytest.mark.xfail
     def test_005_create_evc_on_nni(self):
         """Test to evaluate how mef_eline will behave when the uni is actually
         an NNI."""
