@@ -1235,6 +1235,7 @@ class TestE2EMefEline:
         assert data['enabled'] is True
         assert data['current_path'] == []
 
+    @pytest.mark.xfail
     def test_155_removing_evc_metadata_persistent(self):
         """
         Test /api/kytos/mef_eline/v2/evc/{evc_id}/metadata/{key} on DELETE
