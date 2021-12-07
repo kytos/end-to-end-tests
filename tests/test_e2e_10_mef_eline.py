@@ -1055,8 +1055,8 @@ class TestE2EMefEline:
 
         payload2 = {
             "backup_path": [
-                {"endpoint_a": {"id": "00:00:00:00:00:00:00:03:3"},
-                 "endpoint_b": {"id": "00:00:00:00:00:00:00:01:4"}}
+                {"endpoint_a": {"id": "00:00:00:00:00:00:00:01:4"},
+                 "endpoint_b": {"id": "00:00:00:00:00:00:00:03:3"}}
             ]
         }
 
