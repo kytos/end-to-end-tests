@@ -193,6 +193,14 @@ class NetworkTest:
         self.start_controller(clean_config=True, enable_all=True)
         self.wait_switches_connect()
 
+    def config_all_links_up(self):
+        for link in self.net.links:
+            self.net.configLinkStatus(
+                link.intf1.node.name,
+                link.intf2.node.name,
+                "up"
+            )
+
     def stop(self):
         self.net.stop()
         mininet.clean.cleanup()
