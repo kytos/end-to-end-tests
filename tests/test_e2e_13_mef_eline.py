@@ -21,6 +21,9 @@ class TestE2EMefEline:
         """
         It is called at the beginning of every class method execution
         """
+        # Since some tests may set a link to down state, we should reset
+        # the link state to up (for all links)
+        self.net.config_all_links_up()
         # Start the controller setting an environment in
         # which all elements are disabled in a clean setting
         self.net.start_controller(clean_config=True, enable_all=True)
