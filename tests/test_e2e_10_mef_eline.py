@@ -22,6 +22,9 @@ class TestE2EMefEline:
         """
         It is called at the beginning of every class method execution
         """
+        # Since some tests may set a link to down state, we should reset
+        # the link state to up (for all links)
+        self.net.config_all_links_up()
         # Start the controller setting an environment in
         # which all elements are disabled in a clean setting
         self.net.start_controller(clean_config=True, enable_all=True)
@@ -913,8 +916,6 @@ class TestE2EMefEline:
         assert 'priority=100' in flows_s1
         assert 'priority=100' in flows_s2
 
-    """It does not contain the queue information in the flow description"""
-    @pytest.mark.xfail
     def test_120_patch_queue_id(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -1235,7 +1236,6 @@ class TestE2EMefEline:
         assert data['enabled'] is True
         assert data['current_path'] == []
 
-    @pytest.mark.xfail
     def test_155_removing_evc_metadata_persistent(self):
         """
         Test /api/kytos/mef_eline/v2/evc/{evc_id}/metadata/{key} on DELETE
