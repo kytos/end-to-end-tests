@@ -640,8 +640,6 @@ class TestE2EMefEline:
         assert paths == payload1["backup_path"]
         assert data['active'] is True
 
-    """It is returning Response [200], should be 400"""
-    @pytest.mark.xfail
     def test_125_patch_an_unrelated_backup_path(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         payload1 = {
@@ -899,8 +897,6 @@ class TestE2EMefEline:
         assert paths == payload1["backup_links"]
         assert data['active'] is True
 
-    """It is returning Response 500, but it should return a failure code"""
-    @pytest.mark.xfail
     def test_150_patch_creation_time(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
@@ -965,8 +961,6 @@ class TestE2EMefEline:
         data = response.json()
         assert data['request_time'] != start.strftime(TIME_FMT)
 
-    """It is returning Response 500, but it should return a failure code"""
-    @pytest.mark.xfail
     def test_165_patch_current_path(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         payload1 = {
@@ -1103,8 +1097,6 @@ class TestE2EMefEline:
         response = requests.get(api_url + evc1 + "A")
         assert response.status_code == 404
 
-    """It is returning Response 500, should be 400"""
-    @pytest.mark.xfail
     def test_200_post_on_dynamic_backup_path_and_backup_path(self):
         payload = {
             "name": "my evc1",
@@ -1128,8 +1120,6 @@ class TestE2EMefEline:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """It is returning Response 201, should be 400"""
-    @pytest.mark.xfail
     def test_205_post_on_false_dynamic_backup_path_and_empty_primary_path(self):
         payload = {
             "name": "my evc1",
@@ -1150,8 +1140,6 @@ class TestE2EMefEline:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """It is returning Response 201, should be 400"""
-    @pytest.mark.xfail
     def test_210_post_on_false_dynamic_backup_path_and_none_primary_path(self):
         payload = {
             "name": "my evc1",
@@ -1171,8 +1159,6 @@ class TestE2EMefEline:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """It is returning Response 201, should be 400"""
-    @pytest.mark.xfail
     def test_215_post_on_none_dynamic_backup_path_and_empty_primary_path(self):
         payload = {
             "name": "my evc1",
@@ -1192,8 +1178,6 @@ class TestE2EMefEline:
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400
 
-    """It is returning Response 201, should be 400"""
-    @pytest.mark.xfail
     def test_220_post_on_none_dynamic_backup_path_and_none_primary_path(self):
         payload = {
             "name": "my evc1",

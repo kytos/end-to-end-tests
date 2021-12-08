@@ -76,7 +76,7 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         time.sleep(10)
 
@@ -140,7 +140,8 @@ class TestE2EMefEline:
         }
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
-        requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        r = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert r.status_code == 201, r.text
 
         time.sleep(10)
 
@@ -200,7 +201,8 @@ class TestE2EMefEline:
         }
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
-        requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        r = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert r.status_code == 201, r.text
 
         time.sleep(10)
 
@@ -251,7 +253,7 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         time.sleep(10)
 
@@ -281,8 +283,6 @@ class TestE2EMefEline:
         h1.cmd('ip link del vlan101')
         h2.cmd('ip link del vlan101')
 
-    """It is returning 201 but should be 400 due to the presence of an only read attribute on Post (active)"""
-    @pytest.mark.xfail
     def test_025_should_fail_due_to_invalid_attribute_on_payload(self):
         payload = {
             "name": "my evc1",
