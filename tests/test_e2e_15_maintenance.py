@@ -54,13 +54,15 @@ class TestE2EMaintenance:
             ],
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
-        requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 201, response.text
+
 
     def restart_and_create_circuit(self):
         self.net.restart_kytos_clean()
-        time.sleep(5)
+        time.sleep(10)
         self.create_circuit(100)
-        time.sleep(20)
+        time.sleep(10)
 
     def test_005_list_mw_should_be_empty(self):
         """Tests if the maintenances list is empty at the beginning
