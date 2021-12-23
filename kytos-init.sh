@@ -5,15 +5,12 @@ set -x
 service syslog-ng start
 service openvswitch-switch start
 
-## The commands below are no longer necessary, they are already included into
-## amlight/kytos docker image
-#for napp in storehouse of_core flow_manager topology of_lldp pathfinder \
-#            mef_eline maintenance; do
-#    git clone https://github.com/kytos/$napp
-#    (cd $napp; python3.6 setup.py develop || true)
-#done
-#apt-get update
-#apt-get install -y python-pytest python-requests python-mock python-pytest-timeout
+# the settings below are intended to decrease the tests execution time (in fact, the time.sleep() calls
+# depend on the values below, otherwise many tests would fail)
+sed -i 's/STATS_INTERVAL = 60/STATS_INTERVAL = 3/g' /var/lib/kytos/napps/kytos/of_core/settings.py
+sed -i 's/LINK_UP_TIMER = 10/LINK_UP_TIMER = 1/g' /var/lib/kytos/napps/kytos/topology/settings.py
+sed -i 's/DEPLOY_EVCS_INTERVAL = 60/DEPLOY_EVCS_INTERVAL = 5/g' /var/lib/kytos/napps/kytos/mef_eline/settings.py
+sed -i 's/WARNING/INFO/g' /etc/kytos/logging.ini
 
 python -m pytest tests/
 
