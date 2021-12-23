@@ -1,8 +1,7 @@
-variables:
-  DOCKER_PRIVILEGED: "true"
-
 test_kytos_mininet:
+ tags:
+   - privileged
  image:
-   name: kytos/nightly
+   name: amlight/kytos:latest
  script:
-  - ./kytos-init.sh
+   - ./kytos-init.sh
