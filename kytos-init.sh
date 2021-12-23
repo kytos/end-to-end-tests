@@ -2,9 +2,6 @@
 
 set -x
 
-service syslog-ng start
-service openvswitch-switch start
-
 # the settings below are intended to decrease the tests execution time (in fact, the time.sleep() calls
 # depend on the values below, otherwise many tests would fail)
 sed -i 's/STATS_INTERVAL = 60/STATS_INTERVAL = 3/g' /var/lib/kytos/napps/kytos/of_core/settings.py
@@ -12,7 +9,9 @@ sed -i 's/LINK_UP_TIMER = 10/LINK_UP_TIMER = 1/g' /var/lib/kytos/napps/kytos/top
 sed -i 's/DEPLOY_EVCS_INTERVAL = 60/DEPLOY_EVCS_INTERVAL = 5/g' /var/lib/kytos/napps/kytos/mef_eline/settings.py
 sed -i 's/WARNING/INFO/g' /etc/kytos/logging.ini
 
-python -m pytest tests/
+test -z "$TESTS" && TESTS=tests/ 
+
+python -m pytest $TESTS
 
 # only run specific test
 # python -m pytest --timeout=60 tests/test_e2e_10_mef_eline.py::TestE2EMefEline::test_on_primary_path_fail_should_migrate_to_backup
