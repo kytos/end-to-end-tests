@@ -723,6 +723,9 @@ class TestE2EMefEline:
         for thread in threads:
             thread.join()
 
+        # give some time so Kytos can create the flows and everything
+        time.sleep(10)
+
         # make sure the evcs are active and the flows were created
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
