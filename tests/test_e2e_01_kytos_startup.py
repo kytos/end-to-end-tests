@@ -45,7 +45,7 @@ class TestE2EKytosServer:
         # Check server status if it is UP and running
         api_url = KYTOS_API+'/core/status/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         data = response.json()
         assert data['response'] == 'running'
@@ -63,7 +63,7 @@ class TestE2EKytosServer:
             ]
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         data = response.json()
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps)
@@ -71,11 +71,11 @@ class TestE2EKytosServer:
         # Check disable a napp
         api_url = KYTOS_API+'/core/napps/kytos/mef_eline/disable'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         data = response.json()
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps) - set([("kytos", "mef_eline")])
@@ -86,7 +86,7 @@ class TestE2EKytosServer:
 
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         data = response.json()
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps) - set([("kytos", "mef_eline")])
@@ -94,11 +94,11 @@ class TestE2EKytosServer:
         # check enable a napp
         api_url = KYTOS_API+'/core/napps/kytos/mef_eline/enable'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         data = response.json()
         assert set([tuple(lst) for lst in data['napps']]) == set(expected_napps)

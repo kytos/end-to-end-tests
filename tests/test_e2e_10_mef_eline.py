@@ -68,6 +68,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
         data = response.json()
         if store:
             self.evcs[vlan_id] = data['circuit_id']
@@ -77,7 +78,7 @@ class TestE2EMefEline:
         """Test if list circuits return 'no circuit stored.'."""
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert response.json() == {}
 
     def test_015_create_evc_intra_switch(self):
@@ -103,7 +104,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         time.sleep(10)
@@ -155,7 +156,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         time.sleep(10)
@@ -206,7 +207,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         time.sleep(10)
@@ -255,7 +256,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         time.sleep(10)
@@ -306,7 +307,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         evc1 = data['circuit_id']
@@ -328,7 +329,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         evc2 = data['circuit_id']
@@ -400,7 +401,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         evc1 = data['circuit_id']
@@ -414,7 +415,7 @@ class TestE2EMefEline:
         # It disables the circuit
         payload = {"enable": False}
         response = requests.patch(api_url + evc1, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         time.sleep(10)
 
         # It verifies EVC's status
@@ -460,7 +461,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         evc1 = data['circuit_id']
@@ -469,7 +470,7 @@ class TestE2EMefEline:
         # Delete the circuit
         api_url += evc1
         response = requests.delete(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         time.sleep(10)
 
         # try to reuse the vlan id
@@ -488,7 +489,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'circuit_id' in data
         evc2 = data['circuit_id']
@@ -550,7 +551,7 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         time.sleep(10)
 
@@ -610,16 +611,16 @@ class TestE2EMefEline:
 
         # Delete the circuit
         response = requests.delete(api_url + evc1)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         time.sleep(10)
 
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert evc1 not in data
 
         response = requests.get(api_url, params={'archived': True})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert evc1 in data
         assert data[evc1]['archived'] is True
@@ -663,7 +664,7 @@ class TestE2EMefEline:
                 }
                 api_url = KYTOS_API + '/mef_eline/v2/evc/'
                 response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-                assert response.status_code == 201
+                assert response.status_code == 201, response.text
                 data = response.json()
                 assert 'circuit_id' in data
                 evcs[i] = data['circuit_id']
@@ -678,7 +679,7 @@ class TestE2EMefEline:
                 evc_id = evcs[vid]
                 api_url = KYTOS_API + '/mef_eline/v2/evc/' + evc_id
                 response = requests.get(api_url)
-                assert response.status_code == 200
+                assert response.status_code == 200, response.text
                 evc = response.json()
                 # should be active
                 assert evc["active"] is True
@@ -694,14 +695,14 @@ class TestE2EMefEline:
                 evc_id = evcs[vid]
                 api_url = KYTOS_API + '/mef_eline/v2/evc/' + evc_id
                 response = requests.delete(api_url)
-                assert response.status_code == 200
+                assert response.status_code == 200, response.text
 
             time.sleep(10)
 
             # make sure the circuits were deleted
             api_url = KYTOS_API + '/mef_eline/v2/evc/'
             response = requests.get(api_url)
-            assert response.status_code == 200
+            assert response.status_code == 200, response.text
             assert response.json() == {}
             flows_s1 = s1.dpctl('dump-flows')
             flows_s2 = s2.dpctl('dump-flows')
@@ -734,7 +735,7 @@ class TestE2EMefEline:
 
             api_url = KYTOS_API + '/mef_eline/v2/evc/' + self.evcs[vid]
             response = requests.get(api_url)
-            assert response.status_code == 200
+            assert response.status_code == 200, response.text
             evc = response.json()
             # should be active
             assert evc["active"] is True
@@ -753,14 +754,14 @@ class TestE2EMefEline:
             evc_id = self.evcs[vid]
             api_url = KYTOS_API + '/mef_eline/v2/evc/' + evc_id
             response = requests.delete(api_url)
-            assert response.status_code == 200
+            assert response.status_code == 200, response.text
 
         time.sleep(10)
 
         # make sure the circuits were deleted
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert response.json() == {}
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
@@ -774,7 +775,7 @@ class TestE2EMefEline:
 
         # It verifies EVC's name
         response = requests.get(api_url + evc1)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert data['name'] == 'Vlan_100'
 
@@ -783,7 +784,7 @@ class TestE2EMefEline:
         # It sets a new name
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         time.sleep(10)
 
@@ -805,7 +806,7 @@ class TestE2EMefEline:
         # It sets a new interface_id
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         time.sleep(10)
 
@@ -827,7 +828,7 @@ class TestE2EMefEline:
         # It sets a new interface_id
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         time.sleep(10)
 
@@ -1003,7 +1004,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         time.sleep(10)
 
@@ -1252,7 +1253,7 @@ class TestE2EMefEline:
 
         # Make sure the metadata is initially empty
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert 'metadata' in data
         assert data['metadata'] == {}
@@ -1262,7 +1263,7 @@ class TestE2EMefEline:
         payload = {my_key: "tmp_value", "other": [1, 2, 3]}
 
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         # Make sure the metadata was inserted
         response = requests.get(api_url)
@@ -1279,7 +1280,7 @@ class TestE2EMefEline:
 
         # Delete the evc metadata
         response = requests.delete(api_url + '/' + my_key)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         # Make sure the metadata was deleted
         response = requests.get(api_url)

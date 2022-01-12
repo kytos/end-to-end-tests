@@ -73,7 +73,7 @@ class TestE2EMaintenance:
         # Gets the maintenance schemas
         api_url = KYTOS_API + '/maintenance/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         json_data = response.json()
         assert json_data == []
 
@@ -104,7 +104,7 @@ class TestE2EMaintenance:
         # Creates a new maintenance window
         api_url = KYTOS_API + '/maintenance'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'mw_id' in data
 
@@ -178,7 +178,7 @@ class TestE2EMaintenance:
         # Creates a new maintenance window
         api_url = KYTOS_API + '/maintenance'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_020_create_mw_on_switch_should_fail_items_empty(self):
         """Tests to create maintenance with the wrong payload
@@ -206,7 +206,7 @@ class TestE2EMaintenance:
         # Creates a new maintenance window
         api_url = KYTOS_API + '/maintenance'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_025_create_mw_on_switch_should_fail_no_items_field_on_payload(self):
         """Tests to create maintenance with the wrong payload
@@ -233,7 +233,7 @@ class TestE2EMaintenance:
         # Creates a new maintenance window
         api_url = KYTOS_API + '/maintenance'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_030_create_mw_on_switch_should_fail_payload_empty(self):
         """Tests to create maintenance with the wrong payload
@@ -250,7 +250,7 @@ class TestE2EMaintenance:
         # Creates a new maintenance window
         api_url = KYTOS_API + '/maintenance'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 415
+        assert response.status_code == 415, response.text
 
     def test_035_create_mw_on_switch_and_patch_new_end(self):
         """Tests the maintenance window data update
@@ -282,7 +282,7 @@ class TestE2EMaintenance:
         # Creates a new maintenance window
         api_url = KYTOS_API + '/maintenance'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'mw_id' in data
 
@@ -293,7 +293,7 @@ class TestE2EMaintenance:
         # Gets the maintenance schema
         api_url = KYTOS_API + '/maintenance/' + mw_id
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         json_data = response.json()
         assert json_data['id'] == mw_id
 
@@ -557,7 +557,7 @@ class TestE2EMaintenance:
         # Creates a new maintenance window
         api_url = KYTOS_API + '/maintenance'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'mw_id' in data
 
@@ -568,7 +568,7 @@ class TestE2EMaintenance:
         # Gets the maintenance schema
         api_url = KYTOS_API + '/maintenance/' + mw_id
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         json_data = response.json()
         assert json_data['id'] == mw_id
 
@@ -619,7 +619,7 @@ class TestE2EMaintenance:
         # Creates a new maintenance window
         api_url = KYTOS_API + '/maintenance'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         data = response.json()
         assert 'mw_id' in data
 
@@ -630,7 +630,7 @@ class TestE2EMaintenance:
         # Gets the maintenance schema
         api_url = KYTOS_API + '/maintenance/' + mw_id
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         json_data = response.json()
         assert json_data['id'] == mw_id
 
@@ -847,7 +847,7 @@ class TestE2EMaintenance:
         # Gets the maintenance schema
         api_url = KYTOS_API + '/maintenance/' + mw_id
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         json_data = response.json()
         assert json_data['id'] == mw_id
 
@@ -976,7 +976,7 @@ class TestE2EMaintenance:
         # Gets the maintenance schema
         api_url = KYTOS_API + '/maintenance/' + mw_id
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         json_data = response.json()
         assert json_data['id'] == mw_id
 
@@ -1005,7 +1005,7 @@ class TestE2EMaintenance:
         # extend the maintenance window information
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         # Waits to the time that the MW should be ended but instead will be running (extended)
         time.sleep(mw_duration + 5)
@@ -1073,7 +1073,7 @@ class TestE2EMaintenance:
         # extend the maintenance window information
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_110_extend_unknown_mw_on_switch_should_fail(self):
         self.restart_and_create_circuit()
@@ -1086,7 +1086,7 @@ class TestE2EMaintenance:
         # extend the maintenance window information
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
-        assert response.status_code == 404
+        assert response.status_code == 404, response.text
 
     def test_115_extend_running_mw_on_switch_under_unknown_tag_should_fail(self):
         self.restart_and_create_circuit()
@@ -1124,7 +1124,7 @@ class TestE2EMaintenance:
         # extend the maintenance window information
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_120_extend_ended_mw_on_switch_should_fail(self):
         self.restart_and_create_circuit()
@@ -1162,4 +1162,4 @@ class TestE2EMaintenance:
         # extend the maintenance window information
         api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text

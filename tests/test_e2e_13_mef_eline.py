@@ -84,7 +84,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1 + "A", data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 404
+        assert response.status_code == 404, response.text
 
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
@@ -102,7 +102,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_015_patch_an_inconsistent_uni_a(self):
         """ No existing switch """
@@ -119,7 +119,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_020_patch_an_inconsistent_uni_a(self):
         """ Valid switch but invalid Interface ID """
@@ -136,7 +136,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_025_patch_an_inconsistent_uni_a(self):
         """ Valid switch, valid Interface ID, but invalid tag_type (string) """
@@ -157,7 +157,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     @pytest.mark.xfail
     def test_030_patch_an_inconsistent_uni_a(self):
@@ -179,7 +179,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     @pytest.mark.xfail
     def test_035_patch_an_inconsistent_uni_a(self):
@@ -201,7 +201,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     @pytest.mark.xfail
     def test_040_patch_an_inconsistent_uni_a(self):
@@ -223,7 +223,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     @pytest.mark.xfail
     def test_045_patch_an_inconsistent_uni_a(self):
@@ -245,7 +245,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_050_patch_an_inconsistent_uni_a(self):
         """ Valid switch, valid Interface ID, valid tag_type, but invalid tag_name """
@@ -266,7 +266,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_a
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     # TODO
     """ This test should change the Vlan range and modify it to a plan value outside that range """
@@ -284,7 +284,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_065_patch_an_inconsistent_uni_z(self):
         """ No existing switch """
@@ -301,7 +301,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_070_patch_an_inconsistent_uni_z(self):
         """ Valid switch but invalid Interface ID """
@@ -318,7 +318,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_075_patch_an_inconsistent_uni_z(self):
         """ Valid switch, valid Interface ID, but invalid tag_type (string) """
@@ -339,7 +339,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     @pytest.mark.xfail
     def test_080_patch_an_inconsistent_uni_z(self):
@@ -361,7 +361,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     @pytest.mark.xfail
     def test_085_patch_an_inconsistent_uni_z(self):
@@ -383,7 +383,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     @pytest.mark.xfail
     def test_090_patch_an_inconsistent_uni_z(self):
@@ -405,7 +405,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     @pytest.mark.xfail
     def test_095_patch_an_inconsistent_uni_z(self):
@@ -427,7 +427,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_100_patch_an_inconsistent_uni_z(self):
         """ Valid switch, valid Interface ID, valid tag_type, but invalid tag_name """
@@ -448,7 +448,7 @@ class TestE2EMefEline:
         # It tries to setting up a new uni_z
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     """It is returning Response [200], should be 400"""
     @pytest.mark.xfail
@@ -483,7 +483,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
         time.sleep(10)
 
         # It verifies EVC's data
@@ -531,7 +531,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
         time.sleep(10)
 
         # It verifies EVC's data
@@ -576,7 +576,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
         time.sleep(10)
 
@@ -625,7 +625,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
         time.sleep(10)
 
         # It verifies EVC's data
@@ -677,7 +677,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
         time.sleep(10)
 
         # It verifies EVC's data
@@ -725,7 +725,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
         time.sleep(10)
 
         # It verifies EVC's data
@@ -773,7 +773,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
         time.sleep(10)
 
         # It verifies EVC's data
@@ -827,7 +827,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
         time.sleep(10)
 
         # It verifies EVC's data
@@ -881,7 +881,7 @@ class TestE2EMefEline:
         # It sets a new circuit's primary_path
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
         time.sleep(10)
 
@@ -914,7 +914,7 @@ class TestE2EMefEline:
         # It sets a new circuit's creation_time
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
         time.sleep(10)
 
@@ -933,7 +933,7 @@ class TestE2EMefEline:
         # It sets a new circuit's creation_time
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
@@ -954,7 +954,7 @@ class TestE2EMefEline:
         # It sets a new circuit's creation_time
         response = requests.patch(api_url + evc1, data=json.dumps(payload),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
@@ -1005,7 +1005,7 @@ class TestE2EMefEline:
         # It sets a new circuit's creation_time
         response = requests.patch(api_url + evc1, data=json.dumps(payload2),
                                   headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
         time.sleep(10)
 
@@ -1022,14 +1022,14 @@ class TestE2EMefEline:
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
 
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_175_post_empty_json(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         payload = {}
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_180_post_unknown_port_on_interface(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -1047,7 +1047,7 @@ class TestE2EMefEline:
 
         response = requests.post(api_url, data=json.dumps(payload1),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_185_post_unknown_interface(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -1065,7 +1065,7 @@ class TestE2EMefEline:
 
         response = requests.post(api_url, data=json.dumps(payload1),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_190_post_an_evc_twice(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -1083,11 +1083,11 @@ class TestE2EMefEline:
 
         response = requests.post(api_url, data=json.dumps(payload1),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         response = requests.post(api_url, data=json.dumps(payload1),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 409
+        assert response.status_code == 409, response.text
 
     def test_195_get_unknown_circuit(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
@@ -1095,7 +1095,7 @@ class TestE2EMefEline:
 
         # It verifies EVC's data
         response = requests.get(api_url + evc1 + "A")
-        assert response.status_code == 404
+        assert response.status_code == 404, response.text
 
     def test_200_post_on_dynamic_backup_path_and_backup_path(self):
         payload = {
@@ -1118,7 +1118,7 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_205_post_on_false_dynamic_backup_path_and_empty_primary_path(self):
         payload = {
@@ -1138,7 +1138,7 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_210_post_on_false_dynamic_backup_path_and_none_primary_path(self):
         payload = {
@@ -1157,7 +1157,7 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_215_post_on_none_dynamic_backup_path_and_empty_primary_path(self):
         payload = {
@@ -1176,7 +1176,7 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_220_post_on_none_dynamic_backup_path_and_none_primary_path(self):
         payload = {
@@ -1194,6 +1194,6 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     # TODO tests over primary_links and backup_links

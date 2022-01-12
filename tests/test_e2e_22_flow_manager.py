@@ -58,7 +58,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:05'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 404
+        assert response.status_code == 404, response.text
 
     def test_010_install_flow_should_fail(self):
         """Tests if the flow installation process specifying an empty
@@ -69,7 +69,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_015_install_flow_should_fail(self):
         """Tests if the flow installation process specifying an empty
@@ -83,7 +83,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_020_install_flow_should_fail(self):
         """Tests if the flow installation process specifying an empty
@@ -100,7 +100,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_025_retrieve_flow_from_non_existent_switch_should_fail(self):
         """Tests if the flow retrieving process of an invalid
@@ -111,7 +111,7 @@ class TestE2EFlowManager:
         # It tries to get a flow that does not exist
         api_url = KYTOS_API + '/flow_manager/v2/flows/' + switch_id
         response = requests.get(api_url)
-        assert response.status_code == 404
+        assert response.status_code == 404, response.text
 
     def test_030_install_flows_should_fail(self):
         """Tests if the flow installation process specifying an
@@ -122,7 +122,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_035_install_flows_should_fail(self):
         """Tests if the flow installation process specifying an empty
@@ -136,7 +136,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_040_install_flows_should_fail(self):
         """Tests if the flow installation process specifying an empty
@@ -153,7 +153,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_045_delete_flow_on_non_existent_switch_should_fail(self):
         """Tests if the flow deletion process specifying an
@@ -182,7 +182,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:05'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 404
+        assert response.status_code == 404, response.text
 
     def test_050_delete_flow_should_fail(self):
         """Tests if the flow deletion process specifying an
@@ -194,7 +194,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_055_delete_flow_should_fail(self):
         """Tests if the flow deletion process specifying an empty
@@ -209,7 +209,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_060_delete_flow_should_fail(self):
         """Tests if the flow deletion process specifying an an empty
@@ -227,7 +227,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_065_delete_flows_should_fail(self):
         """Tests if the flow deletion process specifying an
@@ -239,7 +239,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_070_delete_flows_should_fail(self):
         """Tests if the flow deletion process specifying an empty flow
@@ -254,7 +254,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
     def test_075_delete_flows_should_fail(self):
         """Tests if the flow deletion process specifying an empty flow
@@ -272,4 +272,4 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
