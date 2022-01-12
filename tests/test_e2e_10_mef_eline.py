@@ -1273,6 +1273,7 @@ class TestE2EMefEline:
 
         # Make sure the metadata is still there
         response = requests.get(api_url)
+        assert response.status_code == 200, response.text
         data = response.json()
         assert data['metadata'] == payload
 
@@ -1282,6 +1283,7 @@ class TestE2EMefEline:
 
         # Make sure the metadata was deleted
         response = requests.get(api_url)
+        assert response.status_code == 200, response.text
         data = response.json()
         assert my_key not in data['metadata']
         assert len(data['metadata']) > 0
@@ -1290,6 +1292,7 @@ class TestE2EMefEline:
 
         # Make sure the metadata is still not there
         response = requests.get(api_url)
+        assert response.status_code == 200, response.text
         data = response.json()
         assert my_key not in data['metadata']
         assert len(data['metadata']) > 0
