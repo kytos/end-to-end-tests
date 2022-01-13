@@ -59,7 +59,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 202
+        assert response.status_code == 202, response.text
         data = response.json()
         assert 'FlowMod Messages Sent' in data['response']
 
@@ -117,7 +117,7 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert len(data[switch_id]["flows"]) == 2
         assert data[switch_id]["flows"][1]["instructions"][0]["instruction_type"] == "apply_actions"
@@ -153,7 +153,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.post(api_url, data=json.dumps(payload),
                                  headers={'Content-type': 'application/json'})
-        assert response.status_code == 202
+        assert response.status_code == 202, response.text
         data = response.json()
         assert 'FlowMod Messages Sent' in data['response']
 
@@ -206,7 +206,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 202
+        assert response.status_code == 202, response.text
         data = response.json()
         assert 'FlowMod Messages Sent' in data['response']
 
@@ -258,7 +258,7 @@ class TestE2EFlowManager:
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.delete(api_url, data=json.dumps(payload),
                                    headers={'Content-type': 'application/json'})
-        assert response.status_code == 202
+        assert response.status_code == 202, response.text
         data = response.json()
         assert 'FlowMod Messages Sent' in data['response']
 
@@ -490,7 +490,7 @@ class TestE2EFlowManager:
     def test_080_retrieve_flows(self):
         api_url = KYTOS_API + '/flow_manager/v2/flows'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert len(data) == 3
         assert "00:00:00:00:00:00:00:01" in data.keys()

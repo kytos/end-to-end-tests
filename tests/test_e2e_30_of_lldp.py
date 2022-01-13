@@ -40,13 +40,13 @@ class TestE2EOfLLDP:
         data = response.json()
         all_interfaces = data.get("interfaces", [])
         response = requests.post(api_url+'disable/', json={"interfaces": all_interfaces})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
     def test_001_list_interfaces_with_lldp(self):
         """ List interfaces with OF LLDP. """
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert "interfaces" in data
         # the number of interfaces should match the topology + the OFP_LOCAL port, for the RingTopology it means:
@@ -105,7 +105,7 @@ class TestE2EOfLLDP:
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/disable/'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
         response = requests.get(api_url)
@@ -157,7 +157,7 @@ class TestE2EOfLLDP:
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/enable/'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         api_url = KYTOS_API + '/of_lldp/v1/interfaces/'
         response = requests.get(api_url)
@@ -189,7 +189,7 @@ class TestE2EOfLLDP:
         default_polling_time = 3
         api_url = KYTOS_API + '/of_lldp/v1/polling_time'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert "polling_time" in data
         assert data["polling_time"] == default_polling_time
@@ -205,7 +205,7 @@ class TestE2EOfLLDP:
 
         api_url = KYTOS_API + '/of_lldp/v1/polling_time'
         response = requests.post(api_url, json={"polling_time": 1})
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         response = requests.get(api_url)
         data = response.json()

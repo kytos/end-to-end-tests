@@ -61,7 +61,7 @@ class TestE2ETopology:
                  '00:00:00:00:00:00:00:03:4294967294'],
         }
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert 'topology' in data
         assert 'switches' in data['topology']
         assert len(data['topology']['switches']) == 3
@@ -84,7 +84,7 @@ class TestE2ETopology:
         response = requests.get(api_url)
         data = response.json()
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert 'switches' in data
         assert len(data['switches']) == 3
         assert '00:00:00:00:00:00:00:01' in data['switches']
@@ -109,7 +109,7 @@ class TestE2ETopology:
         # Enable the switches
         api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % switch_id
         response = requests.post(api_url)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         self.restart()
 
@@ -143,7 +143,7 @@ class TestE2ETopology:
         # Disable the switch
         api_url = KYTOS_API + '/topology/v3/switches/%s/disable' % switch_id
         response = requests.post(api_url)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         self.restart()
 
@@ -169,7 +169,7 @@ class TestE2ETopology:
         key = next(iter(payload))
         api_url = KYTOS_API + '/topology/v3/switches/%s/metadata' % switch_id
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         self.restart()
 
@@ -183,7 +183,7 @@ class TestE2ETopology:
         # Delete the switch metadata
         api_url = KYTOS_API + '/topology/v3/switches/%s/metadata/%s' % (switch_id, key)
         response = requests.delete(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -213,7 +213,7 @@ class TestE2ETopology:
         # Enable the interface
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/enable' % interface_id
         response = requests.post(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -243,7 +243,7 @@ class TestE2ETopology:
         # Enabling all the interfaces
         api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % switch_id
         response = requests.post(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -258,7 +258,7 @@ class TestE2ETopology:
         # Disabling all the interfaces
         api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/disable' % switch_id
         response = requests.post(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -283,7 +283,7 @@ class TestE2ETopology:
         # Enable the interface
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/enable' % interface_id
         response = requests.post(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -296,7 +296,7 @@ class TestE2ETopology:
         # Disable the interface and check if the interface is really disabled
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/disable' % interface_id
         response = requests.post(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -319,7 +319,7 @@ class TestE2ETopology:
         # Enabling all the interfaces
         api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % switch_id
         response = requests.post(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -349,7 +349,7 @@ class TestE2ETopology:
 
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         self.restart()
 
@@ -363,7 +363,7 @@ class TestE2ETopology:
         # Delete the interface metadata
         api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata/%s' % (interface_id, key)
         response = requests.delete(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -389,7 +389,7 @@ class TestE2ETopology:
         response = requests.get(api_url)
         data = response.json()
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert len(data['links']) == 0
 
         # Need to enable the switches and ports first
@@ -398,11 +398,11 @@ class TestE2ETopology:
 
             api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % sw
             response = requests.post(api_url)
-            assert response.status_code == 201
+            assert response.status_code == 201, response.text
 
             api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % sw
             response = requests.post(api_url)
-            assert response.status_code == 200
+            assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -422,7 +422,7 @@ class TestE2ETopology:
 
         api_url = KYTOS_API + '/topology/v3/links/%s/enable' % link_id1
         response = requests.post(api_url)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         self.restart()
 
@@ -449,7 +449,7 @@ class TestE2ETopology:
         response = requests.get(api_url)
         data = response.json()
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert len(data['links']) == 0
 
         # enable the links (need to enable the switches and ports first)
@@ -458,11 +458,11 @@ class TestE2ETopology:
 
             api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % sw
             response = requests.post(api_url)
-            assert response.status_code == 201
+            assert response.status_code == 201, response.text
 
             api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % sw
             response = requests.post(api_url)
-            assert response.status_code == 200
+            assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -482,7 +482,7 @@ class TestE2ETopology:
 
         api_url = KYTOS_API + '/topology/v3/links/%s/enable' % link_id1
         response = requests.post(api_url)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         # check if the links are now enabled
         api_url = KYTOS_API + '/topology/v3/links'
@@ -506,7 +506,7 @@ class TestE2ETopology:
         # disable the link
         api_url = KYTOS_API + '/topology/v3/links/%s/disable' % link_id1
         response = requests.post(api_url)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         # restart kytos and check if the links are still enabled
         self.net.start_controller(clean_config=False)
@@ -539,11 +539,11 @@ class TestE2ETopology:
 
             api_url = KYTOS_API + '/topology/v3/switches/%s/enable' % sw
             response = requests.post(api_url)
-            assert response.status_code == 201
+            assert response.status_code == 201, response.text
 
             api_url = KYTOS_API + '/topology/v3/interfaces/switch/%s/enable' % sw
             response = requests.post(api_url)
-            assert response.status_code == 200
+            assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -561,7 +561,7 @@ class TestE2ETopology:
         # Enable the link_id
         api_url = KYTOS_API + '/topology/v3/links/%s/enable' % link_id1
         response = requests.post(api_url)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         self.restart()
 
@@ -571,7 +571,7 @@ class TestE2ETopology:
 
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata' % link_id1
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         self.restart()
 
@@ -585,7 +585,7 @@ class TestE2ETopology:
         # Delete the link metadata
         api_url = KYTOS_API + '/topology/v3/links/%s/metadata/%s' % (link_id1, key)
         response = requests.delete(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         self.restart()
 
@@ -606,7 +606,7 @@ class TestE2ETopology:
         response = requests.get(api_url)
         data = response.json()
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert data['switches'][switch_id]['enabled'] is False
 
     def test_300_interfaces_disabled_on_clean_start(self):
@@ -630,7 +630,7 @@ class TestE2ETopology:
         api_url = KYTOS_API + '/topology/v3/switches'
         response = requests.get(api_url)
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         for switch in data['switches']:
             assert data['switches'][switch]['enabled'] is True
@@ -647,7 +647,7 @@ class TestE2ETopology:
         api_url = KYTOS_API + '/topology/v3/interfaces'
         response = requests.get(api_url)
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         for interface in data['interfaces']:
             assert data['interfaces'][interface]['enabled'] is True

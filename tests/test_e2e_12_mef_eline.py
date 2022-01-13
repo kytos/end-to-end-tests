@@ -60,7 +60,7 @@ class TestE2EMefEline:
         }
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         data = response.json()
 
@@ -78,7 +78,7 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
         response = requests.patch(api_url, json=payload)
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         return
 
@@ -103,7 +103,7 @@ class TestE2EMefEline:
         # create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         # waiting some time to trigger the scheduler
         sched_wait = 62
@@ -112,7 +112,7 @@ class TestE2EMefEline:
         # Verify if the circuit is enabled 
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         json = response.json()
         assert json.get("enabled") is True
@@ -146,7 +146,7 @@ class TestE2EMefEline:
         # create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         # waiting some time to trigger the scheduler
         sched_wait = 62
@@ -155,7 +155,7 @@ class TestE2EMefEline:
         # Verify if the circuit is enabled 
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + disabled_circuit_id
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         json = response.json()
         assert json.get("enabled") is True
@@ -178,12 +178,12 @@ class TestE2EMefEline:
         # Create circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         # Verify the list of schedules
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         data = response.json()[0]
         assert data.get("circuit_id") == circuit_id
@@ -198,17 +198,17 @@ class TestE2EMefEline:
         # Delete circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.delete(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         # Verify if the circuit schedule does not exist
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.get(api_url)
-        assert response.status_code == 405
+        assert response.status_code == 405, response.text
 
         # Verify the list of schedules
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         data = response.json()
         assert data == []
@@ -229,7 +229,7 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule'
         response = requests.post(api_url, json=payload)
         json = response.json()
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
 
         # Get schedule ID
         schedule_id = json.get("id")
@@ -248,7 +248,7 @@ class TestE2EMefEline:
         # patch circuit schedule
         api_url = KYTOS_API + '/mef_eline/v2/evc/schedule/' + schedule_id
         response = requests.patch(api_url, json=payload)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         # waiting to trigger the scheduler
         sched_wait = 62
@@ -259,7 +259,7 @@ class TestE2EMefEline:
         response = requests.get(api_url)
         json = response.json()
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert json.get("enabled") is True
 
         frequency = json.get("circuit_scheduler")[0].get("frequency")
@@ -271,7 +271,7 @@ class TestE2EMefEline:
         # List all the circuits stored
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         key = next(iter(data))
         assert data is not {}
@@ -304,7 +304,7 @@ class TestE2EMefEline:
 
         # It tries to set a new circuit's start_date
         response = requests.patch(api_url + circuit_id, json=payload)
-        assert response.status_code == 400
+        assert response.status_code == 400, response.text
 
         time.sleep(10)
 
@@ -347,7 +347,7 @@ class TestE2EMefEline:
 
         # It sets a new circuit's start_date
         response = requests.patch(api_url + schedule_id, json=payload2)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         time.sleep(10)
 
@@ -363,7 +363,7 @@ class TestE2EMefEline:
         # Delete the circuit
         api_url = KYTOS_API + '/mef_eline/v2/evc/' + circuit_id
         response = requests.delete(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         time.sleep(10)
 
@@ -371,7 +371,7 @@ class TestE2EMefEline:
         # listing all the circuits stored
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.get(api_url)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert data == {}
 
