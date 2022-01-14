@@ -23,11 +23,11 @@ for Kytos and Mininet.
 After all installations finish, the docker-compose file will call the kytos-init.sh script which takes care of finishing installing Kytos and all of the required 
 network applications in a quick and efficient way. This script is also responsible for executing all the tests within the projects repository via the commands::
 
-  $ python -m pytest --timeout=60 tests/
+  $ python3 -m pytest --timeout=60 tests/
 
 Which runs all available tests, or run only a specific test::
 
-  $ python -m pytest --timeout=60 \
+  $ python3 -m pytest --timeout=60 \
         tests/test_e2e_10_mef_eline.py::TestE2EMefEline::test_on_primary_path_fail_should_migrate_to_backup
 
 The above lines are entirely up to the user to modify, and will allow them to choose in which way they want to use the tests.
