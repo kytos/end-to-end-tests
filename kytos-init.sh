@@ -8,7 +8,6 @@ sed -i 's/STATS_INTERVAL = 60/STATS_INTERVAL = 3/g' /var/lib/kytos/napps/kytos/o
 sed -i 's/LINK_UP_TIMER = 10/LINK_UP_TIMER = 1/g' /var/lib/kytos/napps/kytos/topology/settings.py
 sed -i 's/DEPLOY_EVCS_INTERVAL = 60/DEPLOY_EVCS_INTERVAL = 5/g' /var/lib/kytos/napps/kytos/mef_eline/settings.py
 sed -i 's/BOX_RESTORE_TIMER = 0.1/BOX_RESTORE_TIMER = 0.5/' /var/lib/kytos/napps/kytos/flow_manager/settings.py
-sed -i 's/COOKIE_PREFIX = 0xbb/COOKIE_PREFIX = 0xab/g' /var/lib/kytos/napps/kytos/of_lldp/settings.py
 
 # increase logging to facilitate troubleshooting
 kytosd --help >/dev/null 2>&1  ## create configs at /etc/kytos from templates
