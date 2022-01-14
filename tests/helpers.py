@@ -161,8 +161,12 @@ class NetworkTest:
             #    pid = int(f.read())
             #    os.kill(pid, signal.SIGTERM)
             time.sleep(5)
+            if os.path.exists('/var/run/kytos/kytosd.pid'):
+                raise Exception("Kytos pid still exists.")
         except Exception as e:
-            print("FAIL restarting kytos -- %s" % e)
+            print("FAIL to stop kytos after 5 seconds -- %s. Force stop!" % e)
+            os.system('pkill -9 kytosd')
+            os.system('rm -f /var/run/kytos/kytosd.pid')
 
         if clean_config:
             # TODO: config is defined at NAPPS_DIR/kytos/storehouse/settings.py 
