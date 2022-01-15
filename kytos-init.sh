@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -xe
 
 # the settings below are intended to decrease the tests execution time (in fact, the time.sleep() calls
 # depend on the values below, otherwise many tests would fail)
