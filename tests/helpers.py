@@ -5,6 +5,7 @@ import mininet.clean
 from mock import patch
 import time
 import os
+import requests
 
 class AmlightTopo(Topo):
     """Amlight Topology."""
@@ -185,13 +186,31 @@ class NetworkTest:
             daemon += ' -E'
         os.system(daemon)
 
+        self.wait_controller_start()
+
+    def wait_controller_start(self):
+        """Wait until controller starts according to core/status API."""
+        wait_count = 0
+        while wait_count < 60:
+            try:
+                response = requests.get('http://127.0.0.1:8181/api/kytos/core/status/', timeout=1)
+                assert response.json()['response'] == 'running'
+                break
+            except:
+                time.sleep(0.5)
+                wait_count += 0.5
+        else:
+            msg = 'Timeout while starting Kytos controller.'
+            raise Exception(msg)
+
     def wait_switches_connect(self):
         max_wait = 0
         while any(not sw.connected() for sw in self.net.switches):
             time.sleep(1)
             max_wait += 1
             if max_wait > 30:
-                raise Exception('Timeout: timed out waiting switches reconnect')
+                status = [(sw.name, sw.connected()) for sw in self.net.switches]
+                raise Exception('Timeout: timed out waiting switches reconnect. Status %s' % status)
 
     def restart_kytos_clean(self):
         self.start_controller(clean_config=True, enable_all=True)
