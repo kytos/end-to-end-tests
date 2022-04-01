@@ -40,7 +40,7 @@ def mongo_hello_wait(retries=6, delay=10):
     """Wait for MongoDB."""
     try:
         client.db.command("hello")
-        print("Sucessfully ran hello command on MongoDB. It's ready!")
+        print("Successfully ran hello command on MongoDB. It's ready!")
     except (OperationFailure, AutoReconnect) as exc:
         retries -= 1
         if retries > 0:
