@@ -1,6 +1,12 @@
 #!/bin/bash
 
-set -x
+set -xe
+
+# XXX: disable sdntrace and sdntrace_cp by default (along with their deps) while we are working on issue #110
+for napp in amlight/coloring amlight/sdntrace amlight/scheduler amlight/flow_stats amlight/sdntrace_cp; do
+   FILE=/var/lib/kytos/napps/$napp
+   test -h $FILE && unlink $FILE
+done
 
 # the settings below are intended to decrease the tests execution time (in fact, the time.sleep() calls
 # depend on the values below, otherwise many tests would fail)
@@ -15,7 +21,7 @@ sed -i 's/WARNING/INFO/g' /etc/kytos/logging.ini
 
 test -z "$TESTS" && TESTS=tests/
 
-python -m pytest $TESTS 2>&1 | tee log-e2e-$(date +%Y%m%d%H%M%S)
+python3 -m pytest $TESTS
 
 # only run specific test
-# python -m pytest --timeout=60 tests/test_e2e_10_mef_eline.py::TestE2EMefEline::test_on_primary_path_fail_should_migrate_to_backup
+# python3 -m pytest --timeout=60 tests/test_e2e_10_mef_eline.py::TestE2EMefEline::test_on_primary_path_fail_should_migrate_to_backup

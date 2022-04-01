@@ -108,4 +108,4 @@ class TestE2EKytosServer:
 
     def test_start_kytos_without_errors(self):
         with open('/var/log/syslog', "r") as f:
-            assert re.findall('kytos.*(error|exception)', f.read(), re.I) == []
+            assert re.findall(r'kytos.*?(error|exception)(.*)?', f.read(), re.I) == []
