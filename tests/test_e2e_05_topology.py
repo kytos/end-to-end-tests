@@ -615,6 +615,8 @@ class TestE2ETopology:
         api_url = KYTOS_API + '/topology/v3/interfaces'
         response = requests.get(api_url)
         data = response.json()
+
+        assert response.status_code == 200, response.text
         for interface in data['interfaces']:
             assert data['interfaces'][interface]['enabled'] is False
 
