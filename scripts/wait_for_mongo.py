@@ -13,8 +13,9 @@ def mongo_client(
     retrywrites=True,
     retryreads=True,
     readpreference="primaryPreferred",
-    maxpoolsize=int(os.environ.get("MONGO_MAX_POOLSIZE", 12)),
-    minpoolsize=int(os.environ.get("MONGO_MIN_POOLSIZE", 12)),
+    maxpoolsize=int(os.environ.get("MONGO_MAX_POOLSIZE", 6)),
+    minpoolsize=int(os.environ.get("MONGO_MIN_POOLSIZE", 3)),
+    serverselectiontimeoutms=30000,
     **kwargs,
 ) -> MongoClient:
     """mongo_client."""
@@ -33,19 +34,17 @@ def mongo_client(
     )
 
 
-client = mongo_client()
-
-
-def mongo_hello_wait(retries=6, delay=10):
+def mongo_hello_wait(mongo_client=mongo_client, retries=6, timeout_ms=30000):
     """Wait for MongoDB."""
     try:
+        client = mongo_client(serverselectiontimeoutms=timeout_ms)
+        print("Trying to run 'hello' command on MongoDB...")
         client.db.command("hello")
-        print("Successfully ran hello command on MongoDB. It's ready!")
+        print("Ran 'hello' command on MongoDB successfully. It's ready!")
     except (OperationFailure, AutoReconnect) as exc:
         retries -= 1
         if retries > 0:
-            print("Retrying...")
-            return mongo_hello_wait(retries, delay)
+            return mongo_hello_wait(mongo_client, retries, timeout_ms)
         print(f"Maximum retries reached when waiting for MongoDB. {str(exc)}")
         sys.exit(1)
 
