@@ -107,7 +107,7 @@ def main() -> None:
     content = write_host_seeds_file(hosts, output_host_seeds_file)
     print(f"Wrote {content} to {output_host_seeds_file}")
 
-    print("Waiting for node {first_node} to become primary")
+    print(f"Waiting for node {first_node} to become primary")
     wait_until_first_node_is_primary(client)
 
     try:
