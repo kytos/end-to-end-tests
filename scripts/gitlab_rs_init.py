@@ -1,5 +1,6 @@
 import os
 import re
+import time
 
 from pymongo import MongoClient
 from pymongo.errors import OperationFailure
@@ -70,6 +71,7 @@ def wait_until_first_node_is_primary(client: MongoClient) -> None:
         print(f"Waiting for the first node to be PRIMARY, current: {status}")
         response = client.admin.command("replSetGetStatus")
         status = response["members"][0]["stateStr"]
+        time.sleep(3)
     print("First node stateStr is PRIMARY")
 
 
@@ -80,7 +82,7 @@ def write_host_seeds_file(
     file_content = ",".join([value["ip_port"] for value in hosts.values()])
     with open(output_host_seeds_file, "w") as f:
         f.write(file_content)
-    return file_content, output_host_seeds_file
+    return file_content
 
 
 def main() -> None:

@@ -6,7 +6,7 @@ services:
     volumes:
       - "./kytos-init.sh:/kytos-init.sh"
       - "./tests:/tests"
-      - "./scripts/wait_for_mongo.py:/wait_for_mongo.py"
+      - "./scripts/wait_for_mongo.py:/scripts/wait_for_mongo.py"
     command:
       - /kytos-init.sh
     environment:
