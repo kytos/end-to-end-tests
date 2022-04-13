@@ -202,7 +202,8 @@ class NetworkTest:
         """Drop database."""
         self.db_client.drop_database(self.db_name)
 
-    def start_controller(self, clean_config=False, enable_all=False, del_flows=False, port=None):
+    def start_controller(self, clean_config=False, enable_all=False,
+                         del_flows=False, port=None, database='mongodb'):
         # Restart kytos and check if the napp is still disabled
         try:
             os.system('pkill kytosd')
@@ -221,10 +222,11 @@ class NetworkTest:
             # TODO: config is defined at NAPPS_DIR/kytos/storehouse/settings.py 
             # and NAPPS_DIR is defined at /etc/kytos/kytos.conf
             os.system('rm -rf /var/tmp/kytos/storehouse')
-            try:
-                self.drop_database()
-            except ServerSelectionTimeoutError as exc:
-                print(f"FAIL to drop database. {str(exc)}")
+            if database:
+                try:
+                    self.drop_database()
+                except ServerSelectionTimeoutError as exc:
+                    print(f"FAIL to drop database. {str(exc)}")
 
         if clean_config or del_flows:
             # Remove any installed flow
@@ -232,6 +234,8 @@ class NetworkTest:
                 sw.dpctl('del-flows')
 
         daemon = 'kytosd'
+        if database:
+            daemon += f' --database {database}'
         if port:
             daemon += ' --port %s' % port
         if enable_all:
