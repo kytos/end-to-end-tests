@@ -2,6 +2,7 @@ import os
 import re
 
 from pymongo import MongoClient
+from pymongo.errors import OperationFailure
 
 
 def set_replicaset(client: MongoClient, host_seeds_ip: dict, rs="rs0") -> None:
@@ -55,6 +56,33 @@ def host_seeds_ip_dict(host_seeds_dict: dict, host_entries: dict) -> None:
     return hosts
 
 
+def create_napps_user(client: MongoClient, user: str, pwd=None):
+    """Create user"""
+    return client.napps.command(
+        "createUser", user, pwd=pwd, roles=[{"role": "dbAdmin", "db": "napps"}]
+    )
+
+
+def wait_until_first_node_is_primary(client: MongoClient) -> None:
+    """Wait until first node is primary."""
+    status = None
+    while status != "PRIMARY":
+        print(f"Waiting for the first node to be PRIMARY, current: {status}")
+        response = client.admin.command("replSetGetStatus")
+        status = response["members"][0]["stateStr"]
+    print("First node stateStr is PRIMARY")
+
+
+def write_host_seeds_file(
+    hosts: dict, output_host_seeds_file="/tmp/host_seeds.txt"
+) -> str:
+    """Write host seeds file to export it as an env var on GitLab."""
+    file_content = ",".join([value["ip_port"] for value in hosts.values()])
+    with open(output_host_seeds_file, "w") as f:
+        f.write(file_content)
+    return file_content, output_host_seeds_file
+
+
 def main() -> None:
     """Main."""
     host_seeds = os.environ["MONGO_HOSTS_PORTS"]
@@ -66,17 +94,28 @@ def main() -> None:
     print(f"Mapped hosts dict: {hosts}")
 
     first_node = next(iter(hosts.keys()))
-    print(f"Trying to run hello cmd on {first_node}")
+    print(f"Running hello cmd on {first_node}")
     client = MongoClient(hosts[first_node]["host_port"], directConnection=True)
-
     print(client.db.command("hello"))
-    print("Trying to config replica set")
-    print(set_replicaset(client, hosts))
 
-    file_content = ",".join([value["ip_port"] for value in hosts.values()])
-    with open(output_host_seeds_file, "w") as f:
-        f.write(file_content)
-    print(f"Wrote {file_content} to {output_host_seeds_file}")
+    print("Configuring replica set")
+    response = set_replicaset(client, hosts)
+    assert "ok" in response, response
+
+    content = write_host_seeds_file(hosts, output_host_seeds_file)
+    print(f"Wrote {content} to {output_host_seeds_file}")
+
+    print("Waiting for node {first_node} to become primary")
+    wait_until_first_node_is_primary(client)
+
+    try:
+        user, pwd = os.environ["MONGO_USERNAME"], os.environ["MONGO_PASSWORD"]
+        print(f"Creating 'napps' user {user}")
+        response = create_napps_user(client, user, pwd)
+        assert "ok" in response, response
+    except OperationFailure as exc:
+        if "already exists" not in str(exc):
+            raise
 
 
 if __name__ == "__main__":
