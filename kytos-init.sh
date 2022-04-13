@@ -21,7 +21,7 @@ sed -i 's/WARNING/INFO/g' /etc/kytos/logging.ini
 
 test -z "$TESTS" && TESTS=tests/
 
-python3 /wait_for_mongo.py
+python3 scripts/wait_for_mongo.py
 python3 -m pytest $TESTS
 
 # only run specific test
