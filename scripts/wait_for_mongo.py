@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from pymongo import MongoClient
 from pymongo.errors import OperationFailure, AutoReconnect
 
@@ -34,7 +35,7 @@ def mongo_client(
     )
 
 
-def mongo_hello_wait(mongo_client=mongo_client, retries=6, timeout_ms=30000):
+def mongo_hello_wait(mongo_client=mongo_client, retries=10, timeout_ms=10000):
     """Wait for MongoDB."""
     try:
         client = mongo_client(serverselectiontimeoutms=timeout_ms)
@@ -44,6 +45,7 @@ def mongo_hello_wait(mongo_client=mongo_client, retries=6, timeout_ms=30000):
     except (OperationFailure, AutoReconnect) as exc:
         retries -= 1
         if retries > 0:
+            time.sleep(max(timeout_ms / 1000, 1))
             return mongo_hello_wait(mongo_client, retries, timeout_ms)
         print(f"Maximum retries reached when waiting for MongoDB. {str(exc)}")
         sys.exit(1)
