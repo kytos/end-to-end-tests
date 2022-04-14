@@ -145,6 +145,7 @@ class TestE2EOfLLDP:
         time.sleep(5)
         self.enable_all_interfaces()
         TestE2EOfLLDP.disable_all_of_lldp()
+        time.sleep(5)
 
         payload = {
             "interfaces": [
