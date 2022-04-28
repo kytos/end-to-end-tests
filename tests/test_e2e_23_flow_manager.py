@@ -4,6 +4,7 @@ import time
 import pytest
 import requests
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from tests.helpers import NetworkTest
 
 CONTROLLER = '127.0.0.1'
@@ -1024,19 +1025,33 @@ class TestE2EFlowManager:
         Tests the performance and race condition
         with the creation of multiple flows
         """
-        import subprocess
-
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
 
-        import shlex
-        for i in range(100, 200):
-            cmd = '''curl -X POST -H 'Content-type: application/json' ''' + api_url + '''
-                    -d "{\\"flows\\": [{\\"priority\\": 100, \\"cookie\\": 84114904,
-                    \\"match\\": {\\"in_port\\": 1, \\"dl_vlan\\":''' + str(i) + '''},
-                    \\"actions\\": [{\\"action_type\\": \\"output\\", \\"port\\": 2}]}]}"'''
+        def flow_request(dl_vlan):
+            payload = {
+              "flows": [{
+                "priority": 100,
+                "cookie": 84114904,
+                "match": {
+                  "in_port": 1,
+                  "dl_vlan": int(dl_vlan),
+                },
+                "actions": [{
+                  "action_type": "output",
+                  "port": 2
+                }]
+              }]
+            }
+            return requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
 
-            args = shlex.split(cmd)
-            process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        with ThreadPoolExecutor(max_workers=100) as executor:
+            futures = [
+                executor.submit(flow_request, dl_vlan) for dl_vlan in range(100, 200)
+            ]
+            for future in as_completed(futures):
+                response = future.result()
+                assert response.status_code == 202, response.text
 
         # wait for the flow to be installed
         time.sleep(10)
