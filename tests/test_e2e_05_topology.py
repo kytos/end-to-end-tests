@@ -1,5 +1,6 @@
 import json
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from tests.helpers import NetworkTest
 import time
 
@@ -193,6 +194,43 @@ class TestE2ETopology:
         data = response.json()
         keys = data['metadata'].keys()
         assert key not in keys
+
+    def test_045_insert_switch_metadata_concurrently(self):
+        """
+        Test /api/kytos/topology/v3/switches/{dpid}/metadata/{key} on POST
+        supported by:
+            /api/kytos/topology/v3/switches/{dpid}/metadata on GET
+        """
+        switch_id = "00:00:00:00:00:00:00:01"
+
+        n_keys = 100
+
+        def insert_metadata(metadata):
+            payload = metadata
+            api_url = f"{KYTOS_API}/topology/v3/switches/{switch_id}/metadata"
+            return requests.post(
+                api_url,
+                data=json.dumps(payload),
+                headers={"Content-type": "application/json"},
+            )
+
+        metadatas = [{str(k): k for k in range(n_keys)}]
+        with ThreadPoolExecutor(max_workers=n_keys) as executor:
+            futures = [
+                executor.submit(insert_metadata, metadata) for metadata in metadatas
+            ]
+            for future in as_completed(futures):
+                response = future.result()
+                assert response.status_code == 201, response.text
+
+        # Verify that the metadata is inserted
+        api_url = KYTOS_API + '/topology/v3/switches/%s/metadata' % switch_id
+        response = requests.get(api_url)
+        data = response.json()
+        keys = list(data['metadata'].keys())
+        expected_keys = [str(k) for k in range(n_keys)]
+        diff = set(expected_keys) - set(keys)
+        assert len(diff) == 0, f"Keys set difference: {diff}"
 
     def test_050_enabling_interface_persistent(self):
         """
@@ -615,6 +653,8 @@ class TestE2ETopology:
         api_url = KYTOS_API + '/topology/v3/interfaces'
         response = requests.get(api_url)
         data = response.json()
+
+        assert response.status_code == 200, response.text
         for interface in data['interfaces']:
             assert data['interfaces'][interface]['enabled'] is False
 
