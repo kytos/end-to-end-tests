@@ -126,12 +126,12 @@ class TestE2EFlowManager:
         assert response.status_code == 200, response.text
         data = response.json()
         assert len(data[switch_id]["flows"]) == BASIC_FLOWS + 1
-        assert data[switch_id]["flows"][1]["instructions"][0]["instruction_type"] == "apply_actions"
-        assert data[switch_id]["flows"][1]['instructions'][0]["actions"] == payload["flows"][0]["actions"]
-        assert data[switch_id]["flows"][1]["match"] == payload["flows"][0]["match"]
-        assert data[switch_id]["flows"][1]["priority"] == payload["flows"][0]["priority"]
-        assert data[switch_id]["flows"][1]["idle_timeout"] == payload["flows"][0]["idle_timeout"]
-        assert data[switch_id]["flows"][1]["hard_timeout"] == payload["flows"][0]["hard_timeout"]
+        assert data[switch_id]["flows"][-1]["instructions"][0]["instruction_type"] == "apply_actions"
+        assert data[switch_id]["flows"][-1]['instructions'][0]["actions"] == payload["flows"][0]["actions"]
+        assert data[switch_id]["flows"][-1]["match"] == payload["flows"][0]["match"]
+        assert data[switch_id]["flows"][-1]["priority"] == payload["flows"][0]["priority"]
+        assert data[switch_id]["flows"][-1]["idle_timeout"] == payload["flows"][0]["idle_timeout"]
+        assert data[switch_id]["flows"][-1]["hard_timeout"] == payload["flows"][0]["hard_timeout"]
 
     def test_015_install_flows(self):
         """Tests if, after kytos restart, a flow installed
