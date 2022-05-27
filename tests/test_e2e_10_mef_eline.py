@@ -13,6 +13,11 @@ KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 TIME_FMT = "%Y-%m-%dT%H:%M:%S+0000"
 
+# BasicFlows
+# Each should have at least 3 flows, considering topology 'ring':
+# - 01 for LLDP
+# - 02 for amlight/coloring (node degree - number of neighbors)
+BASIC_FLOWS = 3
 
 class TestE2EMefEline:
     net = None
@@ -123,8 +128,8 @@ class TestE2EMefEline:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
-        assert len(flows_s1.split('\r\n ')) == 3
+        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
 
         # TODO: make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=101' in flows_s1
@@ -161,13 +166,13 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         time.sleep(10)
 
-        # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=15' in flows_s1
@@ -212,12 +217,12 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         time.sleep(10)
 
-        # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=102' in flows_s1
@@ -261,12 +266,12 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         time.sleep(10)
 
-        # Each switch must have 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
+        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=104' in flows_s1
@@ -336,15 +341,15 @@ class TestE2EMefEline:
         assert evc1 != evc2
         time.sleep(10)
 
-        # The switch 1 should have 5 flows: 01 for LLDP + 02 for evc1 + 02 for evc2
-        # The switches 2 and 3 should have 3 flows: 01 for LLDP + 02 for each evc
+        # Switch should have BASIC_FLOWS + 02 for evc1 + 02 for evc2
+        # The switches 2 and 3 should have BASIC_FLOWS + 02 for evc
         s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 5
-        assert len(flows_s2.split('\r\n ')) == 3
-        assert len(flows_s3.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=110' in flows_s1
@@ -423,12 +428,12 @@ class TestE2EMefEline:
         data = response.json()
         assert data['enabled'] is False
 
-        # Each switch should have only one flow: LLDP
+        # Each switch must have BASIC_FLOWS
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 1
-        assert len(flows_s2.split('\r\n ')) == 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
 
         # Nodes should not be able to ping each other
         h11, h2 = self.net.net.get('h11', 'h2')
@@ -496,12 +501,12 @@ class TestE2EMefEline:
         assert evc1 != evc2
         time.sleep(10)
 
-        # The switches should have 3 flows: 01 for LLDP + 02 for each evc
+        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
 
         # Nodes should be able to ping each other
         h11, h2 = self.net.net.get('h11', 'h2')
@@ -555,15 +560,15 @@ class TestE2EMefEline:
 
         time.sleep(10)
 
-        # Check on the virtual switches directly for flows
+        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
         s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 3
-        assert len(flows_s3.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
 
         # Command to up/down links to test if back-up path is taken
         self.net.net.configLinkStatus('s1', 's2', 'down')
@@ -594,9 +599,9 @@ class TestE2EMefEline:
         self.net.net.configLinkStatus('s1', 's2', 'up')
 
         assert ', 0% packet loss,' in result
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 1
-        assert len(flows_s3.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
 
     """It is returning Response 500, should be 200
         on delete circuit action"""
@@ -706,8 +711,14 @@ class TestE2EMefEline:
             assert response.json() == {}
             flows_s1 = s1.dpctl('dump-flows')
             flows_s2 = s2.dpctl('dump-flows')
-            assert len(flows_s1.split('\r\n ')) == 1, "round=%d - should have only 1 flow but had: \n%s" % (x, flows_s1)
-            assert len(flows_s2.split('\r\n ')) == 1, "round=%d - should have only 1 flow but had: \n%s" % (x, flows_s2)
+            assert (
+                len(flows_s1.split('\r\n ')) == BASIC_FLOWS,
+                f"round={x} - should have {BASIC_FLOWS} flows but had: \n{flows_s1}"
+            )
+            assert (
+                len(flows_s2.split('\r\n ')) == BASIC_FLOWS,
+                f"round={x} - should have {BASIC_FLOWS} flows but had: \n{flows_s2}"
+            )
 
     def test_085_create_and_remove_ten_circuit_concurrently(self):
         """
@@ -765,9 +776,14 @@ class TestE2EMefEline:
         assert response.json() == {}
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 1, "should have only 1 flow but had: \n%s" % flows_s1
-        assert len(flows_s2.split('\r\n ')) == 1, "should have only 1 flow but had: \n%s" % flows_s2
-
+        assert (
+            len(flows_s1.split('\r\n ')) == BASIC_FLOWS,
+            f"should have only {BASIC_FLOWS} flow but had: \n{flows_s1}"
+        )
+        assert (
+            len(flows_s2.split('\r\n ')) == BASIC_FLOWS,
+            f"should have only {BASIC_FLOWS} flow but had: \n{flows_s2}"
+        )
     def test_090_patch_evc_new_name(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'

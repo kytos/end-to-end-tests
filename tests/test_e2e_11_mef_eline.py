@@ -9,6 +9,11 @@ from tests.helpers import NetworkTest
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % (CONTROLLER)
 
+# BasicFlows
+# Each should have at least 3 flows, considering topology 'ring4':
+# - 01 for LLDP
+# - 02 for amlight/coloring (node degree - number of neighbors)
+BASIC_FLOWS = 3
 
 class TestE2EMefEline:
     net = None
@@ -92,10 +97,10 @@ class TestE2EMefEline:
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
         flows_s4 = s4.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 3
-        assert len(flows_s3.split('\r\n ')) == 3
-        assert len(flows_s4.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2
 
         # Nodes should be able to ping each other
         h1, h3 = self.net.net.get('h1', 'h3')
@@ -155,10 +160,10 @@ class TestE2EMefEline:
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
         flows_s4 = s4.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 3
-        assert len(flows_s3.split('\r\n ')) == 3
-        assert len(flows_s4.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2
 
         # Nodes should be able to ping each other
         h1, h3 = self.net.net.get('h1', 'h3')
@@ -217,10 +222,10 @@ class TestE2EMefEline:
         flows_s3 = s3.dpctl('dump-flows')
         flows_s4 = s4.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 3
-        assert len(flows_s3.split('\r\n ')) == 3
-        assert len(flows_s4.split('\r\n ')) == 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2
 
         # Nodes should be able to ping each other
         h1, h3 = self.net.net.get('h1', 'h3')
@@ -263,10 +268,10 @@ class TestE2EMefEline:
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
         flows_s4 = s4.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 3
-        assert len(flows_s2.split('\r\n ')) == 1
-        assert len(flows_s3.split('\r\n ')) == 1
-        assert len(flows_s4.split('\r\n ')) == 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS
 
         # Nodes should be able to ping each other
         h1, h2 = self.net.net.get('h1', 'h2')
