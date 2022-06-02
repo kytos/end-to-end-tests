@@ -7,6 +7,10 @@ import time
 import os
 import requests
 
+from pymongo import MongoClient
+from pymongo.errors import ServerSelectionTimeoutError
+
+
 class AmlightTopo(Topo):
     """Amlight Topology."""
     def build(self):
@@ -136,8 +140,43 @@ topos = {
 }
 
 
+def mongo_client(
+    host_seeds=os.environ.get("MONGO_HOST_SEEDS"),
+    username=os.environ.get("MONGO_USERNAME"),
+    password=os.environ.get("MONGO_PASSWORD"),
+    database=os.environ.get("MONGO_DBNAME"),
+    connect=False,
+    retrywrites=True,
+    retryreads=True,
+    readpreference='primaryPreferred',
+    maxpoolsize=int(os.environ.get("MONGO_MAX_POOLSIZE", 20)),
+    minpoolsize=int(os.environ.get("MONGO_MIN_POOLSIZE", 10)),
+    **kwargs,
+) -> MongoClient:
+    """mongo_client."""
+    return MongoClient(
+        host_seeds.split(","),
+        username=username,
+        password=password,
+        connect=False,
+        authsource=database,
+        retrywrites=retrywrites,
+        retryreads=retryreads,
+        readpreference=readpreference,
+        maxpoolsize=maxpoolsize,
+        minpoolsize=minpoolsize,
+        **kwargs,
+    )
+
+
 class NetworkTest:
-    def __init__(self, controller_ip, topo_name='ring'):
+    def __init__(
+        self,
+        controller_ip,
+        topo_name="ring",
+        db_client=mongo_client,
+        db_client_options=None,
+    ):
         # Create an instance of our topology
         mininet.clean.cleanup()
 
@@ -150,12 +189,22 @@ class NetworkTest:
                 name, ip=controller_ip, port=6653),
             switch=OVSSwitch,
             autoSetMacs=True)
+        db_client_kwargs = db_client_options or {}
+        db_name = db_client_kwargs.get("database") or os.environ.get("MONGO_DBNAME")
+        self.db_client = db_client(**db_client_kwargs)
+        self.db_name = db_name
+        self.db = self.db_client[self.db_name]
 
     def start(self):
         self.net.start()
         self.start_controller(clean_config=True)
 
-    def start_controller(self, clean_config=False, enable_all=False, del_flows=False, port=None):
+    def drop_database(self):
+        """Drop database."""
+        self.db_client.drop_database(self.db_name)
+
+    def start_controller(self, clean_config=False, enable_all=False,
+                         del_flows=False, port=None, database='mongodb'):
         # Restart kytos and check if the napp is still disabled
         try:
             os.system('pkill kytosd')
@@ -174,6 +223,11 @@ class NetworkTest:
             # TODO: config is defined at NAPPS_DIR/kytos/storehouse/settings.py 
             # and NAPPS_DIR is defined at /etc/kytos/kytos.conf
             os.system('rm -rf /var/tmp/kytos/storehouse')
+            if database:
+                try:
+                    self.drop_database()
+                except ServerSelectionTimeoutError as exc:
+                    print(f"FAIL to drop database. {str(exc)}")
 
         if clean_config or del_flows:
             # Remove any installed flow
@@ -181,6 +235,8 @@ class NetworkTest:
                 sw.dpctl('del-flows')
 
         daemon = 'kytosd'
+        if database:
+            daemon += f' --database {database}'
         if port:
             daemon += ' --port %s' % port
         if enable_all:
