@@ -16,7 +16,7 @@ sed -i 's/DEPLOY_EVCS_INTERVAL = 60/DEPLOY_EVCS_INTERVAL = 5/g' /var/lib/kytos/n
 sed -i 's/BOX_RESTORE_TIMER = 0.1/BOX_RESTORE_TIMER = 0.5/' /var/lib/kytos/napps/kytos/flow_manager/settings.py
 #sed -n '10p' /var/lib/kytos/napps/kytos/of_lldp/settings.py
 sed -i 's/LLDP_LOOP_ACTIONS = \["log"\]/BLLDP_LOOP_ACTIONS = \["disable,log"\]/' /var/lib/kytos/napps/kytos/of_lldp/settings.py
-#sed -n '10p' /var/lib/kytos/napps/kytos/of_lldp/settings.py
+sed -n '10p' /var/lib/kytos/napps/kytos/of_lldp/settings.py
 # increase logging to facilitate troubleshooting
 kytosd --help >/dev/null 2>&1  ## create configs at /etc/kytos from templates
 sed -i 's/WARNING/INFO/g' /etc/kytos/logging.ini
