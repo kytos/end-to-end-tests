@@ -35,9 +35,8 @@ class TestE2EOfLLDPLoopDetection:
         """ This will test that given a looped topology, assuming that there is a loop
         it's going to shutdown the interface. """
 
-        polling_time = 60
+        polling_time = 5
 
-        switch = "00:00:00:00:00:00:00:01"
         interface_id = "00:00:00:00:00:00:00:01:1"
 
         # GET topology with the interface ensuring that it's enabled
@@ -55,7 +54,7 @@ class TestE2EOfLLDPLoopDetection:
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         data = response.json()
-        print(data)
+        assert 'looped' in data['interfaces'][interface_id]['metadata']
         assert data['interfaces'][interface_id]['enabled'] == False
 
 
@@ -64,6 +63,7 @@ class TestE2EOfLLDPLoopDetection:
 
         polling_time = 5
 
+        switch = '00:00:00:00:00:00:00:01'
         interface_id4 = "00:00:00:00:00:00:00:01:4"
         interface_id5 = "00:00:00:00:00:00:00:01:5"
 
@@ -79,12 +79,16 @@ class TestE2EOfLLDPLoopDetection:
         time.sleep(polling_time)
 
         # GET topology with the interface ensuring that they are enabled
-        api_url = KYTOS_API + '/topology/v3/interfaces' 
+        api_url = KYTOS_API + '/topology/v3/switches' 
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert data['interfaces'][interface_id4]['enabled'] == True
-        assert data['interfaces'][interface_id5]['enabled'] == True
+        print(data['switches'][switch]['interfaces'][interface_id4]['metadata']) #looped in 
+        print(data['switches'][switch]['metadata']) #ignored_loops: [[4,5]] in
+        assert 'looped' in data['switches'][switch]['interfaces'][interface_id4]['metadata']
+        assert 'ignored_loops' in data['switches'][switch]['metadata']
+        assert data['switches'][switch]['interfaces'][interface_id4]['enabled'] == True
+        assert data['switches'][switch]['interfaces'][interface_id5]['enabled'] == True
 
 
     def test_020_reconfigure_ignored_loops(self):
@@ -92,10 +96,9 @@ class TestE2EOfLLDPLoopDetection:
         POST /api/kytos/topology/v3/switches/{{dpid}}/metadata 
         the loops aren't ignored anymore.. """
 
- 
         polling_time = 5
 
-        switch = "00:00:00:00:00:00:00:01"
+        switch = '00:00:00:00:00:00:00:01'
         interface_id4 = "00:00:00:00:00:00:00:01:4"
         interface_id5 = "00:00:00:00:00:00:00:01:5"
 
@@ -107,27 +110,34 @@ class TestE2EOfLLDPLoopDetection:
         assert data['interfaces'][interface_id4]['enabled'] == True
         assert data['interfaces'][interface_id5]['enabled'] == True
 
-        # Reconfigure the ignored loop
-        api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id4
-        response = requests.post(api_url, json={"ignored_loops": []})
-        assert response.status_code == 200, response.text
-        
-        api_url = KYTOS_API + '/topology/v3/interfaces/%s/metadata' % interface_id5
-        response = requests.post(api_url, json={"ignored_loops": []})
-        assert response.status_code == 200, response.text
-
-        self.restart()
-
         # WAIT for some time, until the feature kicks
         time.sleep(polling_time)
 
+        # check
+        # api_url = KYTOS_API + '/topology/v3/switches' 
+        # response = requests.get(api_url)
+        # assert response.status_code == 200, response.text
+        # data = response.json()
+        # print(data['switches'][switch]['interfaces'][interface_id4]['metadata']) #looped in 
+        # print(data['switches'][switch]['metadata']) #ignored_loops: [] 
+        
+        # Reconfigure the ignored loops
+        api_url = KYTOS_API + '/topology/v3/switches/%s/metadata' % switch
+        response = requests.post(api_url, json={"ignored_loops": []})
+        assert response.status_code == 201, response.text
+
+        self.restart()
+
         # GET topology with the interface ensuring that they are enabled
-        api_url = KYTOS_API + '/topology/v3/interfaces' 
+        api_url = KYTOS_API + '/topology/v3/switches' 
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert data['interfaces'][interface_id4]['enabled'] == True
-        assert data['interfaces'][interface_id5]['enabled'] == True
+        print(data['switches'][switch]['interfaces'][interface_id4]['metadata']) #looped in 
+        print(data['switches'][switch]['metadata']) #ignored_loops: [] 
+        assert data['switches'][switch]['interfaces'][interface_id4]['enabled'] == False
+        assert data['switches'][switch]['interfaces'][interface_id5]['enabled'] == False
+
 
 
 
