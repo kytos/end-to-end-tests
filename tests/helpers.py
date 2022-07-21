@@ -140,6 +140,7 @@ class Looped(Topo):
         s2 = self.addSwitch("s2")
 
         self.addLink(s1, s1, port1=1, port2=2)
+        self.addLink(s1, s1, port1=4, port2=5)
         self.addLink(s1, s2, port1=3, port2=1)
 
 # You can run any of the topologies above by doing:
