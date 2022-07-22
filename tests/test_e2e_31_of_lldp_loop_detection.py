@@ -113,14 +113,6 @@ class TestE2EOfLLDPLoopDetection:
         # WAIT for some time, until the feature kicks
         time.sleep(polling_time)
 
-        # check
-        # api_url = KYTOS_API + '/topology/v3/switches' 
-        # response = requests.get(api_url)
-        # assert response.status_code == 200, response.text
-        # data = response.json()
-        # print(data['switches'][switch]['interfaces'][interface_id4]['metadata']) #looped in 
-        # print(data['switches'][switch]['metadata']) #ignored_loops: [] 
-        
         # Reconfigure the ignored loops
         api_url = KYTOS_API + '/topology/v3/switches/%s/metadata' % switch
         response = requests.post(api_url, json={"ignored_loops": []})
