@@ -14,8 +14,8 @@ class TestE2EOfLLDPLoopDetection:
         cls.net = NetworkTest(CONTROLLER, topo_name='looped')
         cls.net.start()
         cls.net.restart_kytos_clean()
-        cls.net.wait_switches_connect()
-        time.sleep(10)
+        #cls.net.wait_switches_connect()
+        #time.sleep(10)
 
     @classmethod
     def teardown_class(cls):
@@ -63,9 +63,7 @@ class TestE2EOfLLDPLoopDetection:
 
         polling_time = 5
 
-        switch = '00:00:00:00:00:00:00:01'
         interface_id4 = "00:00:00:00:00:00:00:01:4"
-        interface_id5 = "00:00:00:00:00:00:00:01:5"
 
         # GET topology with the interfaces ensuring that they are enabled
         api_url = KYTOS_API + '/topology/v3/interfaces' 
@@ -73,22 +71,16 @@ class TestE2EOfLLDPLoopDetection:
         assert response.status_code == 200, response.text
         data = response.json()
         assert data['interfaces'][interface_id4]['enabled'] == True
-        assert data['interfaces'][interface_id5]['enabled'] == True
 
         # WAIT for some time, until the feature kicks
         time.sleep(polling_time)
 
         # GET topology with the interface ensuring that they are enabled
-        api_url = KYTOS_API + '/topology/v3/switches' 
+        api_url = KYTOS_API + '/topology/v3/interfaces' 
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         data = response.json()
-        print(data['switches'][switch]['interfaces'][interface_id4]['metadata']) #looped in 
-        print(data['switches'][switch]['metadata']) #ignored_loops: [[4,5]] in
-        assert 'looped' in data['switches'][switch]['interfaces'][interface_id4]['metadata']
-        assert 'ignored_loops' in data['switches'][switch]['metadata']
-        assert data['switches'][switch]['interfaces'][interface_id4]['enabled'] == True
-        assert data['switches'][switch]['interfaces'][interface_id5]['enabled'] == True
+        assert data['interfaces'][interface_id4]['enabled'] == True  # [4,5] is an ignored loop
 
 
     def test_020_reconfigure_ignored_loops(self):
@@ -100,7 +92,6 @@ class TestE2EOfLLDPLoopDetection:
 
         switch = '00:00:00:00:00:00:00:01'
         interface_id4 = "00:00:00:00:00:00:00:01:4"
-        interface_id5 = "00:00:00:00:00:00:00:01:5"
 
         # GET topology with the interfaces ensuring that they are enabled
         api_url = KYTOS_API + '/topology/v3/interfaces' 
@@ -108,7 +99,6 @@ class TestE2EOfLLDPLoopDetection:
         assert response.status_code == 200, response.text
         data = response.json()
         assert data['interfaces'][interface_id4]['enabled'] == True
-        assert data['interfaces'][interface_id5]['enabled'] == True
 
         # WAIT for some time, until the feature kicks
         time.sleep(polling_time)
@@ -121,14 +111,11 @@ class TestE2EOfLLDPLoopDetection:
         self.restart()
 
         # GET topology with the interface ensuring that they are enabled
-        api_url = KYTOS_API + '/topology/v3/switches' 
+        api_url = KYTOS_API + '/topology/v3/interfaces' 
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         data = response.json()
-        print(data['switches'][switch]['interfaces'][interface_id4]['metadata']) #looped in 
-        print(data['switches'][switch]['metadata']) #ignored_loops: [] 
-        assert data['switches'][switch]['interfaces'][interface_id4]['enabled'] == False
-        assert data['switches'][switch]['interfaces'][interface_id5]['enabled'] == False
+        assert data['interfaces'][interface_id4]['enabled'] == False # [4,5] is an ignored loop, it was reconfigured
 
 
 

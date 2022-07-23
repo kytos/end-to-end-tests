@@ -197,7 +197,7 @@ class NetworkTest:
         # OVS and controlled by a remote controller
         patch('mininet.util.fixLimits', side_effect=None)
         self.net = Mininet(
-            topo=topos.get(topo_name, topos['looped'])(),
+            topo=topos.get(topo_name, topos[topo_name])(),
             controller=lambda name: RemoteController(
                 name, ip=controller_ip, port=6653),
             switch=OVSSwitch,
