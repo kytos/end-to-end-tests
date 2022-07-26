@@ -39,12 +39,15 @@ class TestE2EOfLLDPLoopDetection:
 
         interface_id = "00:00:00:00:00:00:00:01:1"
 
-        # GET topology with the interface ensuring that it's enabled
-        api_url = KYTOS_API + '/topology/v3/interfaces' 
-        response = requests.get(api_url)
-        assert response.status_code == 200, response.text
-        data = response.json()
-        assert data['interfaces'][interface_id]['enabled'] == True
+        # GET topology with the interface ensuring that it's enabled.
+        # Loop detection relies on the POLLING_TIME, by default is 3 seconds, 
+        # the tests will pretty much start with the interface down. 
+
+        #api_url = KYTOS_API + '/topology/v3/interfaces' 
+        #response = requests.get(api_url)
+        #assert response.status_code == 200, response.text
+        #data = response.json()
+        #assert data['interfaces'][interface_id]['enabled'] == True
 
         # WAIT for some time, until the feature kicks
         time.sleep(polling_time)

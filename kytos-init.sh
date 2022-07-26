@@ -30,8 +30,8 @@ test -z "$TESTS" && TESTS=tests/
 python3 scripts/wait_for_mongo.py 2>/dev/null
 #python3 -m pytest --capture=tee-sys tests/test_e2e_31_of_lldp_loop_detection.py::TestE2EOfLLDPLoopDetection::test_001_loop_detection_disable_action
 #python3 -m pytest --capture=tee-sys tests/test_e2e_31_of_lldp_loop_detection.py::TestE2EOfLLDPLoopDetection::test_010_lldp_ignored_loops
-python3 -m pytest --capture=tee-sys tests/test_e2e_31_of_lldp_loop_detection.py::TestE2EOfLLDPLoopDetection::test_020_reconfigure_ignored_loops
-
+#python3 -m pytest --capture=tee-sys tests/test_e2e_31_of_lldp_loop_detection.py::TestE2EOfLLDPLoopDetection::test_020_reconfigure_ignored_loops
+python3 -m pytest --capture=tee-sys tests/test_e2e_31_of_lldp_loop_detection.py
 #python3 -m pytest $TESTS
 
 #tail -f
