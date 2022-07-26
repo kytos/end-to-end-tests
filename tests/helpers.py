@@ -218,15 +218,11 @@ class NetworkTest:
             os.system('pkill -9 kytosd')
             os.system('rm -f /var/run/kytos/kytosd.pid')
 
-        if clean_config:
-            # TODO: config is defined at NAPPS_DIR/kytos/storehouse/settings.py 
-            # and NAPPS_DIR is defined at /etc/kytos/kytos.conf
-            os.system('rm -rf /var/tmp/kytos/storehouse')
-            if database:
-                try:
-                    self.drop_database()
-                except ServerSelectionTimeoutError as exc:
-                    print(f"FAIL to drop database. {str(exc)}")
+        if clean_config and database:
+            try:
+                self.drop_database()
+            except ServerSelectionTimeoutError as exc:
+                print(f"FAIL to drop database. {str(exc)}")
 
         if clean_config or del_flows:
             # Remove any installed flow
