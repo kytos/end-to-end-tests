@@ -55,7 +55,6 @@ class TestE2EKytosServer:
                 ("kytos", "pathfinder"),
                 ("kytos", "mef_eline"),
                 ("kytos", "maintenance"),
-                ("kytos", "storehouse"),
                 ("kytos", "flow_manager"),
                 ("kytos", "of_core"),
                 ("kytos", "topology"),
