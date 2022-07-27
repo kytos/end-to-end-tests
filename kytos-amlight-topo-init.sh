@@ -83,7 +83,7 @@ wait_on() {
 #############################
 # Setup switches
 #############################
-wait_on switches 11
+wait_on switches 12
 set_switch_enable_metadata 11 '{"node_name": "Ampath1",      "lat":  "26", "lng": "-70", "address": "Datacenter MI1",  "description": "MIA-MI1-SW01"}'
 set_switch_enable_metadata 12 '{"node_name": "Ampath2",      "lat":  "26", "lng": "-90", "address": "Datacenter MI1",  "description": "MIA-MI1-SW02"}'
 set_switch_enable_metadata 13 '{"node_name": "SoL2",         "lat": "-23", "lng": "-46", "address": "Datacenter SP4",  "description": "SAO-SP4-SW01"}'
