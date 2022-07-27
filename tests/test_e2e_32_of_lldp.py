@@ -108,11 +108,3 @@ class TestE2EOfLLDPLoopDetection:
         assert response.status_code == 200, response.text
         data = response.json()
         assert data['interfaces'][interface_id4]['enabled'] == False # [4,5] is an ignored loop, it was reconfigured
-
-
-
-
-
-
-
-        
