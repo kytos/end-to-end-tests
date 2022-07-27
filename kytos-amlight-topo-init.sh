@@ -151,7 +151,7 @@ set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:21:18 '{"mtu": 9000, "po
 # Setup links
 #############################
 # curl -s http://127.0.0.1:8181/api/kytos/topology/v3/links | jq -r '.links[] | .id + " \"" +(.endpoint_a.name|tostring) + "--" + (.endpoint_b.name|tostring) + "\""'
-wait_on links 17
+wait_on links 18
 set_link_enable_metadata 1e7e531ae50f419b1d35d311a66351d997ea567348b691d8dccdc639e1f8340a '{"availability": 100.0, "delay": 1, "packet_loss": 0.0, "bandwidth": 100, "utilization": 0, "link_name": "Ampath4-eth11--Ampath1-eth11"}'
 set_link_enable_metadata 21c046f5eb9fbf577701974e207c2fd2ccd8cc4b91fae77ad396924b79c48483 '{"availability": 100.0, "delay": 1, "packet_loss": 0.0, "bandwidth": 100, "utilization": 0, "link_name": "AL2-eth6--AL3-eth6"}'
 set_link_enable_metadata 26ba6acadb3e4f6b7a103fea28080d6c4d5ab0f78499d0d2f191b9fec5ac7d90 '{"availability": 100.0, "delay": 1, "packet_loss": 0.0, "bandwidth": 100, "utilization": 0, "link_name": "Ampath7-eth16--Ampath4-eth16"}'
