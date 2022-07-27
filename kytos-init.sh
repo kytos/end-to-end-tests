@@ -24,8 +24,7 @@ sed -i 's/WARNING/INFO/g' /etc/kytos/logging.ini
 test -z "$TESTS" && TESTS=tests/
 
 python3 scripts/wait_for_mongo.py 2>/dev/null
-python3 -m pytest tests/test_e2e_32_of_lldp.py
-#python3 -m pytest $TESTS
+python3 -m pytest $TESTS
 
 #tail -f
 
