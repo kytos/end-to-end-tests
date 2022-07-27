@@ -111,7 +111,6 @@ set_interface_enable_metadata 00:00:00:00:00:00:00:18:57 '{"mtu": 9000, "port_na
 set_interface_enable_metadata 00:00:00:00:00:00:00:19:58 '{"mtu": 9000, "port_name": "h9-eth1:Ampath5-eth58"}'
 set_interface_enable_metadata 00:00:00:00:00:00:00:20:59 '{"mtu": 9000, "port_name": "h10-eth1:Ampath7-eth59"}'
 set_interface_enable_metadata 00:00:00:00:00:00:00:21:60 '{"mtu": 9000, "port_name": "h11-eth1:JAX1-eth60"}'
-set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:01:1  '{"mtu": 9000, "port_name": "Interface-01:1"}'
 set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:11:1  '{"mtu": 9000, "port_name": "Interface-11:1"}'
 set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:11:11 '{"mtu": 9000, "port_name": "Interface-11:11"}'
 set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:11:2  '{"mtu": 9000, "port_name": "Interface-11:2"}'
