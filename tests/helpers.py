@@ -129,6 +129,19 @@ class Ring4Topo(Topo):
         self.addLink(s3, s4)
         self.addLink(s4, s1)
 
+class Looped(Topo):
+    """ Network with two switches
+    and a loop in one switch."""
+
+    def build(self):
+        "Create custom topo."
+
+        s1 = self.addSwitch("s1")
+        s2 = self.addSwitch("s2")
+
+        self.addLink(s1, s1, port1=1, port2=2)
+        self.addLink(s1, s1, port1=4, port2=5)
+        self.addLink(s1, s2, port1=3, port2=1)
 
 # You can run any of the topologies above by doing:
 # mn --custom tests/helpers.py --topo ring --controller=remote,ip=127.0.0.1
@@ -136,6 +149,7 @@ topos = {
     'ring': (lambda: RingTopo()),
     'ring4': (lambda: Ring4Topo()),
     'amlight': (lambda: AmlightTopo()),
+    'looped': (lambda: Looped()),
 }
 
 
