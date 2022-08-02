@@ -32,13 +32,27 @@ Which runs all available tests, or run only a specific test::
 
 The above lines are entirely up to the user to modify, and will allow them to choose in which way they want to use the tests.
 
+Mininet Topologies
+##################
+
+.. image:: images/ Mininet-Topologies.png
+
+you can run any of those topologies with the following command::
+
+  # mn --custom tests/helpers.py --topo ring --controller=remote,ip=127.0.0.1
+
+In the command above _ring_ is the name of the topology. To see all available topologies::
+
+  $ grep "lambda.*Topo" tests/helpers.py
+
 Requirements
 ############
 * Python
 * Mininet
 * Docker
+* docker-compose
+* MongoDB (run via docker-compose)
 * Kytos SDN Controller
-* kytos/storehouse
 * kytos/of_core 
 * kytos/flow_manager 
 * kytos/topology 

@@ -26,6 +26,7 @@ class AmlightTopo(Topo):
         Ampath5 = self.addSwitch('Ampath5', listenPort=6610, dpid='0000000000000019')
         Ampath7 = self.addSwitch('Ampath7', listenPort=6611, dpid='0000000000000020')
         JAX1 = self.addSwitch('JAX1', listenPort=6612, dpid='0000000000000021')
+        JAX2 = self.addSwitch('JAX2', listenPort=6613, dpid='0000000000000022')
         # add hosts
         h1 = self.addHost('h1', mac='00:00:00:00:00:01')
         h2 = self.addHost('h2', mac='00:00:00:00:00:02')
@@ -38,6 +39,7 @@ class AmlightTopo(Topo):
         h9 = self.addHost('h9', mac='00:00:00:00:00:09')
         h10 = self.addHost('h10', mac='00:00:00:00:00:0A')
         h11 = self.addHost('h11', mac='00:00:00:00:00:0B')
+        h12 = self.addHost('h12', mac='00:00:00:00:00:0C')
         # Add links
         self.addLink(Ampath1, Ampath2, port1=1, port2=1)
         self.addLink(Ampath1, SouthernLight2, port1=2, port2=2)
@@ -53,9 +55,10 @@ class AmlightTopo(Topo):
         self.addLink(Ampath2, Ampath5, port1=12, port2=12)
         self.addLink(Ampath4, Ampath5, port1=13, port2=13)
         self.addLink(Ampath4, JAX1, port1=14, port2=14)
-        self.addLink(Ampath5, JAX1, port1=15, port2=15)
+        self.addLink(Ampath5, JAX2, port1=15, port2=15)
         self.addLink(Ampath4, Ampath7, port1=16, port2=16)
         self.addLink(Ampath7, SouthernLight2, port1=17, port2=17)
+        self.addLink(JAX1, JAX2, port1=18, port2=18)
         self.addLink(h1, Ampath1, port1=1, port2=50)
         self.addLink(h2, Ampath2, port1=1, port2=51)
         self.addLink(h3, SouthernLight2, port1=1, port2=52)
@@ -67,6 +70,7 @@ class AmlightTopo(Topo):
         self.addLink(h9, Ampath5, port1=1, port2=58)
         self.addLink(h10, Ampath7, port1=1, port2=59)
         self.addLink(h11, JAX1, port1=1, port2=60)
+        self.addLink(h12, JAX2, port1=1, port2=61)
 
 class RingTopo(Topo):
     """Ring topology with three switches
@@ -129,6 +133,56 @@ class Ring4Topo(Topo):
         self.addLink(s3, s4)
         self.addLink(s4, s1)
 
+class Looped(Topo):
+    """ Network with two switches
+    and a loop in one switch."""
+
+    def build(self):
+        "Create custom topo."
+
+        s1 = self.addSwitch("s1")
+        s2 = self.addSwitch("s2")
+
+        self.addLink(s1, s1, port1=1, port2=2)
+        self.addLink(s1, s1, port1=4, port2=5)
+        self.addLink(s1, s2, port1=3, port2=1)
+
+class MultiConnectedTopo(Topo):
+    """Multiply connected network topology six
+    and one host connected to each switch """
+    def build(self):
+        # Create hosts
+        h1 = self.addHost('h1', ip='0.0.0.0')
+        h2 = self.addHost('h2', ip='0.0.0.0')
+        h3 = self.addHost('h3', ip='0.0.0.0')
+        h4 = self.addHost('h4', ip='0.0.0.0')
+        h5 = self.addHost('h5', ip='0.0.0.0')
+        h6 = self.addHost('h6', ip='0.0.0.0')
+        # Create the switches
+        s1 = self.addSwitch('s1')
+        s2 = self.addSwitch('s2')
+        s3 = self.addSwitch('s3')
+        s4 = self.addSwitch('s4')
+        s5 = self.addSwitch('s5')
+        s6 = self.addSwitch('s6')
+        # Add links between the switch and each host
+        self.addLink(s1, h1)
+        self.addLink(s2, h2)
+        self.addLink(s3, h3)
+        self.addLink(s4, h4)
+        self.addLink(s5, h5)
+        self.addLink(s6, h6)
+        # Add links between the switches
+        self.addLink(s1, s2)
+        self.addLink(s2, s3)
+        self.addLink(s3, s4)
+        self.addLink(s4, s5)
+        self.addLink(s5, s6)
+        self.addLink(s1, s6)
+        self.addLink(s2, s6)
+        self.addLink(s3, s6)
+        self.addLink(s4, s6)
+
 
 # You can run any of the topologies above by doing:
 # mn --custom tests/helpers.py --topo ring --controller=remote,ip=127.0.0.1
@@ -137,6 +191,8 @@ topos = {
     'ring4': (lambda: Ring4Topo()),
     'amlight': (lambda: AmlightTopo()),
     'linear10': (lambda: LinearTopo(10)),
+    'multi': (lambda: MultiConnectedTopo()),
+    'looped': (lambda: Looped()),
 }
 
 
@@ -219,15 +275,11 @@ class NetworkTest:
             os.system('pkill -9 kytosd')
             os.system('rm -f /var/run/kytos/kytosd.pid')
 
-        if clean_config:
-            # TODO: config is defined at NAPPS_DIR/kytos/storehouse/settings.py 
-            # and NAPPS_DIR is defined at /etc/kytos/kytos.conf
-            os.system('rm -rf /var/tmp/kytos/storehouse')
-            if database:
-                try:
-                    self.drop_database()
-                except ServerSelectionTimeoutError as exc:
-                    print(f"FAIL to drop database. {str(exc)}")
+        if clean_config and database:
+            try:
+                self.drop_database()
+            except ServerSelectionTimeoutError as exc:
+                print(f"FAIL to drop database. {str(exc)}")
 
         if clean_config or del_flows:
             # Remove any installed flow
