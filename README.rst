@@ -50,8 +50,9 @@ Requirements
 * Python
 * Mininet
 * Docker
+* docker-compose
+* MongoDB (run via docker-compose)
 * Kytos SDN Controller
-* kytos/storehouse
 * kytos/of_core 
 * kytos/flow_manager 
 * kytos/topology 

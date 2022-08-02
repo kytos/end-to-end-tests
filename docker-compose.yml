@@ -6,8 +6,57 @@ services:
     volumes:
       - "./kytos-init.sh:/kytos-init.sh"
       - "./tests:/tests"
+      - "./scripts/wait_for_mongo.py:/scripts/wait_for_mongo.py"
     command:
       - /kytos-init.sh
+    environment:
+      MONGO_USERNAME: napp_user
+      MONGO_PASSWORD: napp_pw
+      MONGO_DBNAME: napps
+      MONGO_HOST_SEEDS: "mongo1t:27027,mongo2t:27028,mongo3t:27029"
+    depends_on:
+      - mongo-setup
+  mongo-setup:
+    container_name: mongo-test-rs-init
+    image: mongo:5.0
+    restart: on-failure
+    volumes:
+      - ./scripts:/scripts
+    entrypoint: ["/scripts/rs-init.sh"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root_user
+      MONGO_INITDB_ROOT_PASSWORD: root_pw
+      MONGO_USERNAME: napp_user
+      MONGO_PASSWORD: napp_pw
+      MONGO_DBNAME: napps
+    depends_on:
+      - mongo1t
+      - mongo2t
+      - mongo3t
+  mongo1t:
+    container_name: mongo1t
+    image: mongo:5.0
+    ports:
+      - 27027:27027
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0", "--port", "27027" ]
+    depends_on:
+      - mongo2t
+      - mongo3t
+  mongo2t:
+    container_name: mongo2t
+    image: mongo:5.0
+    ports:
+      - 27028:27028
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0", "--port", "27028" ]
+  mongo3t:
+    container_name: mongo3t
+    image: mongo:5.0
+    ports:
+      - 27029:27029
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0", "--port", "27029" ]
 #  mininet:
 #      image: italovalcy/mininet:latest
 #      privileged: true
