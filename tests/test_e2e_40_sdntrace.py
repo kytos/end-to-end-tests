@@ -1,6 +1,7 @@
 import requests
 from tests.helpers import NetworkTest
 import time
+import pytest
 
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api' % CONTROLLER
@@ -233,6 +234,8 @@ class TestE2ESDNTrace:
 
         assert expected == actual, f"Expected {expected}. Actual: {actual}"
 
+    # This test may eventually fail due to https://github.com/kytos-ng/flow_stats/issues/19
+    @pytest.mark.xfail
     def test_020_run_sdntrace_fail_missing_flow(self):
         """Run SDNTrace-CP with a failure due to missing flows:
         - delete flow from intermediate switch
