@@ -58,7 +58,12 @@ class TestE2EKytosServer:
                 ("kytos", "flow_manager"),
                 ("kytos", "of_core"),
                 ("kytos", "topology"),
-                ("kytos", "of_lldp")
+                ("kytos", "of_lldp"),
+                ('amlight', 'sdntrace'),
+                ('amlight', 'scheduler'),
+                ('amlight', 'flow_stats'),
+                ('amlight', 'coloring'),
+                ('amlight', 'sdntrace_cp'),
             ]
         api_url = KYTOS_API+'/core/napps_enabled/'
         response = requests.get(api_url)
