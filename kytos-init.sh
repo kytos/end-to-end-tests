@@ -11,9 +11,9 @@ done
 # the settings below are intended to decrease the tests execution time (in fact, the time.sleep() calls
 # depend on the values below, otherwise many tests would fail)
 sed -i 's/STATS_INTERVAL = 60/STATS_INTERVAL = 3/g' /var/lib/kytos/napps/kytos/of_core/settings.py
+sed -i 's/CONSISTENCY_MIN_VERDICT_INTERVAL =.*/CONSISTENCY_MIN_VERDICT_INTERVAL = 3/g' /var/lib/kytos/napps/kytos/flow_manager/settings.py
 sed -i 's/LINK_UP_TIMER = 10/LINK_UP_TIMER = 1/g' /var/lib/kytos/napps/kytos/topology/settings.py
 sed -i 's/DEPLOY_EVCS_INTERVAL = 60/DEPLOY_EVCS_INTERVAL = 5/g' /var/lib/kytos/napps/kytos/mef_eline/settings.py
-sed -i 's/BOX_RESTORE_TIMER = 0.1/BOX_RESTORE_TIMER = 0.5/' /var/lib/kytos/napps/kytos/flow_manager/settings.py
 sed -i 's/LLDP_LOOP_ACTIONS = \["log"\]/LLDP_LOOP_ACTIONS = \["disable","log"\]/' /var/lib/kytos/napps/kytos/of_lldp/settings.py
 sed -i 's/LLDP_IGNORED_LOOPS = {}/LLDP_IGNORED_LOOPS = {"00:00:00:00:00:00:00:01": \[\[4, 5\]\]}/' /var/lib/kytos/napps/kytos/of_lldp/settings.py
 sed -i 's/CONSISTENCY_COOKIE_IGNORED_RANGE =.*/CONSISTENCY_COOKIE_IGNORED_RANGE = [(0xdd00000000000000, 0xdd00000000000009)]/g' /var/lib/kytos/napps/kytos/flow_manager/settings.py
