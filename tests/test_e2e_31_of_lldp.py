@@ -6,6 +6,12 @@ import time
 CONTROLLER = "127.0.0.1"
 KYTOS_API = f"http://{CONTROLLER}:8181/api/kytos"
 
+# BasicFlows
+# Each should have at least 3 flows, considering topology 'ring4':
+# - 01 for LLDP
+# - 02 for amlight/coloring (node degree - number of neighbors)
+BASIC_FLOWS = 3
+
 
 class TestE2EOfLLDP:
     net = None
