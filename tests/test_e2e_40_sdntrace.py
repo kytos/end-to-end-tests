@@ -56,7 +56,9 @@ class TestE2ESDNTrace:
         return data
 
 
-    def test_001_run_sdntrace(self):
+    # This test may eventually fail due to https://github.com/kytos-ng/flow_stats/issues/19
+    @pytest.mark.xfail
+    def test_001_run_sdntrace_cp(self):
         """Run SDNTrace-CP (Control Plane)."""
         # Trace from UNI_A
         payload = {
