@@ -9,6 +9,12 @@ from tests.helpers import NetworkTest
 CONTROLLER = '127.0.0.1'
 KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
+# BasicFlows
+# Each should have at least 3 flows, considering topology 'ring':
+# - 01 for LLDP
+# - 02 for amlight/coloring (node degree - number of neighbors)
+BASIC_FLOWS = 3
+
 
 class TestE2EFlowManager:
     net = None
@@ -79,10 +85,10 @@ class TestE2EFlowManager:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
         for flow in flows_s1.split('\r\n '):
             # Check all flows but the of_lldp, which is reinstalled
-            if 'dl_vlan=3799,dl_type=0x88cc' in flow: continue
+            if 'dl_vlan=999' not in flow: continue
             match = re.search("duration=([0-9.]+)", flow)
             duration = float(match.group(1))
             assert duration + 1 >= wait_time + delta
@@ -128,5 +134,5 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
         assert 'dl_vlan=999' in flows_s1

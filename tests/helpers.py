@@ -1,5 +1,5 @@
 from mininet.net import Mininet
-from mininet.topo import Topo
+from mininet.topo import Topo, LinearTopo
 from mininet.node import RemoteController, OVSSwitch
 import mininet.clean
 from mock import patch
@@ -190,6 +190,7 @@ topos = {
     'ring': (lambda: RingTopo()),
     'ring4': (lambda: Ring4Topo()),
     'amlight': (lambda: AmlightTopo()),
+    'linear10': (lambda: LinearTopo(10)),
     'multi': (lambda: MultiConnectedTopo()),
     'looped': (lambda: Looped()),
 }

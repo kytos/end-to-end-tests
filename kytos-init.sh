@@ -2,12 +2,6 @@
 
 set -xe
 
-# XXX: disable sdntrace and sdntrace_cp by default (along with their deps) while we are working on issue #110
-for napp in amlight/coloring amlight/sdntrace amlight/scheduler amlight/flow_stats amlight/sdntrace_cp; do
-   FILE=/var/lib/kytos/napps/$napp
-   test -h $FILE && unlink $FILE
-done
-
 # the settings below are intended to decrease the tests execution time (in fact, the time.sleep() calls
 # depend on the values below, otherwise many tests would fail)
 sed -i 's/STATS_INTERVAL = 60/STATS_INTERVAL = 3/g' /var/lib/kytos/napps/kytos/of_core/settings.py

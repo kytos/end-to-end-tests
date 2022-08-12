@@ -11,6 +11,12 @@ KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 TIME_FMT = "%Y-%m-%dT%H:%M:%S+0000"
 
+# BasicFlows
+# Each should have at least 3 flows, considering topology 'ring':
+# - 01 for LLDP
+# - 02 for amlight/coloring (node degree - number of neighbors)
+BASIC_FLOWS = 3
+
 class TestE2EMefEline:
     net = None
 
@@ -280,8 +286,8 @@ class TestE2EMefEline:
         # Verify that the flow is in the flow table
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        # Each switch had 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
-        assert len(flows_s1.split('\r\n ')) == 3
+        # Each switch had BASIC_FLOWS flows + 02 for the EVC (ingress + egress)
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
 
     """Error, start_date should be patched only if the Evc
     has been created under the scheduler action
@@ -378,6 +384,6 @@ class TestE2EMefEline:
         # Verify that the flow is not in the flow table
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        # Each switch had 3 flows: 01 for LLDP + 02 for the EVC (ingress + egress)
-        # at this point the flow number should be reduced to 1
-        assert len(flows_s1.split('\r\n ')) == 1
+        # Each switch had BASIC_FLOWS flows + 02 for the EVC (ingress + egress)
+        # at this point the flow number should be reduced to BASIC_FLOWS
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS
