@@ -13,6 +13,8 @@ KYTOS_API = 'http://%s:8181/api/kytos' % CONTROLLER
 
 TIME_FMT = "%Y-%m-%dT%H:%M:%S+0000"
 
+RE_I=re.IGNORECASE
+
 # BasicFlows
 # Each should have at least 3 flows, considering topology 'ring':
 # - 01 for LLDP
@@ -166,13 +168,15 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         time.sleep(10)
 
-        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
+        # search for the cookie, should have three flows:
+        #  - 2 for the current path
+        #  - 1 for the failover path
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=15' in flows_s1
@@ -217,12 +221,14 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         time.sleep(10)
 
-        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
+        # Each switch must have BASIC_FLOWS + 03 for the EVC:
+        #  - 2 for current path (ingress + egress)
+        #  - 1 for failover path
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=102' in flows_s1
@@ -266,12 +272,14 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         time.sleep(10)
 
-        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
+        # Each switch must have BASIC_FLOWS + 03 for the EVC:
+        #  - 2 for current path (ingress + egress)
+        #  - 1 for failover path
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=104' in flows_s1
@@ -341,15 +349,16 @@ class TestE2EMefEline:
         assert evc1 != evc2
         time.sleep(10)
 
-        # Switch should have BASIC_FLOWS + 02 for evc1 + 02 for evc2
-        # The switches 2 and 3 should have BASIC_FLOWS + 02 for evc
+        # Switch s1 should have BASIC_FLOWS + 3 for evc1 + 3 for evc2
+        # Switch s2 should have BASIC_FLOWS + 3 for evc1 + 2 for evc2/failover
+        # Switch s2 should have BASIC_FLOWS + 3 for evc2 + 2 for evc1/failover
         s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 6
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 5
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 5
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=110' in flows_s1
@@ -501,12 +510,14 @@ class TestE2EMefEline:
         assert evc1 != evc2
         time.sleep(10)
 
-        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
+        # Each switch must have BASIC_FLOWS + 03 for the EVC:
+        #  - 2 for current path (ingress + egress)
+        #  - 1 for failover path
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3
 
         # Nodes should be able to ping each other
         h11, h2 = self.net.net.get('h11', 'h2')
@@ -560,7 +571,9 @@ class TestE2EMefEline:
 
         time.sleep(10)
 
-        # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
+        # Each switch must have BASIC_FLOWS + 02 for the EVC:
+        #  - 2 for current path (ingress + egress)
+        #  - (there will be no failover path)
         s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
@@ -691,9 +704,17 @@ class TestE2EMefEline:
                 # search for the vlan id
                 assert "dl_vlan=%s" % vid in flows_s1
                 assert "dl_vlan=%s" % vid in flows_s2
-                # search for the cookie, should have two flows
-                assert len(re.findall(evc['id'], flows_s1, flags=re.IGNORECASE)) == 2, "round=%d - should have 2 flows but had: \n%s" % (x, flows_s1)
-                assert len(re.findall(evc['id'], flows_s2, flags=re.IGNORECASE)) == 2, "round=%d - should have 2 flows but had: \n%s" % (x, flows_s2)
+                # search for the cookie, should have three flows:
+                #  - 2 for the current path
+                #  - 1 for the failover path
+                assert (
+                    len(re.findall(evc['id'], flows_s1, flags=RE_I)) == 3,
+                    f"round={x} - should have 3 flows but had: \n{flows_s1}"
+                )
+                assert (
+                    len(re.findall(evc['id'], flows_s2, flags=RE_I)) == 3,
+                    f"round={x} - should have 3 flows but had: \n{flows_s2}"
+                )
 
             # Delete the circuits
             for vid in evcs:
@@ -754,11 +775,17 @@ class TestE2EMefEline:
             # search for the vlan id
             assert "dl_vlan=%s" % vid in flows_s1
             assert "dl_vlan=%s" % vid in flows_s2
-            # search for the cookie, should have two flows
-            assert len(re.findall(evc['id'], flows_s1, flags=re.IGNORECASE)) == 2, \
-                "should have 2 flows but had: \n%s" % flows_s1
-            assert len(re.findall(evc['id'], flows_s2, flags=re.IGNORECASE)) == 2, \
-                "should have 2 flows but had: \n%s" % flows_s2
+            # search for the cookie, should have three flows:
+            #  - 2 for the current path
+            #  - 1 for the failover path
+            assert (
+                len(re.findall(evc['id'], flows_s1, flags=RE_I)) == 3,
+                "should have 3 flows but had: \n%s" % flows_s1
+            )
+            assert (
+                len(re.findall(evc['id'], flows_s2, flags=RE_I)) == 3,
+                "should have 3 flows but had: \n%s" % flows_s2
+            )
 
         # Delete the circuits
         for vid in self.evcs:
