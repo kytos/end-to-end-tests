@@ -644,7 +644,7 @@ class TestE2EMefEline:
         assert data[evc1]['archived'] is True
         assert data[evc1]['active'] is False
 
-    # TODO
+    @pytest.mark.skip(reason="TODO")
     def test_patch_evc_by_changing_unis_from_interface_to_another(self):
         """To edit an EVC, a PATCH request must be used:
 
@@ -658,7 +658,7 @@ class TestE2EMefEline:
 
         assert True
 
-    # TODO
+    @pytest.mark.skip(reason="TODO")
     def test_create_evc_with_scheduled_times_for_provisioning_and_ending(self):
         assert True
 
@@ -707,14 +707,10 @@ class TestE2EMefEline:
                 # search for the cookie, should have three flows:
                 #  - 2 for the current path
                 #  - 1 for the failover path
-                assert (
-                    len(re.findall(evc['id'], flows_s1, flags=RE_I)) == 3,
+                assert len(re.findall(evc['id'], flows_s1, flags=RE_I)) == 3, \
                     f"round={x} - should have 3 flows but had: \n{flows_s1}"
-                )
-                assert (
-                    len(re.findall(evc['id'], flows_s2, flags=RE_I)) == 3,
+                assert len(re.findall(evc['id'], flows_s2, flags=RE_I)) == 3, \
                     f"round={x} - should have 3 flows but had: \n{flows_s2}"
-                )
 
             # Delete the circuits
             for vid in evcs:
@@ -732,14 +728,10 @@ class TestE2EMefEline:
             assert response.json() == {}
             flows_s1 = s1.dpctl('dump-flows')
             flows_s2 = s2.dpctl('dump-flows')
-            assert (
-                len(flows_s1.split('\r\n ')) == BASIC_FLOWS,
+            assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS, \
                 f"round={x} - should have {BASIC_FLOWS} flows but had: \n{flows_s1}"
-            )
-            assert (
-                len(flows_s2.split('\r\n ')) == BASIC_FLOWS,
+            assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, \
                 f"round={x} - should have {BASIC_FLOWS} flows but had: \n{flows_s2}"
-            )
 
     def test_085_create_and_remove_ten_circuit_concurrently(self):
         """
@@ -778,14 +770,10 @@ class TestE2EMefEline:
             # search for the cookie, should have three flows:
             #  - 2 for the current path
             #  - 1 for the failover path
-            assert (
-                len(re.findall(evc['id'], flows_s1, flags=RE_I)) == 3,
+            assert len(re.findall(evc['id'], flows_s1, flags=RE_I)) == 3, \
                 "should have 3 flows but had: \n%s" % flows_s1
-            )
-            assert (
-                len(re.findall(evc['id'], flows_s2, flags=RE_I)) == 3,
+            assert len(re.findall(evc['id'], flows_s2, flags=RE_I)) == 3, \
                 "should have 3 flows but had: \n%s" % flows_s2
-            )
 
         # Delete the circuits
         for vid in self.evcs:
@@ -803,14 +791,11 @@ class TestE2EMefEline:
         assert response.json() == {}
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert (
-            len(flows_s1.split('\r\n ')) == BASIC_FLOWS,
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS, \
             f"should have only {BASIC_FLOWS} flow but had: \n{flows_s1}"
-        )
-        assert (
-            len(flows_s2.split('\r\n ')) == BASIC_FLOWS,
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, \
             f"should have only {BASIC_FLOWS} flow but had: \n{flows_s2}"
-        )
+
     def test_090_patch_evc_new_name(self):
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
