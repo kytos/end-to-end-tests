@@ -210,7 +210,7 @@ class TestE2EOfLLDP:
         s2 = self.net.net.get('s2')
         flows_s2 = s2.dpctl("dump-flows")
         # Expects 2x LLDP flow entries
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 1, flows_s2
 
         # Assert GET liveness/ is enabled and down
         api_url = f"{KYTOS_API}/of_lldp/v1/liveness/?interface_id={interface_ids[1]}"
@@ -237,7 +237,7 @@ class TestE2EOfLLDP:
         s2 = self.net.net.get('s2')
         flows_s2 = s2.dpctl("dump-flows")
         # Expects 1x LLDP flow entry
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
 
         # Assert GET liveness/ is enabled and up
         api_url = f"{KYTOS_API}/of_lldp/v1/liveness/?interface_id={interface_ids[1]}"

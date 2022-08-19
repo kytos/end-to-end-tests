@@ -85,7 +85,7 @@ class TestE2EFlowManager:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         for flow in flows_s1.split('\r\n '):
             # Check all flows but the of_lldp, which is reinstalled
             if 'dl_vlan=999' not in flow: continue
@@ -134,5 +134,5 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'dl_vlan=999' in flows_s1

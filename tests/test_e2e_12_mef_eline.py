@@ -287,7 +287,7 @@ class TestE2EMefEline:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
         # Each switch had BASIC_FLOWS flows + 02 for the EVC (ingress + egress)
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
 
     """Error, start_date should be patched only if the Evc
     has been created under the scheduler action
@@ -386,4 +386,4 @@ class TestE2EMefEline:
         flows_s1 = s1.dpctl('dump-flows')
         # Each switch had BASIC_FLOWS flows + 02 for the EVC (ingress + egress)
         # at this point the flow number should be reduced to BASIC_FLOWS
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS, flows_s1
