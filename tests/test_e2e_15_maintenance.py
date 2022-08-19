@@ -122,9 +122,9 @@ class TestE2EMaintenance:
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2, flows_s3
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
 
         # Makes sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=100' in flows_s1
@@ -148,7 +148,7 @@ class TestE2EMaintenance:
         time.sleep(mw_duration)
 
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
         result = h11.cmd('ping -c1 100.0.0.2')
         assert ', 0% packet loss,' in result
 
@@ -332,7 +332,7 @@ class TestE2EMaintenance:
         s2 = self.net.net.get('s2')
         flows_s2 = s2.dpctl('dump-flows')
         assert 'dl_vlan=100' not in flows_s2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
 
         # Checks connectivity during maintenance
         h11, h3 = self.net.net.get('h11', 'h3')
@@ -677,7 +677,7 @@ class TestE2EMaintenance:
         # Verifies the flow at the initial MW time
         # (no maintenance at that time, it has been delayed)
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
         result = h11.cmd('ping -c1 100.0.0.2')
         assert ', 0% packet loss,' in result
 
@@ -687,7 +687,7 @@ class TestE2EMaintenance:
         # Verifies the flow during maintenance time
         flows_s2 = s2.dpctl('dump-flows')
         assert 'dl_vlan=100' not in flows_s2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
         result = h11.cmd('ping -c1 100.0.0.2')
         assert ', 0% packet loss,' in result
 
@@ -800,7 +800,7 @@ class TestE2EMaintenance:
         # Verifies the flow behavior
         # (no maintenance at that time, it has been deleted)
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
         result = h11.cmd('ping -c1 100.0.0.2')
         assert ', 0% packet loss,' in result
 
@@ -887,7 +887,7 @@ class TestE2EMaintenance:
 
         # Verifies the flow behavior and connectivity after ending the maintenance
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
         result = h11.cmd('ping -c1 100.0.0.2')
         assert ', 0% packet loss,' in result
 
@@ -993,7 +993,7 @@ class TestE2EMaintenance:
         s2 = self.net.net.get('s2')
         flows_s2 = s2.dpctl('dump-flows')
         assert 'dl_vlan=100' not in flows_s2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
 
         # Checks connectivity during maintenance
         h11, h3 = self.net.net.get('h11', 'h3')
@@ -1020,7 +1020,7 @@ class TestE2EMaintenance:
         s2 = self.net.net.get('s2')
         flows_s2 = s2.dpctl('dump-flows')
         assert 'dl_vlan=100' not in flows_s2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
 
         # Checks connectivity during maintenance
         h11, h3 = self.net.net.get('h11', 'h3')
@@ -1038,7 +1038,7 @@ class TestE2EMaintenance:
 
         # Verifies the flows behavior after the maintenance
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
         result = h11.cmd('ping -c1 100.0.0.2')
         assert ', 0% packet loss,' in result
 

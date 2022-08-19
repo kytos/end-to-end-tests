@@ -131,7 +131,7 @@ class TestE2EMefEline:
         flows_s1 = s1.dpctl('dump-flows')
 
         # Each switch must have BASIC_FLOWS + 02 for the EVC (ingress + egress)
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
 
         # TODO: make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=101' in flows_s1
@@ -175,8 +175,8 @@ class TestE2EMefEline:
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3, flows_s2
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=15' in flows_s1
@@ -227,8 +227,8 @@ class TestE2EMefEline:
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3, flows_s2
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=102' in flows_s1
@@ -278,8 +278,8 @@ class TestE2EMefEline:
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3, flows_s2
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=104' in flows_s1
@@ -356,9 +356,9 @@ class TestE2EMefEline:
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 6
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 5
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 5
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 6, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 5, flows_s2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 5, flows_s3
 
         # make sure it should be dl_vlan instead of vlan_vid
         assert 'dl_vlan=110' in flows_s1
@@ -441,8 +441,8 @@ class TestE2EMefEline:
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
 
         # Nodes should not be able to ping each other
         h11, h2 = self.net.net.get('h11', 'h2')
@@ -516,8 +516,8 @@ class TestE2EMefEline:
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3, flows_s2
 
         # Nodes should be able to ping each other
         h11, h2 = self.net.net.get('h11', 'h2')
@@ -579,9 +579,9 @@ class TestE2EMefEline:
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2, flows_s3
 
         # Command to up/down links to test if back-up path is taken
         self.net.net.configLinkStatus('s1', 's2', 'down')

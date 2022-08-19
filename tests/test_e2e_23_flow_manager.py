@@ -110,7 +110,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         payload2 = {
@@ -132,7 +132,7 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
 
         assert 'actions=output:"s1-eth3"' in flows_s1
         assert 'actions=output:"s1-eth4"' in flows_s1
@@ -202,7 +202,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         payload2 = {
@@ -223,7 +223,7 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4, flows_s1
 
         assert 'actions=output:"s1-eth2"' in flows_s1
         assert 'actions=output:"s1-eth3"' in flows_s1
@@ -294,7 +294,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         payload2 = {
@@ -318,7 +318,7 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4, flows_s1
 
         assert 'actions=output:"s1-eth2"' in flows_s1
         assert 'actions=output:"s1-eth3"' in flows_s1
@@ -373,7 +373,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         payload2 = {
@@ -421,7 +421,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4, flows_s1
 
         assert 'actions=output:"s1-eth2"' in flows_s1
         assert 'actions=output:"s1-eth3"' in flows_s1
@@ -477,7 +477,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
         assert 'actions=output:"s1-eth3"' in flows_s1
 
@@ -513,7 +513,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
         assert 'actions=output:"s1-eth3"' in flows_s1
         assert 'in_port="s1-eth3"' in flows_s1
@@ -546,7 +546,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 4, flows_s1
 
         assert 'in_port="s1-eth4"' in flows_s1
         assert 'actions=output:"s1-eth1"' in flows_s1
@@ -624,7 +624,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
     def test_035_install_flow(self):
@@ -661,7 +661,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
@@ -673,7 +673,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
@@ -685,7 +685,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
     def test_040_install_flow(self):
@@ -765,7 +765,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
     def test_045_install_flow(self):
@@ -803,7 +803,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
@@ -815,7 +815,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
@@ -827,7 +827,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
     def test_050_install_flow(self):
@@ -879,7 +879,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
     def test_055_install_flow(self):
@@ -917,7 +917,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
         payload1 = {
@@ -948,7 +948,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
     def test_060_install_flow(self):
@@ -1001,7 +1001,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
         assert 'actions=output:"s1-eth3"' in flows_s1
 
@@ -1022,7 +1022,7 @@ class TestE2EFlowManager:
 
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 3, flows_s1
         assert 'actions=drop' in flows_s1
 
     def test_065_install_flow(self):
@@ -1064,7 +1064,7 @@ class TestE2EFlowManager:
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 100
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 100, flows_s1
 
     def create_flow(self, vlan_id):
         payload = {
@@ -1108,4 +1108,4 @@ class TestE2EFlowManager:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 100
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 100, flows_s1

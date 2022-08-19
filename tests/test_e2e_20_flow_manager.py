@@ -80,7 +80,7 @@ class TestE2EFlowManager:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth2"' in flows_s1
 
     def test_010_install_flow_and_retrieve_it_back(self):
@@ -175,7 +175,7 @@ class TestE2EFlowManager:
         for sw_name in ['s1', 's2', 's3']:
             sw = self.net.net.get(sw_name)
             flows_sw = sw.dpctl('dump-flows')
-            assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS + 1
+            assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS + 1, flows_sw
             assert 'actions=output:"%s-eth2"' % sw_name in flows_sw
 
     def test_020_delete_flow(self):
@@ -227,7 +227,7 @@ class TestE2EFlowManager:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS, flows_s1
         assert 'actions=output:"s1-eth2"' not in flows_s1
 
     def test_025_delete_flows(self):
@@ -280,7 +280,7 @@ class TestE2EFlowManager:
         for sw_name in ['s1', 's2', 's3']:
             sw = self.net.net.get(sw_name)
             flows_sw = sw.dpctl('dump-flows')
-            assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS
+            assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS, flows_sw
             assert 'actions=output:"%s-eth2"' % sw_name not in flows_sw
 
     def modify_match(self, restart_kytos=False):
@@ -326,7 +326,7 @@ class TestE2EFlowManager:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'in_port="s1-eth1' in flows_s1
 
     def test_030_modify_match(self):
@@ -366,7 +366,7 @@ class TestE2EFlowManager:
         # Verify the flow
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'in_port="s1-eth1' in flows_s1
 
         # Modify the actions and verify its modification
@@ -385,7 +385,7 @@ class TestE2EFlowManager:
         # Check that the flow keeps the original setting
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=output:"s1-eth3"' not in flows_s1
         assert 'in_port="s1-eth1' in flows_s1
 
@@ -423,7 +423,7 @@ class TestE2EFlowManager:
         # Verify the flow
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'in_port="s1-eth1' in flows_s1
 
         s1.dpctl('add-flow', 'in_port=1,idle_timeout=360,hard_timeout=1200,priority=10,actions=strip_vlan,output:2')
@@ -436,7 +436,7 @@ class TestE2EFlowManager:
         time.sleep(10)
 
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'actions=strip_vlan,' not in flows_s1
         assert 'actions=output:"s1-eth2' in flows_s1
 
@@ -461,7 +461,7 @@ class TestE2EFlowManager:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS, flows_s1
 
     def test_060_flow_another_table(self):
         self.flow_another_table()
@@ -485,7 +485,7 @@ class TestE2EFlowManager:
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS, flows_s1
 
     def test_070_flow_table_0(self):
         self.flow_table_0()

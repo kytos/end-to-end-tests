@@ -97,10 +97,10 @@ class TestE2EMefEline:
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
         flows_s4 = s4.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2, flows_s3
+        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2, flows_s4
 
         # Nodes should be able to ping each other
         h1, h3 = self.net.net.get('h1', 'h3')
@@ -160,10 +160,10 @@ class TestE2EMefEline:
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
         flows_s4 = s4.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2, flows_s3
+        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2, flows_s4
 
         # Nodes should be able to ping each other
         h1, h3 = self.net.net.get('h1', 'h3')
@@ -222,10 +222,10 @@ class TestE2EMefEline:
         flows_s3 = s3.dpctl('dump-flows')
         flows_s4 = s4.dpctl('dump-flows')
 
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2, flows_s3
+        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS + 2, flows_s4
 
         # Nodes should be able to ping each other
         h1, h3 = self.net.net.get('h1', 'h3')
@@ -268,10 +268,10 @@ class TestE2EMefEline:
         flows_s2 = s2.dpctl('dump-flows')
         flows_s3 = s3.dpctl('dump-flows')
         flows_s4 = s4.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS
-        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS, flows_s3
+        assert len(flows_s4.split('\r\n ')) == BASIC_FLOWS, flows_s4
 
         # Nodes should be able to ping each other
         h1, h2 = self.net.net.get('h1', 'h2')
