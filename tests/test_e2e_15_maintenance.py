@@ -73,11 +73,11 @@ class TestE2EMaintenance:
     def test_005_list_mw_should_be_empty(self):
         """Tests if the maintenances list is empty at the beginning
         Test:
-            /api/kytos/maintenance/ on GET
+            /api/kytos/maintenance/v1/ on GET
         """
 
         # Gets the maintenance schemas
-        api_url = KYTOS_API + '/maintenance/'
+        api_url = KYTOS_API + '/maintenance/v1/'
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         json_data = response.json()
@@ -86,7 +86,7 @@ class TestE2EMaintenance:
     def test_010_create_mw_on_switch_should_move_evc(self):
         """Tests the EVC behaviors during maintenance
         Test:
-            /api/kytos/maintenance on POST
+            /api/kytos/maintenance/v1 on POST
         """
 
         self.restart_and_create_circuit()
@@ -108,7 +108,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201, response.text
         data = response.json()
@@ -160,7 +160,7 @@ class TestE2EMaintenance:
         """Tests to create maintenance with the wrong payload
         Test:
             400 response calling
-            /api/kytos/maintenance on POST
+            /api/kytos/maintenance/v1 on POST
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -182,7 +182,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400, response.text
 
@@ -190,7 +190,7 @@ class TestE2EMaintenance:
         """Tests to create maintenance with the wrong payload
         Test:
             400 response calling
-            /api/kytos/maintenance on POST
+            /api/kytos/maintenance/v1 on POST
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -210,7 +210,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400, response.text
 
@@ -218,7 +218,7 @@ class TestE2EMaintenance:
         """Tests to create maintenance with the wrong payload
         Test:
             400 response calling
-            /api/kytos/maintenance on POST
+            /api/kytos/maintenance/v1 on POST
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -237,7 +237,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 400, response.text
 
@@ -245,7 +245,7 @@ class TestE2EMaintenance:
         """Tests to create maintenance with the wrong payload
         Test:
             415 response calling
-            /api/kytos/maintenance on POST
+            /api/kytos/maintenance/v1 on POST
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -254,7 +254,7 @@ class TestE2EMaintenance:
         payload = {}
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 415, response.text
 
@@ -262,10 +262,10 @@ class TestE2EMaintenance:
         """Tests the maintenance window data update
         process through MW Id focused on the end time
         Test:
-            /api/kytos/maintenance on POST and
-            /api/kytos/maintenance/{mw_id} on PATCH
+            /api/kytos/maintenance/v1 on POST and
+            /api/kytos/maintenance/v1/{mw_id} on PATCH
         supported by
-            /api/kytos/maintenance on GET
+            /api/kytos/maintenance/v1 on GET
         """
         self.restart_and_create_circuit()
 
@@ -286,7 +286,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201, response.text
         data = response.json()
@@ -297,7 +297,7 @@ class TestE2EMaintenance:
         mw_id = data["mw_id"]
 
         # Gets the maintenance schema
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         json_data = response.json()
@@ -315,12 +315,12 @@ class TestE2EMaintenance:
         }
 
         # Updates the maintenance window information
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
+        mw_api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 200
 
         # Gets the maintenance window schema
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         response = requests.get(api_url)
         json_data = response.json()
         assert json_data['end'] == new_time.strftime(TIME_FMT)
@@ -361,7 +361,7 @@ class TestE2EMaintenance:
     def test_040_patch_non_existent_mw_on_switch_should_fail(self):
         """
         404 response calling
-            /api/kytos/maintenance/{mw_id} on PATCH
+            /api/kytos/maintenance/v1/{mw_id} on PATCH
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -384,14 +384,14 @@ class TestE2EMaintenance:
             ]
         }
 
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
+        mw_api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 404
 
     def test_045_patch_mw_on_switch_should_fail_wrong_payload_on_dates(self):
         """
         400 response calling
-            /api/kytos/maintenance/{mw_id} on PATCH
+            /api/kytos/maintenance/v1/{mw_id} on PATCH
         """
 
         self.restart_and_create_circuit()
@@ -413,7 +413,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
 
@@ -432,18 +432,18 @@ class TestE2EMaintenance:
         }
 
         # Updates the maintenance window information
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
+        mw_api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 400
 
         # Deletes the maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         requests.delete(api_url)
 
     def test_050_patch_mw_on_switch_should_fail_wrong_payload_items_empty(self):
         """
         400 response calling
-            /api/kytos/maintenance/{mw_id} on PATCH
+            /api/kytos/maintenance/v1/{mw_id} on PATCH
         """
         self.restart_and_create_circuit()
 
@@ -464,7 +464,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
 
@@ -481,18 +481,18 @@ class TestE2EMaintenance:
         }
 
         # Updates the maintenance window information
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
+        mw_api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 400
 
         # Deletes the maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         requests.delete(api_url)
 
     def test_055_patch_mw_on_switch_should_fail_empty_payload(self):
         """
         415 response calling
-            /api/kytos/maintenance/{mw_id} on PATCH
+            /api/kytos/maintenance/v1/{mw_id} on PATCH
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -515,7 +515,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
 
@@ -526,19 +526,19 @@ class TestE2EMaintenance:
         payload1 = {}
 
         # Updates the maintenance window information
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
+        mw_api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 415
 
         # Deletes the maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         requests.delete(api_url)
 
     def test_060_patch_mw_on_switch_should_fail_on_running_mw(self):
         """
         Tests the patching process over a running maintenance
         400 response calling
-            /api/kytos/maintenance/{mw_id} on PATCH
+            /api/kytos/maintenance/v1/{mw_id} on PATCH
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -561,7 +561,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201, response.text
         data = response.json()
@@ -572,7 +572,7 @@ class TestE2EMaintenance:
         mw_id = data["mw_id"]
 
         # Gets the maintenance schema
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         json_data = response.json()
@@ -592,7 +592,7 @@ class TestE2EMaintenance:
         time.sleep(mw_start_delay + 5)
 
         # Updates a running maintenance
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
+        mw_api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 400
 
@@ -600,9 +600,9 @@ class TestE2EMaintenance:
         """Tests the maintenance window data update
         process through MW's ID focused on the start time
         Test:
-            /api/kytos/maintenance on POST,
-            /api/kytos/maintenance/{mw_id} on GET, and
-            /api/kytos/maintenance/{mw_id} on PATCH
+            /api/kytos/maintenance/v1 on POST,
+            /api/kytos/maintenance/v1/{mw_id} on GET, and
+            /api/kytos/maintenance/v1/{mw_id} on PATCH
         """
         self.restart_and_create_circuit()
 
@@ -623,7 +623,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         assert response.status_code == 201, response.text
         data = response.json()
@@ -634,7 +634,7 @@ class TestE2EMaintenance:
         mw_id = data["mw_id"]
 
         # Gets the maintenance schema
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         json_data = response.json()
@@ -651,12 +651,12 @@ class TestE2EMaintenance:
         }
 
         # Updates the maintenance window information
-        mw_api_url = KYTOS_API + '/maintenance/' + mw_id
+        mw_api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         request = requests.patch(mw_api_url, data=json.dumps(payload1), headers={'Content-type': 'application/json'})
         assert request.status_code == 200
 
         # Gets the maintenance window schema
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         response = requests.get(api_url)
         json_data = response.json()
         assert json_data['start'] == new_start.strftime(TIME_FMT)
@@ -707,11 +707,11 @@ class TestE2EMaintenance:
     def test_070_delete_running_mw_on_switch_should_fail(self):
         """Tests the maintenance window removing process on a running MW
         Test:
-            /api/kytos/maintenance/ on POST and
-            /api/kytos/maintenance/{mw_id} on DELETE
+            /api/kytos/maintenance/v1/ on POST and
+            /api/kytos/maintenance/v1/{mw_id} on DELETE
 
             400 response calling
-            /api/kytos/maintenance/{mw_id} on DELETE
+            /api/kytos/maintenance/v1/{mw_id} on DELETE
         """
         self.restart_and_create_circuit()
 
@@ -732,7 +732,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance/'
+        api_url = KYTOS_API + '/maintenance/v1/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         json_data = response.json()
         mw_id = json_data["mw_id"]
@@ -741,15 +741,15 @@ class TestE2EMaintenance:
         time.sleep(mw_start_delay + 5)
 
         # Deletes running maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         delete_response = requests.delete(api_url)
         assert delete_response.status_code == 400
 
     def test_075_delete_future_mw_on_switch(self):
         """Tests the maintenance window removing process on a scheduled MW
         Test:
-            /api/kytos/maintenance/ on POST and
-            /api/kytos/maintenance/{mw_id} on DELETE
+            /api/kytos/maintenance/v1/ on POST and
+            /api/kytos/maintenance/v1/{mw_id} on DELETE
         """
 
         self.restart_and_create_circuit()
@@ -771,13 +771,13 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance/'
+        api_url = KYTOS_API + '/maintenance/v1/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         json_data = response.json()
         mw_id = json_data["mw_id"]
 
         # Deletes the maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         delete_response = requests.delete(api_url)
         assert delete_response.status_code == 200
 
@@ -811,7 +811,7 @@ class TestE2EMaintenance:
     def test_080_delete_non_existent_mw_on_switch_should_fail(self):
         """
         404 response calling
-            /api/kytos/maintenance/{mw_id} on DELETE
+            /api/kytos/maintenance/v1/{mw_id} on DELETE
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -819,7 +819,7 @@ class TestE2EMaintenance:
         mw_id = "c16f5bbc4d004f018a76b22f677f8c2a"
 
         # Deletes the maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         delete_response = requests.delete(api_url)
         assert delete_response.status_code == 404
 
@@ -843,7 +843,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
 
@@ -851,7 +851,7 @@ class TestE2EMaintenance:
         mw_id = data["mw_id"]
 
         # Gets the maintenance schema
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         json_data = response.json()
@@ -878,7 +878,7 @@ class TestE2EMaintenance:
         assert ', 0% packet loss,' in result
 
         # Ends the maintenance window information
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/end'
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id + '/end'
         end_response = requests.patch(api_url)
         assert end_response.status_code == 200
 
@@ -898,7 +898,7 @@ class TestE2EMaintenance:
     def test_090_end_non_existent_running_mw_on_switch_should_fail(self):
         """
         404 response calling
-            /api/kytos/maintenance/{mw_id}/end on PATCH
+            /api/kytos/maintenance/v1/{mw_id}/end on PATCH
         """
         self.net.restart_kytos_clean()
         time.sleep(5)
@@ -906,7 +906,7 @@ class TestE2EMaintenance:
         mw_id = "c16f5bbc4d004f018a76b22f677f8c2a"
 
         # Ends an unknown maintenance
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/end'
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id + '/end'
         end_response = requests.patch(api_url)
         assert end_response.status_code == 404
 
@@ -914,7 +914,7 @@ class TestE2EMaintenance:
         """Tests the maintenance window ending process on a not running MW
         Test:
             400 response calling
-            /api/kytos/maintenance/{mw_id}/end on PATCH
+            /api/kytos/maintenance/v1/{mw_id}/end on PATCH
         """
 
         self.restart_and_create_circuit()
@@ -936,18 +936,18 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance/'
+        api_url = KYTOS_API + '/maintenance/v1/'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         json_data = response.json()
         mw_id = json_data["mw_id"]
 
         # Ends a not running maintenance
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/end'
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id + '/end'
         end_response = requests.patch(api_url)
         assert end_response.status_code == 400
 
         # Deletes the maintenance by its id
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         requests.delete(api_url)
 
     def test_100_extend_running_mw_on_switch(self):
@@ -972,7 +972,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
 
@@ -980,7 +980,7 @@ class TestE2EMaintenance:
         mw_id = data["mw_id"]
 
         # Gets the maintenance schema
-        api_url = KYTOS_API + '/maintenance/' + mw_id
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         json_data = response.json()
@@ -1009,7 +1009,7 @@ class TestE2EMaintenance:
         payload2 = {'minutes': mw_extension}
 
         # extend the maintenance window information
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 200, response.text
 
@@ -1067,7 +1067,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
 
@@ -1077,7 +1077,7 @@ class TestE2EMaintenance:
         payload2 = {'seconds': mw_extension}
 
         # extend the maintenance window information
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 400, response.text
 
@@ -1090,7 +1090,7 @@ class TestE2EMaintenance:
         payload2 = {'minutes': 1}
 
         # extend the maintenance window information
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 404, response.text
 
@@ -1115,7 +1115,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
 
@@ -1128,7 +1128,7 @@ class TestE2EMaintenance:
         payload2 = {'second': mw_extension}
 
         # extend the maintenance window information
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 400, response.text
 
@@ -1153,7 +1153,7 @@ class TestE2EMaintenance:
         }
 
         # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance'
+        api_url = KYTOS_API + '/maintenance/v1'
         response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
         data = response.json()
 
@@ -1166,6 +1166,6 @@ class TestE2EMaintenance:
         payload2 = {'minutes': mw_extension}
 
         # extend the maintenance window information
-        api_url = KYTOS_API + '/maintenance/' + mw_id + '/extend'
+        api_url = KYTOS_API + '/maintenance/v1/' + mw_id + '/extend'
         response = requests.patch(api_url, data=json.dumps(payload2), headers={'Content-type': 'application/json'})
         assert response.status_code == 400, response.text
