@@ -60,7 +60,6 @@ class TestE2EKytosServer:
                 ("kytos", "topology"),
                 ("kytos", "of_lldp"),
                 ('amlight', 'sdntrace'),
-                ('amlight', 'scheduler'),
                 ('amlight', 'flow_stats'),
                 ('amlight', 'coloring'),
                 ('amlight', 'sdntrace_cp'),
