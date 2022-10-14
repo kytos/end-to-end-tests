@@ -926,21 +926,22 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
-        priority = 100
+        sb_priority = 100
         payload = {
-            "priority": priority
+            "sb_priority": sb_priority
         }
 
-        # It sets a new circuit's priority
-        requests.patch(api_url + evc1, data=json.dumps(payload),
-                       headers={'Content-type': 'application/json'})
+        # It sets a new circuit's sb_priority
+        response = requests.patch(api_url + evc1, data=json.dumps(payload),
+                                  headers={'Content-type': 'application/json'})
+        assert response.status_code == 200, response.text
 
         time.sleep(10)
 
         # It verifies EVC's data
         response = requests.get(api_url + evc1)
         data = response.json()
-        assert data['priority'] == priority
+        assert data['sb_priority'] == sb_priority, data
 
         s1, s2 = self.net.net.get('s1', 's2')
         flows_s1 = s1.dpctl('dump-flows')
