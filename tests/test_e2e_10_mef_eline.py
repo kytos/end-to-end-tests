@@ -282,8 +282,8 @@ class TestE2EMefEline:
         assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 3, flows_s2
 
         # make sure it should be dl_vlan instead of vlan_vid
-        assert 'dl_vlan=104' in flows_s1
-        assert 'dl_vlan=104' not in flows_s2
+        assert 'in_port="s1-eth1",dl_vlan=104' in flows_s1, flows_s1
+        assert 'in_port="s2-eth1",dl_vlan' not in flows_s2, flows_s2
 
         # Make the final and most important test: connectivity
         # 1. create the vlans and setup the ip addresses
