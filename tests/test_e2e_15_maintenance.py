@@ -33,6 +33,14 @@ class TestE2EMaintenance:
         cls.net.stop()
 
     @staticmethod
+    def get_evc(circuit_id):
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.get(api_url+circuit_id)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        return data
+
+    @staticmethod
     def create_circuit(vlan_id):
         payload = {
             "name": "my evc1",
@@ -62,13 +70,15 @@ class TestE2EMaintenance:
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         response = requests.post(api_url, json=payload)
         assert response.status_code == 201, response.text
-
+        data = response.json()
+        return data["circuit_id"]
 
     def restart_and_create_circuit(self):
         self.net.restart_kytos_clean()
         time.sleep(10)
-        self.create_circuit(100)
+        evc_id = self.create_circuit(100)
         time.sleep(10)
+        return evc_id
 
     def test_005_list_mw_should_be_empty(self):
         """Tests if the maintenances list is empty at the beginning
@@ -85,55 +95,32 @@ class TestE2EMaintenance:
 
     def test_010_create_mw_on_switch_should_move_evc(self):
         """Tests the EVC behaviors during maintenance
+
+        This test case makes sure that the EVC will
+        converge steering away from the maintenance items
+
         Test:
             /api/kytos/maintenance/v1 on POST
         """
 
-        self.restart_and_create_circuit()
+        """
+        Make sure the EVC gets created and goes over the maintenance item
+        Ping should work
+        """
+        evc_id = self.restart_and_create_circuit()
+        sw_mw = "00:00:00:00:00:00:00:02"
+        data = self.get_evc(evc_id)
+        assert data["current_path"], data["current_path"]
+        current_path_sws = set()
+        for link in data["current_path"]:
+            current_path_sws.add(link["endpoint_a"]["switch"])
+            current_path_sws.add(link["endpoint_b"]["switch"])
+        assert current_path_sws == {
+            "00:00:00:00:00:00:00:01",
+            sw_mw,
+            "00:00:00:00:00:00:00:03",
+        }, current_path_sws
 
-        # Sets up the maintenance window information
-        mw_start_delay = 60
-        mw_duration = 60
-        start = datetime.now() + timedelta(seconds=mw_start_delay)
-        end = start + timedelta(seconds=mw_duration)
-
-        # Sets up the maintenance window data
-        payload = {
-            "description": "mw for test 010",
-            "start": start.strftime(TIME_FMT),
-            "end": end.strftime(TIME_FMT),
-            "items": [
-                "00:00:00:00:00:00:00:02"
-            ]
-        }
-
-        # Creates a new maintenance window
-        api_url = KYTOS_API + '/maintenance/v1'
-        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
-        assert response.status_code == 201, response.text
-        data = response.json()
-        assert 'mw_id' in data
-
-        # Waits for the MW to start
-        time.sleep(mw_start_delay + mw_duration / 4)
-
-        # Switch 1 and 3 should have 3 flows; Switch 2 should have only 1 flow.
-        s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
-        flows_s1 = s1.dpctl('dump-flows')
-        flows_s2 = s2.dpctl('dump-flows')
-        flows_s3 = s3.dpctl('dump-flows')
-        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
-        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2, flows_s3
-        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS, flows_s2
-
-        # Makes sure it should be dl_vlan instead of vlan_vid
-        assert 'dl_vlan=100' in flows_s1
-        assert 'dl_vlan=100' in flows_s3
-        assert 'dl_vlan=100' not in flows_s2
-
-        # It makes the final and most important test: connectivity
-        # 1. Creates the VLANs and set up the IP addresses
-        # 2. Tries to ping to each other
         h11, h3 = self.net.net.get('h11', 'h3')
         h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
         h11.cmd('ip link set up vlan100')
@@ -144,13 +131,79 @@ class TestE2EMaintenance:
         result = h11.cmd('ping -c1 100.0.0.2')
         assert ', 0% packet loss,' in result
 
-        # Waits for the MW to finish and check if the path returns to the initial configuration
-        time.sleep(mw_duration)
-
+        # Initially, it should only have these flows
+        s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
+        flows_s1 = s1.dpctl('dump-flows')
         flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
         assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2, flows_s3
+
+        # Sets up the maintenance window information
+        mw_start_delay = 10
+        mw_duration = 20
+        start = datetime.now() + timedelta(seconds=mw_start_delay)
+        end = start + timedelta(seconds=mw_duration)
+
+        # Sets up the maintenance window data
+        payload = {
+            "description": "mw for test 010",
+            "start": start.strftime(TIME_FMT),
+            "end": end.strftime(TIME_FMT),
+            "items": [sw_mw]
+        }
+
+        # Creates a new maintenance window
+        api_url = KYTOS_API + '/maintenance/v1'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'mw_id' in data
+
+        """
+        During the maintenance the EVC should steer away from sw_mw
+        Ping should still work
+        """
+        time.sleep(mw_start_delay + mw_duration / 2)
+
+        data = self.get_evc(evc_id)
+        assert data["current_path"], data["current_path"]
+        current_path_sws = set()
+        for link in data["current_path"]:
+            current_path_sws.add(link["endpoint_a"]["switch"])
+            current_path_sws.add(link["endpoint_b"]["switch"])
+        assert current_path_sws == {
+            "00:00:00:00:00:00:00:01",
+            "00:00:00:00:00:00:00:03",
+        }, current_path_sws
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert '0 received' not in result
+
+        # Waits for the MW to finish and check if the path returns to the initial configuration
+        time.sleep(mw_duration + 10)
+        data = self.get_evc(evc_id)
+        assert data["current_path"], data["current_path"]
+        current_path_sws = set()
+        for link in data["current_path"]:
+            current_path_sws.add(link["endpoint_a"]["switch"])
+            current_path_sws.add(link["endpoint_b"]["switch"])
+        assert current_path_sws == {
+            "00:00:00:00:00:00:00:01",
+            sw_mw,
+            "00:00:00:00:00:00:00:03",
+        }, current_path_sws
         result = h11.cmd('ping -c1 100.0.0.2')
         assert ', 0% packet loss,' in result
+
+        # Eventually these flows are expected over the original path again
+        s1, s2, s3 = self.net.net.get('s1', 's2', 's3')
+        flows_s1 = s1.dpctl('dump-flows')
+        flows_s2 = s2.dpctl('dump-flows')
+        flows_s3 = s3.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
+        assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS + 2, flows_s2
+        assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2, flows_s3
 
         # Cleans up
         h11.cmd('ip link del vlan100')
