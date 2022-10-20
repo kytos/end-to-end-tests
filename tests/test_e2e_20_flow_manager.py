@@ -43,9 +43,11 @@ class TestE2EFlowManager:
         """Tests if, after kytos restart, a flow installed
         to a switch will still be installed."""
 
+        cookie = 1024
         payload = {
             "flows": [
                 {
+                    "cookie": cookie,
                     "priority": 10,
                     "idle_timeout": 360,
                     "hard_timeout": 1200,
@@ -77,6 +79,23 @@ class TestE2EFlowManager:
         self.net.wait_switches_connect()
 
         time.sleep(10)
+
+        # Make sure that the flow that was sent is on /v2/stored_flows
+        dpid = "00:00:00:00:00:00:00:01"
+        response = requests.get(
+            f"{KYTOS_API}/flow_manager/v2/stored_flows?state=installed&dpid={dpid}"
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert dpid in data
+        assert len(data[dpid]) == BASIC_FLOWS + 1
+        expected_flow = payload["flows"][0]
+        for stored_flow in data[dpid]:
+            if stored_flow["flow"]["cookie"] != cookie:
+                continue
+            assert stored_flow["state"] == "installed"
+            for key, value in expected_flow.items():
+                assert stored_flow["flow"][key] == value, stored_flow
 
         s1 = self.net.net.get('s1')
         flows_s1 = s1.dpctl('dump-flows')
