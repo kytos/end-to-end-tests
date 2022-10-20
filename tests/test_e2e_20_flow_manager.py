@@ -277,6 +277,30 @@ class TestE2EFlowManager:
 
         time.sleep(10)
 
+        # Make sure that flows are soft deleted on /v2/stored_flows
+        response = requests.get(
+            f"{KYTOS_API}/flow_manager/v2/stored_flows?state=deleted"
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        for i in range(1, 4):
+            dpid = f"00:00:00:00:00:00:00:0{i}"
+            assert dpid in data
+            assert len(data[dpid]) == len(payload["flows"])
+            expected_flow = payload["flows"][0]
+            flow_entry = data[dpid][0]["flow"]
+            for key, value in expected_flow.items():
+                assert flow_entry[key] == value, flow_entry
+
+        # Make sure that flows are deleted on /v2/flows
+        response = requests.get(api_url)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        for i in range(1, 4):
+            dpid = f"00:00:00:00:00:00:00:0{i}"
+            assert dpid in data
+            assert len(data[dpid]["flows"]) == BASIC_FLOWS, data[dpid]
+
         for sw_name in ['s1', 's2', 's3']:
             sw = self.net.net.get(sw_name)
             flows_sw = sw.dpctl('dump-flows')
