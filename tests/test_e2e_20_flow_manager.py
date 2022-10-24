@@ -364,6 +364,8 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller(enable_all=True)
             self.net.wait_switches_connect()
+        else:
+            self.net.reconnect_switches()
 
         time.sleep(10)
 
@@ -422,6 +424,8 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller(enable_all=True)
             self.net.wait_switches_connect()
+        else:
+            self.net.reconnect_switches()
 
         time.sleep(10)
 
@@ -499,6 +503,8 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller(enable_all=True)
             self.net.wait_switches_connect()
+        else:
+            self.net.reconnect_switches()
 
         time.sleep(10)
 
@@ -523,6 +529,8 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller(enable_all=True)
             self.net.wait_switches_connect()
+        else:
+            self.net.reconnect_switches()
 
         time.sleep(10)
 
