@@ -325,15 +325,15 @@ class NetworkTest:
         self.start_controller(clean_config=True, enable_all=True)
         self.wait_switches_connect()
 
-    def reconnect_switches(self, target="tcp:127.0.0.1:6653", min_delay=3):
+    def reconnect_switches(self, target="tcp:127.0.0.1:6653"):
         """Restart switches connections.
         This method can also be used to trigger a consistency check initial run."""
         for sw in self.net.switches:
-            sw.vsctl(f'del-controller {sw.name}')
+            sw.vsctl(f"del-controller {sw.name}")
         for sw in self.net.switches:
-            sw.vsctl(f'set-controller {sw.name} {target}')
-        # Min delay to avoid introducing other delays since TCP reconn is quick
-        time.sleep(min_delay)
+            sw.vsctl(f"set-controller {sw.name} {target}")
+            sw.controllerUUIDs(update=True)
+        self.wait_switches_connect()
 
     def config_all_links_up(self):
         for link in self.net.links:
