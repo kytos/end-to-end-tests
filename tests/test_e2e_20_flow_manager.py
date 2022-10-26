@@ -141,16 +141,22 @@ class TestE2EFlowManager:
 
         time.sleep(10)
 
-        response = requests.get(api_url)
+        sw_name = "s1"
+        sw = self.net.net.get(sw_name)
+        flows_sw = sw.dpctl("dump-flows")
+        assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS + 1, flows_sw
+        assert 'actions=output:"%s-eth2"' % sw_name in flows_sw
+
+        stored_flows = f'{KYTOS_API}/flow_manager/v2/stored_flows/?dpids={switch_id}'
+        response = requests.get(stored_flows)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert len(data[switch_id]["flows"]) == BASIC_FLOWS + 1
-        assert data[switch_id]["flows"][-1]["instructions"][0]["instruction_type"] == "apply_actions"
-        assert data[switch_id]["flows"][-1]['instructions'][0]["actions"] == payload["flows"][0]["actions"]
-        assert data[switch_id]["flows"][-1]["match"] == payload["flows"][0]["match"]
-        assert data[switch_id]["flows"][-1]["priority"] == payload["flows"][0]["priority"]
-        assert data[switch_id]["flows"][-1]["idle_timeout"] == payload["flows"][0]["idle_timeout"]
-        assert data[switch_id]["flows"][-1]["hard_timeout"] == payload["flows"][0]["hard_timeout"]
+        assert len(data[switch_id]) == BASIC_FLOWS + 1
+        assert data[switch_id][-1]["flow"]["actions"] == payload["flows"][0]["actions"]
+        assert data[switch_id][-1]["flow"]["match"] == payload["flows"][0]["match"]
+        assert data[switch_id][-1]["flow"]["priority"] == payload["flows"][0]["priority"]
+        assert data[switch_id][-1]["flow"]["idle_timeout"] == payload["flows"][0]["idle_timeout"]
+        assert data[switch_id][-1]["flow"]["hard_timeout"] == payload["flows"][0]["hard_timeout"]
 
     def test_015_install_flows(self):
         """Tests if, after kytos restart, a flow installed
@@ -479,6 +485,8 @@ class TestE2EFlowManager:
             # restart controller keeping configuration
             self.net.start_controller(enable_all=True)
             self.net.wait_switches_connect()
+        else:
+            self.net.reconnect_switches()
 
         time.sleep(10)
 
