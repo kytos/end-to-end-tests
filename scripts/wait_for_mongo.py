@@ -1,8 +1,11 @@
 import os
 import sys
 import time
+from pydantic import ValidationError
 from pymongo import MongoClient
-from pymongo.errors import OperationFailure, AutoReconnect
+from pymongo.errors import OperationFailure, AutoReconnect, DuplicateKeyError
+
+from kytos.core.auth import UserController
 
 
 def mongo_client(
@@ -34,6 +37,19 @@ def mongo_client(
         **kwargs,
     )
 
+def create_user(
+    username=os.environ.get('USER_USERNAME'),
+    password=os.environ.get('USER_PASSWORD'),
+    email=os.environ.get('USER_EMAIL'),
+) -> None:
+    """Create user"""
+    user_controller = UserController()
+    data = {
+        'username': username,
+        'email': email,
+        'password': password
+    }
+    data = user_controller.create_user(data)
 
 def mongo_hello_wait(mongo_client=mongo_client, retries=10, timeout_ms=10000):
     """Wait for MongoDB."""
@@ -58,3 +74,9 @@ if __name__ == "__main__":
         retries = int(sys.argv[1])
 
     mongo_hello_wait(retries=retries)
+    try:
+        create_user()
+    except DuplicateKeyError:
+        sys.exit()
+    except ValidationError:
+        sys.exit()
