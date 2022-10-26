@@ -553,7 +553,7 @@ class TestE2EFlowManager:
         self.flow_table_0(restart_kytos=True)
 
     def test_080_retrieve_flows(self):
-        api_url = KYTOS_API + '/flow_manager/v2/flows'
+        api_url = KYTOS_API + '/flow_manager/v2/stored_flows'
         response = requests.get(api_url)
         assert response.status_code == 200, response.text
         data = response.json()
@@ -561,6 +561,6 @@ class TestE2EFlowManager:
         assert "00:00:00:00:00:00:00:01" in data.keys()
         assert "00:00:00:00:00:00:00:02" in data.keys()
         assert "00:00:00:00:00:00:00:03" in data.keys()
-        assert len(data["00:00:00:00:00:00:00:01"]["flows"]) == BASIC_FLOWS
-        assert len(data["00:00:00:00:00:00:00:02"]["flows"]) == BASIC_FLOWS
-        assert len(data["00:00:00:00:00:00:00:03"]["flows"]) == BASIC_FLOWS
+        assert len(data["00:00:00:00:00:00:00:01"]) == BASIC_FLOWS
+        assert len(data["00:00:00:00:00:00:00:02"]) == BASIC_FLOWS
+        assert len(data["00:00:00:00:00:00:00:03"]) == BASIC_FLOWS
