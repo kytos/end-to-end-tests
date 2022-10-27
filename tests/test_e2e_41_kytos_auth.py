@@ -61,6 +61,7 @@ class TestE2EKytosAuth:
         wrong_password = "wrong_password"
         answer_fail = requests.get(api_url, auth=(username, wrong_password))
         assert answer_fail.status_code == 401
+        assert answer_fail.json()["description"] == "Incorrect password"
 
         #Error: NoTFound
         wrong_username = "wrong_username"
