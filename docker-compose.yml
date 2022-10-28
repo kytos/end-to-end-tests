@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   kytos:
-    image: amlight/kytos:mongo
+    image: amlight/kytos:latest
     privileged: true
     volumes:
       - "./kytos-init.sh:/kytos-init.sh"
