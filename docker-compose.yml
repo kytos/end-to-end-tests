@@ -14,9 +14,6 @@ services:
       MONGO_PASSWORD: napp_pw
       MONGO_DBNAME: napps
       MONGO_HOST_SEEDS: "mongo1t:27027,mongo2t:27028,mongo3t:27029"
-      USER_USERNAME: Superuser
-      USER_PASSWORD: Password123
-      USER_EMAIL: user@kytos.io
     depends_on:
       - mongo-setup
   mongo-setup:
