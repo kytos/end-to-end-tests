@@ -34,10 +34,6 @@ class TestE2EKytosAuth:
     def setup_class(cls):
         cls.net = NetworkTest(CONTROLLER)
         cls.net.start()
-        # rotate logfile (copy/truncate strategy)
-        logfile = '/var/log/syslog'
-        shutil.copy(logfile, logfile + '-' + time.strftime("%Y%m%d%H%M%S"))
-        open(logfile, 'w').close()
 
     @classmethod
     def teardown_class(cls):
