@@ -34,7 +34,6 @@ def mongo_client(
         **kwargs,
     )
 
-
 def mongo_hello_wait(mongo_client=mongo_client, retries=10, timeout_ms=10000):
     """Wait for MongoDB."""
     try:
