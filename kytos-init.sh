@@ -18,9 +18,10 @@ kytosd --help >/dev/null 2>&1  ## create configs at /etc/kytos from templates
 sed -i 's/WARNING/INFO/g' /etc/kytos/logging.ini
 
 test -z "$TESTS" && TESTS=tests/
+test -z "$RERUNS" && RERUNS=3
 
 python3 scripts/wait_for_mongo.py 2>/dev/null
-python3 -m pytest $TESTS
+python3 -m pytest $TESTS --reruns $RERUNS --only-rerun AssertionError -r fEr
 
 #tail -f
 
