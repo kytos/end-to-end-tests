@@ -15,15 +15,17 @@ def pytest_terminal_summary(terminalreporter):
     terminalreporter.section('start/stop times', sep='-', bold=True)
     for stat in terminalreporter.stats.values():
         for report in stat:
-            start = datetime.fromtimestamp(report.start)
-            stop = datetime.fromtimestamp(report.stop)
             if (
                 hasattr(report, "outcome")
                 and report.outcome == "rerun"
                 and report.when == "call"
             ):
                 terminalreporter.write_line(f"rerun: {report.rerun}")
+                start = datetime.fromtimestamp(report.start)
+                stop = datetime.fromtimestamp(report.stop)
                 terminalreporter.write_line('{id:20}: {start:%Y-%m-%d,%H:%M:%S.%f} - {stop:%Y-%m-%d,%H:%M:%S.%f}'.format(id=report.nodeid, start=start, stop=stop))
                 terminalreporter.write_line(f"{report.longrepr}")
             if hasattr(report, 'failed') and report.failed and report.when == 'call':
+                start = datetime.fromtimestamp(report.start)
+                stop = datetime.fromtimestamp(report.stop)
                 terminalreporter.write_line('{id:20}: {start:%Y-%m-%d,%H:%M:%S.%f} - {stop:%Y-%m-%d,%H:%M:%S.%f}'.format(id=report.nodeid, start=start, stop=stop))
