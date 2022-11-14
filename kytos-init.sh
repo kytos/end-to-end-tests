@@ -21,7 +21,7 @@ test -z "$TESTS" && TESTS=tests/
 test -z "$RERUNS" && RERUNS=2
 
 python3 scripts/wait_for_mongo.py 2>/dev/null
-python3 -m pytest $TESTS --reruns $RERUNS --only-rerun AssertionError -r fEr
+python3 -m pytest $TESTS --reruns $RERUNS -r fEr
 
 #tail -f
 
