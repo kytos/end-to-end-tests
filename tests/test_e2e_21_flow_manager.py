@@ -129,6 +129,8 @@ class TestE2EFlowManager:
         # so to simulate that, we just delete all flows
         s1 = self.net.net.get('s1')
         s1.dpctl('del-flows')
+        # reconnect to trigger and speed up consistency check after the handshake
+        self.net.reconnect_switches()
 
         # wait for the flow to be installed
         time.sleep(10)
