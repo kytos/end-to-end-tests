@@ -145,6 +145,9 @@ set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:20:16 '{"mtu": 9000, "po
 set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:20:17 '{"mtu": 9000, "port_name": "Interface-20:17"}'
 set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:21:14 '{"mtu": 9000, "port_name": "Interface-21:14"}'
 set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:21:18 '{"mtu": 9000, "port_name": "Interface-21:18"}'
+set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:22:15 '{"mtu": 9000, "port_name": "Interface-22:15"}'
+set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:22:18 '{"mtu": 9000, "port_name": "Interface-22:18"}'
+set_interface_enable_lldp_metadata 00:00:00:00:00:00:00:22:61 '{"mtu": 9000, "port_name": "Interface-22:61"}'
 
 
 #############################
