@@ -4,7 +4,7 @@ set -xe
 
 # the settings below are intended to decrease the tests execution time (in fact, the time.sleep() calls
 # depend on the values below, otherwise many tests would fail)
-sed -i 's/STATS_INTERVAL = 60/STATS_INTERVAL = 30/g' /var/lib/kytos/napps/kytos/of_core/settings.py
+sed -i 's/STATS_INTERVAL = 60/STATS_INTERVAL = 7/g' /var/lib/kytos/napps/kytos/of_core/settings.py
 sed -i 's/CONSISTENCY_MIN_VERDICT_INTERVAL =.*/CONSISTENCY_MIN_VERDICT_INTERVAL = 60/g' /var/lib/kytos/napps/kytos/flow_manager/settings.py
 sed -i 's/LINK_UP_TIMER = 10/LINK_UP_TIMER = 1/g' /var/lib/kytos/napps/kytos/topology/settings.py
 sed -i 's/DEPLOY_EVCS_INTERVAL = 60/DEPLOY_EVCS_INTERVAL = 5/g' /var/lib/kytos/napps/kytos/mef_eline/settings.py
