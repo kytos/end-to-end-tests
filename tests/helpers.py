@@ -325,11 +325,17 @@ class NetworkTest:
         self.start_controller(clean_config=True, enable_all=True)
         self.wait_switches_connect()
 
-    def reconnect_switches(self, target="tcp:127.0.0.1:6653"):
+    def reconnect_switches(self, target="tcp:127.0.0.1:6653",
+                           temp_target="tcp:127.0.0.1:6654"):
         """Restart switches connections.
-        This method can also be used to trigger a consistency check initial run."""
+        This method can also be used to trigger a consistency check initial run.
+
+        A temporary target is used in order to avoid OvS deleting the flows
+        if the controller config were to be deleted.
+        """
         for sw in self.net.switches:
-            sw.vsctl(f"del-controller {sw.name}")
+            sw.vsctl(f"set-controller {sw.name} {temp_target}")
+            sw.controllerUUIDs(update=True)
         for sw in self.net.switches:
             sw.vsctl(f"set-controller {sw.name} {target}")
             sw.controllerUUIDs(update=True)
