@@ -106,10 +106,8 @@ class TestE2EMefEline:
         data = response.json()
         return data
 
-    def test_001_create_delete_create_with_constraints(self):
-        """Test to create, delete create with constraints
-
-        In the future, this test should be replaced with a create -> update."""
+    def test_001_create_update_with_constraints(self):
+        """Test to create -> update with constraints."""
 
         links_metadata = self.add_topology_metadata()
         blue_link_ids, red_link_ids = set(), set()
@@ -153,13 +151,9 @@ class TestE2EMefEline:
         assert current_path_ids == red_link_ids, current_path_ids
         assert failover_path_ids == blue_link_ids, failover_path_ids
 
-        self.delete_evc(evc_id)
-
-        # create the EVC switching the primary and secondary constraints
-        evc_id = self.create_evc(
-            uni_a="00:00:00:00:00:00:00:01:1",
-            uni_z="00:00:00:00:00:00:00:03:1",
-            vlan_id=100,
+        # update the EVC switching the primary and secondary constraints
+        evc_id = self.update_evc(
+            evc_id,
             primary_constraints={
                 "mandatory_metrics": {"ownership": "blue"},
                 "spf_attribute": "hop",
