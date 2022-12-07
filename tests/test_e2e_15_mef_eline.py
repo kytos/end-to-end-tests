@@ -152,7 +152,7 @@ class TestE2EMefEline:
         assert failover_path_ids == blue_link_ids, failover_path_ids
 
         # update the EVC switching the primary and secondary constraints
-        evc_id = self.update_evc(
+        self.update_evc(
             evc_id,
             primary_constraints={
                 "mandatory_metrics": {"ownership": "blue"},
