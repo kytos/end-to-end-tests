@@ -57,7 +57,7 @@ class TestE2ESDNTrace:
 
 
     # This test may eventually fail due to https://github.com/kytos-ng/flow_stats/issues/19
-    @pytest.mark.xfail
+    # @pytest.mark.xfail
     def test_001_run_sdntrace_cp(self):
         """Run SDNTrace-CP (Control Plane)."""
         # Trace from UNI_A
@@ -237,7 +237,7 @@ class TestE2ESDNTrace:
         assert expected == actual, f"Expected {expected}. Actual: {actual}"
 
     # This test may eventually fail due to https://github.com/kytos-ng/flow_stats/issues/19
-    @pytest.mark.xfail
+    # @pytest.mark.xfail
     def test_020_run_sdntrace_fail_missing_flow(self):
         """Run SDNTrace-CP with a failure due to missing flows:
         - delete flow from intermediate switch
@@ -376,3 +376,23 @@ class TestE2ESDNTrace:
             (step['dpid'], step['port']) for step in result[1:-1]
         ]
         assert expected == actual, f"Expected {expected}. Actual: {actual}"
+
+    def test_030_run_sdntrace_for_stored_flows(self):
+        """Run SDNTrace to get traces from flow_manager stored_flow"""
+        payload = {
+                    "trace": {
+                        "switch": {
+                            "dpid": "00:00:00:00:00:00:00:01",
+                            "in_port": 1
+                        },
+                        "eth": {
+                            "dl_vlan": 100
+                        }
+                    }
+                }
+                
+        api_url = KYTOS_API + '/amlight/sdntrace_cp/trace'
+        response = requests.put(api_url, json=payload)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data['result'][0]['dpid'] == '00:00:00:00:00:00:00:01'
