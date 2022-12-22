@@ -1000,18 +1000,26 @@ class TestE2EMefEline:
         assert 'set_queue:3' in flows_s2
 
     def test_125_patch_dynamic_backup_path(self):
+        """Test patching an EVC to be non dynamic with primary_path."""
 
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
 
         dynamic_backup_path = False
         payload = {
-            "dynamic_backup_path": dynamic_backup_path
+            "dynamic_backup_path": dynamic_backup_path,
+            "primary_path": [
+                {
+                    "endpoint_a": {"id": "00:00:00:00:00:00:00:01:3"},
+                    "endpoint_b": {"id": "00:00:00:00:00:00:00:02:2"},
+                }
+            ],
         }
 
         # It sets a new circuit's dynamic_backup_path
-        requests.patch(api_url + evc1, data=json.dumps(payload),
-                       headers={'Content-type': 'application/json'})
+        response = requests.patch(api_url + evc1, data=json.dumps(payload),
+                                  headers={'Content-type': 'application/json'})
+        assert response.status_code == 200, response.text
 
         time.sleep(10)
 
@@ -1019,6 +1027,22 @@ class TestE2EMefEline:
         response = requests.get(api_url + evc1)
         data = response.json()
         assert data['dynamic_backup_path'] == dynamic_backup_path
+
+    def test_126_patch_dynamic_backup_path_false_no_primary_path(self):
+        """Test try to patch dynamic_backup_path as False with an EVC
+        that doesn't have a static primary_path."""
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+        payload = {
+            "dynamic_backup_path": False,
+        }
+        response = requests.patch(api_url + evc1, data=json.dumps(payload),
+                                  headers={'Content-type': 'application/json'})
+        assert response.status_code == 400, response.text
+        expected_err = "must have a primary path or allow dynamic paths"
+        data = response.json()
+        assert expected_err in data["description"]
 
     """The EVC is returning active=False"""
     @pytest.mark.xfail
