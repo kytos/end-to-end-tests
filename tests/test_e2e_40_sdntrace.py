@@ -236,8 +236,6 @@ class TestE2ESDNTrace:
 
         assert expected == actual, f"Expected {expected}. Actual: {actual}"
 
-    # This test may eventually fail due to https://github.com/kytos-ng/flow_stats/issues/19
-    @pytest.mark.xfail
     def test_020_run_sdntrace_fail_missing_flow(self):
         """Run SDNTrace-CP with a failure due to missing flows:
         - delete flow from intermediate switch
@@ -246,10 +244,12 @@ class TestE2ESDNTrace:
         - redeploy evc and make sure sdntrace / sdntrace_cp works
         """
         # 1. delete flow
-        cookie_id = int(self.circuit['id'], 16) + (0xaa << 56)
         delete_flow = {
             "flows": [
-                {"cookie": cookie_id}
+                {
+                    'cookie': int("0xaa%s" % self.circuit['id'], 16),
+                    'cookie_mask': 0xffffffffffffffff,
+                }
             ]
         }
 
