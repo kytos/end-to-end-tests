@@ -1028,6 +1028,22 @@ class TestE2EMefEline:
         data = response.json()
         assert data['dynamic_backup_path'] == dynamic_backup_path
 
+    def test_126_patch_dynamic_backup_path_false_no_primary_path(self):
+        """Test try to patch dynamic_backup_path as False with an EVC
+        that doesn't have a static primary_path."""
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        evc1 = self.create_evc(100)
+        payload = {
+            "dynamic_backup_path": False,
+        }
+        response = requests.patch(api_url + evc1, data=json.dumps(payload),
+                                  headers={'Content-type': 'application/json'})
+        assert response.status_code == 400, response.text
+        expected_err = "must have a primary path or allow dynamic paths"
+        data = response.json()
+        assert expected_err in data["description"]
+
     """The EVC is returning active=False"""
     @pytest.mark.xfail
     def test_130_patch_primary_path(self):
