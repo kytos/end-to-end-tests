@@ -27,17 +27,17 @@ class TestE2ESDNTrace:
         cls.net.stop()
 
     @staticmethod
-    def create_evc(vlan_id):
+    def create_evc(vlan_id, interface_a="00:00:00:00:00:00:00:01:1", interface_z="00:00:00:00:00:00:00:0a:1"):
         payload = {
             "name": "Vlan_%s" % vlan_id,
             "enabled": True,
             "dynamic_backup_path": True,
             "uni_a": {
-                "interface_id": "00:00:00:00:00:00:00:01:1",
+                "interface_id": interface_a,
                 "tag": {"tag_type": 1, "value": vlan_id}
             },
             "uni_z": {
-                "interface_id": "00:00:00:00:00:00:00:0a:1",
+                "interface_id": interface_z,
                 "tag": {"tag_type": 1, "value": vlan_id}
             }
         }
@@ -55,8 +55,6 @@ class TestE2ESDNTrace:
         data = response.json()
         return data
 
-
-    # This test may eventually fail due to https://github.com/kytos-ng/flow_stats/issues/19
     def test_001_run_sdntrace_cp(self):
         """Run SDNTrace-CP (Control Plane)."""
         # Trace from UNI_A
@@ -235,7 +233,6 @@ class TestE2ESDNTrace:
 
         assert expected == actual, f"Expected {expected}. Actual: {actual}"
 
-    # This test may eventually fail due to https://github.com/kytos-ng/flow_stats/issues/19
     def test_020_run_sdntrace_fail_missing_flow(self):
         """Run SDNTrace-CP with a failure due to missing flows:
         - delete flow from intermediate switch
@@ -375,23 +372,58 @@ class TestE2ESDNTrace:
         ]
         assert expected == actual, f"Expected {expected}. Actual: {actual}"
 
-    def test_030_run_sdntrace_for_stored_flows(self):
+    def test_030_run_sdntrace_for_stored_flows(cls):
         """Run SDNTrace to get traces from flow_manager stored_flow"""
-        payload = [{
-                    "trace": {
-                        "switch": {
-                            "dpid": "00:00:00:00:00:00:00:01",
-                            "in_port": 1
-                        },
-                        "eth": {
-                            "dl_vlan": 100
+        cls.create_evc(100, "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:0a:1")
+        cls.create_evc(101, "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:0a:1")
+        cls.create_evc(102, "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:0a:1")
+        payload = [
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:01",
+                                "in_port": 1
+                            },
+                            "eth": {
+                                "dl_vlan": 100
+                            }
+                        }
+                    },
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:01",
+                                "in_port": 2
+                            },
+                            "eth": {
+                                "dl_vlan": 101
+                            }
+                        }
+                    },
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:0a",
+                                "in_port": 1
+                            }
+                        }
+                    },
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:0a",
+                                "in_port": 1
+                            }
                         }
                     }
-                }]
+                ]
                 
-        api_url = KYTOS_API + '/kytos-ng/sdntrace_cp/traces'
+        api_url = KYTOS_API + '/amlight/sdntrace_cp/traces'
         response = requests.put(api_url, json=payload)
         assert response.status_code == 200, response.text
         data = response.json()
-        print(data)
-        assert data['result'][0]['dpid'] == '00:00:00:00:00:00:00:01'
+        assert len(data) == 2
+        assert "00:00:00:00:00:00:00:01" in data
+        assert len(data["00:00:00:00:00:00:00:01"]) == 2
+        assert "00:00:00:00:00:00:00:0a" in data
+        assert len(data["00:00:00:00:00:00:00:0a"]) == 1
