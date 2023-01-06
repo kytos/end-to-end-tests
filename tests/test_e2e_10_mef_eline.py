@@ -638,9 +638,6 @@ class TestE2EMefEline:
         assert len(flows_s2.split('\r\n ')) == BASIC_FLOWS
         assert len(flows_s3.split('\r\n ')) == BASIC_FLOWS + 2
 
-    """It is returning Response 500, should be 200
-        on delete circuit action"""
-    @pytest.mark.xfail
     def test_055_delete_evc_after_restart_kytos_and_no_switch_reconnected(self):
         api_url = KYTOS_API + '/mef_eline/v2/evc/'
         evc1 = self.create_evc(100)
