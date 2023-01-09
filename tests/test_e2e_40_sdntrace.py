@@ -241,10 +241,12 @@ class TestE2ESDNTrace:
         - redeploy evc and make sure sdntrace / sdntrace_cp works
         """
         # 1. delete flow
-        cookie_id = int(self.circuit['id'], 16) + (0xaa << 56)
         delete_flow = {
             "flows": [
-                {"cookie": cookie_id}
+                {
+                    'cookie': int("0xaa%s" % self.circuit['id'], 16),
+                    'cookie_mask': 0xffffffffffffffff,
+                }
             ]
         }
 
