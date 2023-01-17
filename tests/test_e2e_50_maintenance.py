@@ -151,7 +151,7 @@ class TestE2EMaintenance:
             "description": "mw for test 010",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [sw_mw]
+            "switches": [sw_mw]
         }
 
         # Creates a new maintenance window
@@ -229,7 +229,7 @@ class TestE2EMaintenance:
             "description": "mw for test 015",
             "start": end.strftime(TIME_FMT),
             "end": start.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -259,7 +259,7 @@ class TestE2EMaintenance:
             "description": "mw for test 020",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": []
+            "switches": []
         }
 
         # Creates a new maintenance window
@@ -333,7 +333,7 @@ class TestE2EMaintenance:
             "description": "mw for test 035",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -362,7 +362,7 @@ class TestE2EMaintenance:
         payload1 = {
             "start": start.strftime(TIME_FMT),
             "end": new_time.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -432,7 +432,7 @@ class TestE2EMaintenance:
             "description": "mw for test 040",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -460,7 +460,7 @@ class TestE2EMaintenance:
             "description": "mw for test 045",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -479,7 +479,7 @@ class TestE2EMaintenance:
         payload1 = {
             "start": new_time.strftime(TIME_FMT),
             "end": start.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -511,7 +511,7 @@ class TestE2EMaintenance:
             "description": "mw for test 050",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -530,7 +530,7 @@ class TestE2EMaintenance:
         payload1 = {
             "start": start.strftime(TIME_FMT),
             "end": new_time.strftime(TIME_FMT),
-            "items": []
+            "switches": []
         }
 
         # Updates the maintenance window information
@@ -562,7 +562,7 @@ class TestE2EMaintenance:
             "description": "mw for test 055",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -608,7 +608,7 @@ class TestE2EMaintenance:
             "description": "mw for test 060",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -636,7 +636,7 @@ class TestE2EMaintenance:
         payload1 = {
             "start": start.strftime(TIME_FMT),
             "end": new_time.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -670,7 +670,7 @@ class TestE2EMaintenance:
             "description": "mw for test 065",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -698,7 +698,7 @@ class TestE2EMaintenance:
         payload1 = {
             "start": new_start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -779,7 +779,7 @@ class TestE2EMaintenance:
             "description": "mw for test 070",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:02"
             ]
         }
@@ -818,7 +818,7 @@ class TestE2EMaintenance:
             "description": "mw for test 075",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:02"
             ]
         }
@@ -890,7 +890,7 @@ class TestE2EMaintenance:
             "description": "mw for test 85",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -983,7 +983,7 @@ class TestE2EMaintenance:
             "description": "mw for test 95",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:02"
             ]
         }
@@ -1019,7 +1019,7 @@ class TestE2EMaintenance:
             "description": "mw for test 100",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -1114,7 +1114,7 @@ class TestE2EMaintenance:
             "description": "mw for test 105",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -1162,7 +1162,7 @@ class TestE2EMaintenance:
             "description": "mw for test 115",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
@@ -1200,7 +1200,7 @@ class TestE2EMaintenance:
             "description": "mw for test 120",
             "start": start.strftime(TIME_FMT),
             "end": end.strftime(TIME_FMT),
-            "items": [
+            "switches": [
                 "00:00:00:00:00:00:00:02"
             ]
         }
