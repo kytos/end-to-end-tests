@@ -332,6 +332,289 @@ class TestE2EFlowManager:
             assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS, flows_sw
             assert 'actions=output:"%s-eth2"' % sw_name not in flows_sw
 
+    def test_026_delete_flows_cookie_mask_range(self):
+        """Test deleting flows with cookie range mask and persistence."""""
+
+        payload = {
+            "flows": [
+                {
+                    "cookie": 0xaa00000000000001,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 100
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                },
+                {
+                    "cookie": 0xaa00000000000002,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 101
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                }
+            ]
+        }
+
+        dpid = "00:00:00:00:00:00:00:01"
+        api_url = f"{KYTOS_API}/flow_manager/v2/flows/{dpid}"
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
+        assert response.status_code == 202, response.text
+
+        # wait for the flows to be installed
+        time.sleep(10)
+
+        # it's expected to match all 0xaa cookie prefix
+        delete_payload = {
+          "flows": [
+            {
+              "cookie": 0xaa00000000000000,
+              "cookie_mask": 0xff00000000000000
+            }
+          ]
+        }
+
+        # delete the flows
+        api_url = f"{KYTOS_API}/flow_manager/v2/flows/{dpid}"
+        response = requests.delete(api_url, data=json.dumps(delete_payload),
+                                   headers={'Content-type': 'application/json'})
+        assert response.status_code == 202, response.text
+        data = response.json()
+        assert 'FlowMod Messages Sent' in data['response']
+
+        # wait for the flows to be deleted
+        time.sleep(10)
+
+        # restart controller keeping configuration
+        self.net.start_controller(enable_all=True, del_flows=True)
+        self.net.wait_switches_connect()
+
+        time.sleep(10)
+
+        # Make sure that flows are soft deleted on /v2/stored_flows
+        response = requests.get(
+            f"{KYTOS_API}/flow_manager/v2/stored_flows?state=deleted"
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert dpid in data
+        assert len(data[dpid]) == len(payload["flows"])
+
+        expected_flows = payload["flows"]
+        flow_entry = data[dpid]
+        for i, flow in enumerate(expected_flows):
+            for key, value in flow.items():
+                assert flow_entry[i]["flow"][key] == value, flow_entry[i]
+
+        # Make sure that flows are deleted on /v2/flows
+        response = requests.get(api_url)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert dpid in data
+        assert len(data[dpid]["flows"]) == BASIC_FLOWS, data[dpid]
+
+        sw = self.net.net.get("s1")
+        flows_sw = sw.dpctl("dump-flows")
+        assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS, flows_sw
+
+    def test_027_delete_flows_cookie_mask_range_any(self):
+        """Test deleting flows with cookie range mask any."""""
+
+        payload = {
+            "flows": [
+                {
+                    "cookie": 0xaa00000000000001,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 100
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                },
+                {
+                    "cookie": 0xaa00000000000002,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 101
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                },
+                {
+                    "cookie": 0xbb00000000000001,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 102
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                }
+            ]
+        }
+
+        dpid = "00:00:00:00:00:00:00:01"
+        api_url = f"{KYTOS_API}/flow_manager/v2/flows/{dpid}"
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
+        assert response.status_code == 202, response.text
+
+        # wait for the flows to be installed
+        time.sleep(10)
+
+        # cookie mask all 0's means match any
+        delete_payload = {
+          "flows": [
+            {
+              "cookie": 0x0000000000000000,
+              "cookie_mask": 0x0000000000000000
+            }
+          ]
+        }
+
+        # delete the flows
+        api_url = f"{KYTOS_API}/flow_manager/v2/flows/{dpid}"
+        response = requests.delete(api_url, data=json.dumps(delete_payload),
+                                   headers={'Content-type': 'application/json'})
+        assert response.status_code == 202, response.text
+        data = response.json()
+        assert 'FlowMod Messages Sent' in data['response']
+
+        # wait for the flows to be deleted
+        time.sleep(10)
+
+        # Make sure that flows are soft deleted on /v2/stored_flows
+        response = requests.get(
+            f"{KYTOS_API}/flow_manager/v2/stored_flows?state=deleted"
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert dpid in data
+        assert len(data[dpid]) == len(payload["flows"]) + BASIC_FLOWS
+
+        # Make sure that flows are deleted on /v2/flows
+        response = requests.get(api_url)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert dpid in data
+        assert len(data[dpid]["flows"]) == 0, data[dpid]
+
+        sw = self.net.net.get("s1")
+        flows_sw = sw.dpctl("dump-flows")
+        assert flows_sw.split('\r\n ') == [''], flows_sw
+
+    def test_028_delete_flows_cookie_mask_range_partial(self):
+        """Test deleting flows with cookie range mask partial match."""""
+
+        payload = {
+            "flows": [
+                {
+                    "cookie": 0xaa00000000000001,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 100
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                },
+                {
+                    "cookie": 0xaa00000000000002,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 101
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                }
+            ]
+        }
+
+        dpid = "00:00:00:00:00:00:00:01"
+        api_url = f"{KYTOS_API}/flow_manager/v2/flows/{dpid}"
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
+        assert response.status_code == 202, response.text
+
+        # wait for the flows to be installed
+        time.sleep(10)
+
+        # it's expected to match [0xaa00000000000000, 0xaa00000000000001]
+        delete_payload = {
+          "flows": [
+            {
+              "cookie": 0xaa00000000000000,
+              "cookie_mask": 0xfffffffffffffffe
+            }
+          ]
+        }
+
+        # delete the flow
+        api_url = f"{KYTOS_API}/flow_manager/v2/flows/{dpid}"
+        response = requests.delete(api_url, data=json.dumps(delete_payload),
+                                   headers={'Content-type': 'application/json'})
+        assert response.status_code == 202, response.text
+        data = response.json()
+        assert 'FlowMod Messages Sent' in data['response']
+        # wait for the flow to be deleted
+        time.sleep(10)
+
+        # Make sure that only one flow got soft deleted on /v2/stored_flows
+        response = requests.get(
+            f"{KYTOS_API}/flow_manager/v2/stored_flows?state=deleted"
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert dpid in data
+        assert len(data[dpid]) == 1
+
+        expected_flows = payload["flows"]
+        flow_entry = data[dpid]
+        for key, value in expected_flows[0].items():
+            assert flow_entry[0]["flow"][key] == value, flow_entry[0]
+
+        # Make sure that only one flow got deleted on /v2/flows
+        response = requests.get(api_url)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert dpid in data
+        assert len(data[dpid]["flows"]) == BASIC_FLOWS + 1, data[dpid]
+
+        # Make sure that only one flow got deleted
+        sw = self.net.net.get("s1")
+        flows_sw = sw.dpctl("dump-flows")
+        assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS + 1, flows_sw
+        assert 'dl_vlan=101' in flows_sw
+
     def modify_match(self, restart_kytos=False):
         """Tests if after a match is modified outside
         kytos, the original flow is restored."""
