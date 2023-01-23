@@ -283,7 +283,7 @@ class TestE2ESDNTrace:
         ]
 
         assert full_path != actual, f"Full path {full_path}. Actual: {actual}"
-        assert full_path[:3] == actual, f"Expected {full_path[:4]}. Actual: {actual}"
+        assert full_path[:3] == actual, f"Expected {full_path[:3]}. Actual: {actual}"
 
         # 3. sdntrace data plane - Trace from UNI_A
         payload_2 = {
