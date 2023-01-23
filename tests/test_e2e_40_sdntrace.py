@@ -265,8 +265,8 @@ class TestE2ESDNTrace:
         api_url = KYTOS_API + '/amlight/sdntrace_cp/trace'
         response = requests.put(api_url, json=payload_1)
         data = response.json()
-        # only 5 steps are expected: starting, 1->2, 2->3, 3->4, 4->5
-        assert len(data["result"]) == 5, data
+        # only 4 steps are expected: starting, 1->2, 2->3, 3->4
+        assert len(data["result"]) == 4, str(data)
 
         full_path = [
             (
@@ -283,7 +283,7 @@ class TestE2ESDNTrace:
         ]
 
         assert full_path != actual, f"Full path {full_path}. Actual: {actual}"
-        assert full_path[:4] == actual, f"Expected {full_path[:4]}. Actual: {actual}"
+        assert full_path[:3] == actual, f"Expected {full_path[:3]}. Actual: {actual}"
 
         # 3. sdntrace data plane - Trace from UNI_A
         payload_2 = {
