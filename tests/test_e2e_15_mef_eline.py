@@ -151,6 +151,29 @@ class TestE2EMefEline:
         assert current_path_ids == red_link_ids, current_path_ids
         assert failover_path_ids == blue_link_ids, failover_path_ids
 
+        # Update the EVC switching the uni_z to switch 2
+        self.update_evc(
+            evc_id,
+            uni_z={
+                "interface_id": "00:00:00:00:00:00:00:02:1",
+                "tag": {"tag_type": 1, "value": 100}
+            },
+        )
+        time.sleep(10)
+        response = requests.get(api_url + evc_id)
+        data = response.json()
+        assert data["uni_z"]["interface_id"] == "00:00:00:00:00:00:00:02:1"
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
+        h2.cmd('ip link add link %s name vlan100 type vlan id 100' % (h2.intfNames()[0]))
+        h2.cmd('ip link set up vlan100')
+        h2.cmd('ip addr add 100.0.0.2/24 dev vlan100')
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
         # update the EVC switching the primary and secondary constraints
         self.update_evc(
             evc_id,
@@ -161,6 +184,10 @@ class TestE2EMefEline:
             secondary_constraints={
                 "mandatory_metrics": {"ownership": "red"},
                 "spf_attribute": "hop",
+            },
+            uni_z={
+                "interface_id": "00:00:00:00:00:00:00:03:1",
+                "tag": {"tag_type": 1, "value": 100}
             },
         )
         time.sleep(10)
