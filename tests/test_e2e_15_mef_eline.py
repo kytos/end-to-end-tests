@@ -106,6 +106,43 @@ class TestE2EMefEline:
         data = response.json()
         return data
 
+    def test_002_update_uni(self):
+        """Test when a uni is updated"""
+        api_url = KYTOS_API + "/mef_eline/v2/evc/"
+        evc_id = self.create_evc(
+            uni_a="00:00:00:00:00:00:00:01:1",
+            uni_z="00:00:00:00:00:00:00:03:1",
+            vlan_id=100,
+        )
+        time.sleep(10)
+        response = requests.get(api_url + evc_id)
+        data = response.json()
+        assert data["enabled"]
+        assert data["active"]
+
+        # Update the EVC switching the uni_z to switch 2
+        self.update_evc(
+            evc_id,
+            uni_z={
+                "interface_id": "00:00:00:00:00:00:00:02:1",
+                "tag": {"tag_type": 1, "value": 100}
+            },
+        )
+        time.sleep(10)
+        response = requests.get(api_url + evc_id)
+        data = response.json()
+        assert data["uni_z"]["interface_id"] == "00:00:00:00:00:00:00:02:1"
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
+        h2.cmd('ip link add link %s name vlan100 type vlan id 100' % (h2.intfNames()[0]))
+        h2.cmd('ip link set up vlan100')
+        h2.cmd('ip addr add 100.0.0.2/24 dev vlan100')
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
     def test_001_create_update_with_constraints(self):
         """Test to create -> update with constraints."""
 
