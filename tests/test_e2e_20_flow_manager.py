@@ -203,6 +203,32 @@ class TestE2EFlowManager:
             assert len(flows_sw.split('\r\n ')) == BASIC_FLOWS + 1, flows_sw
             assert 'actions=output:"%s-eth2"' % sw_name in flows_sw
 
+    def test_016_install_invalid_flow_cookie_overflowed(self):
+        """Test try to install an overflowed cookie value."""
+        payload = {
+          "flows": [
+            {
+              "priority": 101,
+              "cookie": 27115650311270694912,
+              "match": {
+                "in_port": 1
+              },
+              "actions": [
+                {
+                  "action_type": "output",
+                  "port": 2
+                }
+              ]
+            }
+          ]
+        }
+        api_url = KYTOS_API + '/flow_manager/v2/flows'
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
+        assert response.status_code == 400, response.text
+        data = response.json()
+        assert "FlowMod.cookie" in data["description"]
+
     def test_020_delete_flow(self):
         """Tests if, after kytos restart, a flow deleted
         from a switch will still be deleted."""
