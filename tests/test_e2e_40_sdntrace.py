@@ -377,7 +377,7 @@ class TestE2ESDNTrace:
     def test_030_run_sdntrace_for_stored_flows(cls):
         """Run SDNTrace to get traces from flow_manager stored_flow"""
         cls.create_evc(100, "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:0a:1")
-        cls.create_evc(101, "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:0a:1")
+        cls.create_evc(101, "00:00:00:00:00:00:00:03:2", "00:00:00:00:00:00:00:0a:1")
         cls.create_evc(102, "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:0a:1")
         payload = [
                     {
@@ -398,7 +398,7 @@ class TestE2ESDNTrace:
                                 "in_port": 1
                             },
                             "eth": {
-                                "dl_vlan": 101
+                                "dl_vlan": 100
                             }
                         }
                     },
@@ -409,6 +409,17 @@ class TestE2ESDNTrace:
                                 "in_port": 1
                             }
                         }
+                    },
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:03",
+                                "in_port": 2
+                            },
+                            "eth": {
+                                "dl_vlan": 101
+                            }
+                        }
                     }
                 ]
                 
@@ -417,12 +428,17 @@ class TestE2ESDNTrace:
         assert response.status_code == 200, response.text
         data = response.json()
         list_results = data["result"] 
-        assert len(list_results) == 3
+
+        assert len(list_results) == 4
 
         assert list_results[0] == []
 
+        assert len(list_results[1]) == 10
         assert list_results[1][0]["dpid"] == "00:00:00:00:00:00:00:01"
         assert list_results[1][0]["port"] == 1
 
         assert list_results[2] == []
 
+        assert len(list_results[3]) == 8
+        assert list_results[3][0]["dpid"] == "00:00:00:00:00:00:00:03"
+        assert list_results[3][0]["port"] == 2
