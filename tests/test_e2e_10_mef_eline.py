@@ -1369,3 +1369,121 @@ class TestE2EMefEline:
         data = response.json()
         assert my_key not in data['metadata']
         assert len(data['metadata']) > 0
+
+    def test_160_create_untagged_evc(self):
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(20)
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip addr add 104.0.0.11/24 dev %s' % (h11.intfNames()[0]))
+        h2.cmd('ip addr add 104.0.0.2/24 dev %s' % (h2.intfNames()[0]))
+        result = h11.cmd('ping -c1 104.0.0.2')
+        assert ', 0% packet loss,' in result
+        
+    def test_165_create_any_evc(self):
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
+        h2.cmd('ip link add link %s name vlan100 type vlan id 100' % (h2.intfNames()[0]))
+        h2.cmd('ip link set up vlan100')
+        h2.cmd('ip addr add 100.0.0.2/24 dev vlan100')
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+    def test_170_create_any_100_evc(self):
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": 100},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
+        h2.cmd('ip link add link %s name vlan100 type vlan id 100' % (h2.intfNames()[0]))
+        h2.cmd('ip link set up vlan100')
+        h2.cmd('ip addr add 100.0.0.2/24 dev vlan100')
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+    def test_185_create_100_untagged_evc(self):
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": 100},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip link add link %s name vlan104 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan104')
+        h11.cmd('ip addr add 104.0.0.11/24 dev vlan104')
+        h2.cmd('ip addr add 104.0.0.2/24 dev %s' % (h2.intfNames()[0]))
+        result = h11.cmd('ping -c1 104.0.0.2')
+        assert ', 0% packet loss,' in result

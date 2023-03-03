@@ -138,3 +138,64 @@ class TestE2EFlowManager:
         flows_s1 = s1.dpctl('dump-flows')
         assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'dl_vlan=999' in flows_s1
+
+    def test_032_deserialization_by_restarting_kytos(self):
+        """Test if, after kytos restart, deserialize properly"""
+
+        payload = {
+            "flows": [
+                {
+                    "priority": 10,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": "4096/4096"
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                },
+                {
+                    "priority": 10,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 0
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                },
+            ]
+        }
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.post(api_url, data=json.dumps(payload),
+                                 headers={'Content-type': 'application/json'})
+        assert response.status_code == 202, response.text
+        data = response.json()
+        assert 'FlowMod Messages Sent' in data['response']
+
+        # wait for the flow to be installed
+        time.sleep(10)
+
+        # OVS does not have a way to actually restart the switch
+        # so to simulate that, we just delete all flows
+        s1 = self.net.net.get('s1')
+        s1.dpctl('del-flows')
+        # reconnect to trigger and speed up consistency check after the handshake
+        self.net.reconnect_switches()
+
+        # wait for the flow to be installed
+        time.sleep(10)
+
+        flows_s1 = s1.dpctl('dump-flows')
+        assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 2, flows_s1
+        # 4096/4096
+        assert 'vlan_tci=0x1000/0x1000' in flows_s1
+        # 0
+        assert 'vlan_tci=0x0000/0x1fff' in flows_s1
