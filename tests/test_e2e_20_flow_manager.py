@@ -237,7 +237,8 @@ class TestE2EFlowManager:
         payload = {
             "flows": [
                 {
-                    "priority": 30,
+                    "cookie": 1,
+                    "priority": 1,
                     "match": {
                         "in_port": 1
                     },
@@ -249,6 +250,7 @@ class TestE2EFlowManager:
                     ]
                 },
                 {
+                    "cookie": 2,
                     "priority": 10,
                     "match": {
                         "in_port": 1
@@ -261,6 +263,7 @@ class TestE2EFlowManager:
                     ]
                 },
                 {
+                    "cookie": 3,
                     "priority": 20,
                     "match": {
                         "in_port": 2
@@ -289,13 +292,13 @@ class TestE2EFlowManager:
 
         time.sleep(10)
 
-        stored_flows = f'{KYTOS_API}/flow_manager/v2/stored_flows/?dpids={switch_id}'
+        stored_flows = f'{KYTOS_API}/flow_manager/v2/stored_flows/?dpids={switch_id}&cookie_range=1&cookie_range=3'
         response = requests.get(stored_flows)
         assert response.status_code == 200, response.text
         data = response.json()
         data = data[switch_id]
-        assert data[BASIC_FLOWS]["flow"]["priority"] > data[BASIC_FLOWS+1]["flow"]["priority"] 
-        assert data[BASIC_FLOWS+1]["flow"]["priority"] > data[BASIC_FLOWS+2]["flow"]["priority"] 
+        assert data[0]["flow"]["priority"] > data[1]["flow"]["priority"] 
+        assert data[1]["flow"]["priority"] > data[2]["flow"]["priority"]
 
     def test_020_delete_flow(self):
         """Tests if, after kytos restart, a flow deleted
