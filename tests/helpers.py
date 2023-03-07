@@ -40,6 +40,9 @@ class AmlightTopo(Topo):
         h10 = self.addHost('h10', mac='00:00:00:00:00:0A')
         h11 = self.addHost('h11', mac='00:00:00:00:00:0B')
         h12 = self.addHost('h12', mac='00:00:00:00:00:0C')
+        h13 = self.addHost('h13', mac='00:00:00:00:00:0D')
+        h14 = self.addHost('h14', mac='00:00:00:00:00:0E')
+        h15 = self.addHost('h15', mac='00:00:00:00:00:0F')
         # Add links
         self.addLink(Ampath1, Ampath2, port1=1, port2=1)
         self.addLink(Ampath1, SouthernLight2, port1=2, port2=2)
@@ -71,6 +74,9 @@ class AmlightTopo(Topo):
         self.addLink(h10, Ampath7, port1=1, port2=59)
         self.addLink(h11, JAX1, port1=1, port2=60)
         self.addLink(h12, JAX2, port1=1, port2=61)
+        self.addLink(h13, Ampath1, port1=1, port2=62)
+        self.addLink(h14, Ampath2, port1=1, port2=63)
+        self.addLink(h15, AndesLight2, port1=1, port2=64)
 
 class RingTopo(Topo):
     """Ring topology with three switches
