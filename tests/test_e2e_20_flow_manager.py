@@ -229,6 +229,77 @@ class TestE2EFlowManager:
         data = response.json()
         assert "FlowMod.cookie" in data["description"]
 
+    def test_017_install_flows_and_retrieve_sorted(self):
+        """Test that flows are returned in order according to priority."""
+
+        switch_id = '00:00:00:00:00:00:00:01'
+
+        payload = {
+            "flows": [
+                {
+                    "cookie": 1,
+                    "priority": 1,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 3
+                        }
+                    ]
+                },
+                {
+                    "cookie": 2,
+                    "priority": 10,
+                    "match": {
+                        "in_port": 1
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                },
+                {
+                    "cookie": 3,
+                    "priority": 20,
+                    "match": {
+                        "in_port": 2
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                }
+            ]
+        }
+
+        # It installs the flow
+        api_url = KYTOS_API + '/flow_manager/v2/flows/' + switch_id
+        requests.post(api_url, data=json.dumps(payload),
+                      headers={'Content-type': 'application/json'})
+
+        # wait for the flow to be installed
+        time.sleep(10)
+
+        # restart controller keeping configuration
+        self.net.start_controller(enable_all=True, del_flows=True)
+        self.net.wait_switches_connect()
+
+        time.sleep(10)
+
+        stored_flows = f'{KYTOS_API}/flow_manager/v2/stored_flows/?dpids={switch_id}&cookie_range=1&cookie_range=3'
+        response = requests.get(stored_flows)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        data = data[switch_id]
+        assert data[0]["flow"]["priority"] > data[1]["flow"]["priority"] 
+        assert data[1]["flow"]["priority"] > data[2]["flow"]["priority"]
+
     def test_020_delete_flow(self):
         """Tests if, after kytos restart, a flow deleted
         from a switch will still be deleted."""
