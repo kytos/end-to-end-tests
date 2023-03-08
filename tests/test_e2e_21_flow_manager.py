@@ -139,7 +139,7 @@ class TestE2EFlowManager:
         assert len(flows_s1.split('\r\n ')) == BASIC_FLOWS + 1, flows_s1
         assert 'dl_vlan=999' in flows_s1
 
-    def test_032_deserialization_by_restarting_kytos(self):
+    def test_032_on_switch_reconnection_should_recreate_untagged_any_flows(self):
         """Test if, after kytos restart, deserialize properly"""
 
         payload = {
