@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timedelta
 
 import pytest
+from random import randrange
 import requests
 
 from tests.helpers import NetworkTest
@@ -1369,3 +1370,579 @@ class TestE2EMefEline:
         data = response.json()
         assert my_key not in data['metadata']
         assert len(data['metadata']) > 0
+
+    def test_160_create_untagged_evc(self):
+        """Test create an EVC with untagged in both uni"""
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][2]
+
+        expected = {
+            "match": {
+                "in_port": 1,
+                "dl_vlan": 0
+            },
+            "actions": [
+                {"action_type": "push_vlan", "tag_type": "s"},
+                {"action_type": "set_vlan", "vlan_id": 1},
+                {"action_type": "output", "port": 3}
+            ],
+            "priority": 20000
+        }
+        assert data["match"] == expected["match"]
+        assert data["priority"] == expected["priority"]
+        assert data["instructions"][0]["actions"] == expected["actions"]
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip addr add 100.0.0.11/24 dev %s' % (h11.intfNames()[0]))
+        h2.cmd('ip addr add 100.0.0.2/24 dev %s' % (h2.intfNames()[0]))
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+        # Clean up
+        h11.cmd('ip addr del 100.0.0.11/24 dev %s' % (h11.intfNames()[0]))
+        h2.cmd('ip addr del 100.0.0.2/24 dev %s' % (h2.intfNames()[0]))
+        self.net.restart_kytos_clean()
+        
+    def test_165_create_any_evc(self):
+        """Test create an EVC with any in both uni"""
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][4]
+
+        expected = {
+            "match": {
+                "in_port": 1,
+                "dl_vlan": "4096/4096"
+            },
+            "actions": [
+                {"action_type": "push_vlan", "tag_type": "s"},
+                {"action_type": "set_vlan", "vlan_id": 1},
+                {"action_type": "output", "port": 3}
+            ],
+            "priority": 15000
+        }
+        assert data["match"] == expected["match"]
+        assert data["priority"] == expected["priority"]
+        assert data["instructions"][0]["actions"] == expected["actions"]
+
+        ra_vlan = randrange(1, 4096)
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip link add link %s name vlan_ra type vlan id %s' % (h11.intfNames()[0], ra_vlan))
+        h11.cmd('ip link set up vlan_ra')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan_ra')
+        h2.cmd('ip link add link %s name vlan_ra type vlan id %s' % (h2.intfNames()[0], ra_vlan))
+        h2.cmd('ip link set up vlan_ra')
+        h2.cmd('ip addr add 100.0.0.2/24 dev vlan_ra')
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+        # Clean up
+        h11.cmd('ip link del vlan_ra')
+        h2.cmd('ip link del vlan_ra')
+        self.net.restart_kytos_clean()
+
+    def test_170_create_any_100_evc(self):
+        """Test create an EVC with any and 100 as uni.tag.value"""
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": 100},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        expected = [
+            {"match": {"in_port": 1, "dl_vlan": "4096/4096"},
+            "actions": [
+                {"action_type": "set_vlan", "vlan_id": 100},
+                {"action_type": "push_vlan", "tag_type": "s"},
+                {"action_type": "set_vlan", "vlan_id": 1},
+                {"action_type": "output", "port": 3}
+            ],
+            "priority": 15000},
+            {"match": {"in_port": 1, "dl_vlan": 100},
+            "actions": [
+                {"action_type": "push_vlan", "tag_type": "s"},
+                {"action_type": "set_vlan", "vlan_id": 1},
+                {"action_type": "output", "port": 2}
+            ],
+            "priority": 20000}
+        ]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][4]
+        assert data["match"] == expected[0]["match"]
+        assert data["priority"] == expected[0]["priority"]
+        assert data["instructions"][0]["actions"] == expected[0]["actions"]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:02'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:02"]["flows"][2]
+        assert data["match"] == expected[1]["match"]
+        assert data["priority"] == expected[1]["priority"]
+        assert data["instructions"][0]["actions"] == expected[1]["actions"]
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
+        h2.cmd('ip link add link %s name vlan100 type vlan id 100' % (h2.intfNames()[0]))
+        h2.cmd('ip link set up vlan100')
+        h2.cmd('ip addr add 100.0.0.2/24 dev vlan100')
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+        # Clean up
+        h11.cmd('ip link del vlan100')
+        h2.cmd('ip link del vlan100')
+        self.net.restart_kytos_clean()
+
+    def test_175_create_100_untagged_evc(self):
+        """Test create an EVC with 100 and untagged as uni.tag.value"""
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": 100},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        expected = [
+            {"match": {"in_port": 1, "dl_vlan": 100},
+            "actions": [
+                {"action_type": "pop_vlan"},
+                {"action_type": "push_vlan", "tag_type": "s"},
+                {"action_type": "set_vlan", "vlan_id": 1},
+                {"action_type": "output", "port": 3}
+            ],
+            "priority": 20000},
+            {"match": {"in_port": 1, "dl_vlan": 0},
+            "actions": [
+                {"action_type": "push_vlan", "tag_type": "c"},
+                {"action_type": "set_vlan", "vlan_id": 100},
+                {"action_type": "push_vlan", "tag_type": "s"},
+                {"action_type": "set_vlan", "vlan_id": 1},
+                {"action_type": "output", "port": 2}
+            ],
+            "priority": 20000}
+        ]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][2]
+        assert data["match"] == expected[0]["match"]
+        assert data["priority"] == expected[0]["priority"]
+        assert data["instructions"][0]["actions"] == expected[0]["actions"]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:02'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:02"]["flows"][2]
+        assert data["match"] == expected[1]["match"]
+        assert data["priority"] == expected[1]["priority"]
+        assert data["instructions"][0]["actions"] == expected[1]["actions"]
+
+        h11, h2 = self.net.net.get('h11', 'h2')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.0.0.11/24 dev vlan100')
+        h2.cmd('ip addr add 100.0.0.2/24 dev %s' % (h2.intfNames()[0]))
+        result = h11.cmd('ping -c1 100.0.0.2')
+        assert ', 0% packet loss,' in result
+
+        # Clean up
+        h11.cmd('ip link del vlan100')
+        h2.cmd('ip addr del 100.0.0.2/24 dev %s' % (h2.intfNames()[0]))
+        self.net.restart_kytos_clean()
+
+    def test_180_create_any_untagged_evc(self):
+        """Test create an EVC with any and untagged as uni.tag.value"""
+        payload = {
+            "name": "evc1",
+            "dynamic_backup_path": True,
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:1"
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:02:1"
+            }
+        }
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, data=json.dumps(payload), headers={'Content-type': 'application/json'})
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        expected = [
+            {"match": {"in_port": 1, "dl_vlan": "4096/4096"},
+            "actions": [
+                {"action_type": "pop_vlan"},
+                {"action_type": "push_vlan", "tag_type": "s"},
+                {"action_type": "set_vlan", "vlan_id": 1},
+                {"action_type": "output", "port": 3}
+            ],
+            "priority": 15000},
+            {"match": {"in_port": 1, "dl_vlan": 0},
+            "actions": [
+                {"action_type": "push_vlan", "tag_type": "s"},
+                {"action_type": "set_vlan", "vlan_id": 1},
+                {"action_type": "output", "port": 2}
+            ],
+            "priority": 20000}
+        ]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][4]
+        assert data["match"] == expected[0]["match"]
+        assert data["priority"] == expected[0]["priority"]
+        assert data["instructions"][0]["actions"] == expected[0]["actions"]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:02'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:02"]["flows"][2]
+        assert data["match"] == expected[1]["match"]
+        assert data["priority"] == expected[1]["priority"]
+        assert data["instructions"][0]["actions"] == expected[1]["actions"]
+
+        # Clean up
+        self.net.restart_kytos_clean()
+
+    def test_185_create_any_intra_evc(self):
+        """Test create an intra-switch EVC with any as uni.tag.value"""
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:2",
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        expected = [
+            {"match": {"in_port": 1, "dl_vlan": "4096/4096"},
+            "actions": [{"action_type": "output", "port": 2}],
+            "priority": 15000},
+            {"match": {"in_port": 2, "dl_vlan": "4096/4096"},
+            "actions": [{"action_type": "output", "port": 1}],
+            "priority": 15000}
+        ]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        assert data[2]["match"] == expected[0]["match"]
+        assert data[2]["priority"] == expected[0]["priority"]
+        assert data[2]["instructions"][0]["actions"] == expected[0]["actions"]
+        assert data[3]["match"] == expected[1]["match"]
+        assert data[3]["priority"] == expected[1]["priority"]
+        assert data[3]["instructions"][0]["actions"] == expected[1]["actions"]
+
+        ra_vlan = randrange(1, 4096)
+        h11, h12 = self.net.net.get('h11', 'h12')
+        h11.cmd('ip link add link %s name ra_vlan type vlan id %s' % (h11.intfNames()[0], ra_vlan))
+        h11.cmd('ip link set up ra_vlan')
+        h11.cmd('ip addr add 10.1.1.11/24 dev ra_vlan')
+        h12.cmd('ip link add link %s name ra_vlan type vlan id %s' % (h12.intfNames()[0], ra_vlan))
+        h12.cmd('ip link set up ra_vlan')
+        h12.cmd('ip addr add 10.1.1.12/24 dev ra_vlan')
+        result = h11.cmd('ping -c1 10.1.1.12')
+        assert ', 0% packet loss,' in result
+
+        # clean up
+        h11.cmd('ip link del ra_vlan')
+        h12.cmd('ip link del ra_vlan')
+        self.net.restart_kytos_clean()
+
+    def test_190_create_untagged_intra_evc(self):
+        """Test create an intra-switch EVC with untagged as uni.tag.value"""
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:01:2",
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        expected = [
+            {"match": {"in_port": 1, "dl_vlan": 0},
+            "actions": [{"action_type": "output", "port": 2}],
+            "priority": 20000},
+            {"match": {"in_port": 2, "dl_vlan": 0},
+            "actions": [{"action_type": "output", "port": 1}],
+            "priority": 20000}
+        ]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        assert data[2]["match"] == expected[0]["match"]
+        assert data[2]["priority"] == expected[0]["priority"]
+        assert data[2]["instructions"][0]["actions"] == expected[0]["actions"]
+        assert data[3]["match"] == expected[1]["match"]
+        assert data[3]["priority"] == expected[1]["priority"]
+        assert data[3]["instructions"][0]["actions"] == expected[1]["actions"]
+
+        h11, h12 = self.net.net.get('h11', 'h12')
+        h11.cmd('ip addr add 100.1.1.11/24 dev %s' % (h11.intfNames()[0]))
+        h12.cmd('ip addr add 100.1.1.12/24 dev %s' % (h12.intfNames()[0]))
+        result = h11.cmd('ping -c1 100.1.1.12')
+        assert ', 0% packet loss,' in result
+
+        # clean up
+        h11.cmd('ip addr del 100.1.1.11/24 dev %s' % (h11.intfNames()[0]))
+        h12.cmd('ip addr del 100.1.1.12/24 dev %s' % (h12.intfNames()[0]))
+        self.net.restart_kytos_clean()
+
+    def test_195_create_any_100_intra_evc(self):
+        """Test create an intra-switch EVC with any and 100 as uni.tag.value"""
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": 100},
+                "interface_id": "00:00:00:00:00:00:00:01:2",
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        expected = [
+            {"match": {"in_port": 1, "dl_vlan": "4096/4096"},
+            "actions": [{"action_type": "set_vlan", "vlan_id": 100},
+                        {"action_type": "output", "port": 2}],
+            "priority": 15000},
+            {"match": {"in_port": 2, "dl_vlan": 100},
+            "actions": [{"action_type": "output", "port": 1}],
+            "priority": 20000}
+        ]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        assert data[3]["match"] == expected[0]["match"]
+        assert data[3]["priority"] == expected[0]["priority"]
+        assert data[3]["instructions"][0]["actions"] == expected[0]["actions"]
+        assert data[2]["match"] == expected[1]["match"]
+        assert data[2]["priority"] == expected[1]["priority"]
+        assert data[2]["instructions"][0]["actions"] == expected[1]["actions"]
+
+        h11, h12 = self.net.net.get('h11', 'h12')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 10.1.1.11/24 dev vlan100')
+        h12.cmd('ip link add link %s name vlan100 type vlan id 100' % (h12.intfNames()[0]))
+        h12.cmd('ip link set up vlan100')
+        h12.cmd('ip addr add 10.1.1.12/24 dev vlan100')
+        result = h11.cmd('ping -c1 10.1.1.12')
+        assert ', 0% packet loss,' in result
+
+        # clean up
+        h11.cmd('ip link del vlan100')
+        h12.cmd('ip link del vlan100')
+        self.net.restart_kytos_clean()
+
+    def test_200_create_100_untagged_intra_evc(self):
+        """Test create an intra-switch EVC with 100 and untagged as 
+        uni.tag.value"""
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": 100},
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:01:2",
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        expected = [
+            {"match": {"in_port": 1, "dl_vlan": 100},
+            "actions": [
+                {"action_type": "pop_vlan"},
+                {"action_type": "output", "port": 2}
+            ],
+            "priority": 20000},
+            {"match": {"in_port": 2, "dl_vlan": 0},
+            "actions": [
+                {"action_type": "push_vlan", "tag_type": 'c'},
+                {"action_type": "set_vlan", "vlan_id": 100},
+                {"action_type": "output", "port": 1}
+            ],
+            "priority": 20000}
+        ]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        assert data[2]["match"] == expected[0]["match"]
+        assert data[2]["priority"] == expected[0]["priority"]
+        assert data[2]["instructions"][0]["actions"] == expected[0]["actions"]
+        assert data[3]["match"] == expected[1]["match"]
+        assert data[3]["priority"] == expected[1]["priority"]
+        assert data[3]["instructions"][0]["actions"] == expected[1]["actions"]
+
+        h11, h12 = self.net.net.get('h11', 'h12')
+        h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
+        h11.cmd('ip link set up vlan100')
+        h11.cmd('ip addr add 100.1.1.11/24 dev vlan100')
+        h12.cmd('ip addr add 100.1.1.12/24 dev %s' % (h12.intfNames()[0]))
+        result = h11.cmd('ping -c1 100.1.1.12')
+        assert ', 0% packet loss,' in result
+
+        # clean up
+        h11.cmd('ip link del vlan100')
+        h12.cmd('ip addr del 100.1.1.12/24 dev %s' % (h12.intfNames()[0]))
+        self.net.restart_kytos_clean()
+
+    def test_205_create_any_untagged_intra_evc(self):
+        """Test create an intra-switch EVC with any and untagged as 
+        uni.tag.value"""
+        payload = {
+            "name": "my evc1",
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": "any"},
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": "untagged"},
+                "interface_id": "00:00:00:00:00:00:00:01:2",
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        time.sleep(10)
+
+        expected = [
+            {"match": {"in_port": 1, "dl_vlan": "4096/4096"},
+            "actions": [{"action_type": "pop_vlan"},
+                        {"action_type": "output", "port": 2}],
+            "priority": 15000},
+            {"match": {"in_port": 2, "dl_vlan": 0},
+            "actions": [{"action_type": "output", "port": 1}],
+            "priority": 20000}
+        ]
+
+        api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.get(api_url)
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        assert data[3]["match"] == expected[0]["match"]
+        assert data[3]["priority"] == expected[0]["priority"]
+        assert data[3]["instructions"][0]["actions"] == expected[0]["actions"]
+        assert data[2]["match"] == expected[1]["match"]
+        assert data[2]["priority"] == expected[1]["priority"]
+        assert data[2]["instructions"][0]["actions"] == expected[1]["actions"]
+
+        # Clean up
+        self.net.restart_kytos_clean()
