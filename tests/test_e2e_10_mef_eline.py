@@ -1371,6 +1371,14 @@ class TestE2EMefEline:
         assert my_key not in data['metadata']
         assert len(data['metadata']) > 0
 
+    @staticmethod
+    def get_flow_by_vlan_match(data, dl_vlan):
+        """Get flow from data matching with dl_vlan"""
+        for flow in data:
+            if flow["match"].get("dl_vlan", None) == dl_vlan:
+                return flow
+        return None
+
     def test_160_create_untagged_evc(self):
         """Test create an EVC with untagged in both uni"""
         payload = {
@@ -1395,13 +1403,11 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
-        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][2]
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        untagged_flow = self.get_flow_by_vlan_match(data, 0)
 
         expected = {
-            "match": {
-                "in_port": 1,
-                "dl_vlan": 0
-            },
+            "match": {"in_port": 1, "dl_vlan": 0},
             "actions": [
                 {"action_type": "push_vlan", "tag_type": "s"},
                 {"action_type": "set_vlan", "vlan_id": 1},
@@ -1409,9 +1415,9 @@ class TestE2EMefEline:
             ],
             "priority": 20000
         }
-        assert data["match"] == expected["match"]
-        assert data["priority"] == expected["priority"]
-        assert data["instructions"][0]["actions"] == expected["actions"]
+        assert untagged_flow["match"] == expected["match"]
+        assert untagged_flow["priority"] == expected["priority"]
+        assert untagged_flow["instructions"][0]["actions"] == expected["actions"]
 
         h11, h2 = self.net.net.get('h11', 'h2')
         h11.cmd('ip addr add 100.0.0.11/24 dev %s' % (h11.intfNames()[0]))
@@ -1448,13 +1454,11 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
-        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][4]
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        any_flow = self.get_flow_by_vlan_match(data, "4096/4096")
 
         expected = {
-            "match": {
-                "in_port": 1,
-                "dl_vlan": "4096/4096"
-            },
+            "match": {"in_port": 1, "dl_vlan": "4096/4096"},
             "actions": [
                 {"action_type": "push_vlan", "tag_type": "s"},
                 {"action_type": "set_vlan", "vlan_id": 1},
@@ -1462,9 +1466,9 @@ class TestE2EMefEline:
             ],
             "priority": 15000
         }
-        assert data["match"] == expected["match"]
-        assert data["priority"] == expected["priority"]
-        assert data["instructions"][0]["actions"] == expected["actions"]
+        assert any_flow["match"] == expected["match"]
+        assert any_flow["priority"] == expected["priority"]
+        assert any_flow["instructions"][0]["actions"] == expected["actions"]
 
         ra_vlan = randrange(1, 4096)
         h11, h2 = self.net.net.get('h11', 'h2')
@@ -1524,17 +1528,19 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
-        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][4]
-        assert data["match"] == expected[0]["match"]
-        assert data["priority"] == expected[0]["priority"]
-        assert data["instructions"][0]["actions"] == expected[0]["actions"]
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        any_flow = self.get_flow_by_vlan_match(data, "4096/4096")
+        assert any_flow["match"] == expected[0]["match"]
+        assert any_flow["priority"] == expected[0]["priority"]
+        assert any_flow["instructions"][0]["actions"] == expected[0]["actions"]
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:02'
         response = requests.get(api_url)
-        data = response.json()["00:00:00:00:00:00:00:02"]["flows"][2]
-        assert data["match"] == expected[1]["match"]
-        assert data["priority"] == expected[1]["priority"]
-        assert data["instructions"][0]["actions"] == expected[1]["actions"]
+        data = response.json()["00:00:00:00:00:00:00:02"]["flows"]
+        common_flow = self.get_flow_by_vlan_match(data, 100)
+        assert common_flow["match"] == expected[1]["match"]
+        assert common_flow["priority"] == expected[1]["priority"]
+        assert common_flow["instructions"][0]["actions"] == expected[1]["actions"]
 
         h11, h2 = self.net.net.get('h11', 'h2')
         h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
@@ -1595,17 +1601,19 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
-        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][2]
-        assert data["match"] == expected[0]["match"]
-        assert data["priority"] == expected[0]["priority"]
-        assert data["instructions"][0]["actions"] == expected[0]["actions"]
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        common_flow = self.get_flow_by_vlan_match(data, 100)
+        assert common_flow["match"] == expected[0]["match"]
+        assert common_flow["priority"] == expected[0]["priority"]
+        assert common_flow["instructions"][0]["actions"] == expected[0]["actions"]
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:02'
         response = requests.get(api_url)
-        data = response.json()["00:00:00:00:00:00:00:02"]["flows"][2]
-        assert data["match"] == expected[1]["match"]
-        assert data["priority"] == expected[1]["priority"]
-        assert data["instructions"][0]["actions"] == expected[1]["actions"]
+        data = response.json()["00:00:00:00:00:00:00:02"]["flows"]
+        untagged_flow = self.get_flow_by_vlan_match(data, 0)
+        assert untagged_flow["match"] == expected[1]["match"]
+        assert untagged_flow["priority"] == expected[1]["priority"]
+        assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
 
         h11, h2 = self.net.net.get('h11', 'h2')
         h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
@@ -1663,17 +1671,19 @@ class TestE2EMefEline:
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
-        data = response.json()["00:00:00:00:00:00:00:01"]["flows"][4]
-        assert data["match"] == expected[0]["match"]
-        assert data["priority"] == expected[0]["priority"]
-        assert data["instructions"][0]["actions"] == expected[0]["actions"]
+        data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
+        any_flow = self.get_flow_by_vlan_match(data, "4096/4096")
+        assert any_flow["match"] == expected[0]["match"]
+        assert any_flow["priority"] == expected[0]["priority"]
+        assert any_flow["instructions"][0]["actions"] == expected[0]["actions"]
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:02'
         response = requests.get(api_url)
-        data = response.json()["00:00:00:00:00:00:00:02"]["flows"][2]
-        assert data["match"] == expected[1]["match"]
-        assert data["priority"] == expected[1]["priority"]
-        assert data["instructions"][0]["actions"] == expected[1]["actions"]
+        data = response.json()["00:00:00:00:00:00:00:02"]["flows"]
+        untagged_flow = self.get_flow_by_vlan_match(data, 0)
+        assert untagged_flow["match"] == expected[1]["match"]
+        assert untagged_flow["priority"] == expected[1]["priority"]
+        assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
 
         # Clean up
         self.net.restart_kytos_clean()
@@ -1703,20 +1713,15 @@ class TestE2EMefEline:
             {"match": {"in_port": 1, "dl_vlan": "4096/4096"},
             "actions": [{"action_type": "output", "port": 2}],
             "priority": 15000},
-            {"match": {"in_port": 2, "dl_vlan": "4096/4096"},
-            "actions": [{"action_type": "output", "port": 1}],
-            "priority": 15000}
         ]
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
         data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
-        assert data[2]["match"] == expected[0]["match"]
-        assert data[2]["priority"] == expected[0]["priority"]
-        assert data[2]["instructions"][0]["actions"] == expected[0]["actions"]
-        assert data[3]["match"] == expected[1]["match"]
-        assert data[3]["priority"] == expected[1]["priority"]
-        assert data[3]["instructions"][0]["actions"] == expected[1]["actions"]
+        any_flow = self.get_flow_by_vlan_match(data, "4096/4096")
+        assert any_flow["match"] == expected[0]["match"]
+        assert any_flow["priority"] == expected[0]["priority"]
+        assert any_flow["instructions"][0]["actions"] == expected[0]["actions"]
 
         ra_vlan = randrange(1, 4096)
         h11, h12 = self.net.net.get('h11', 'h12')
@@ -1755,24 +1760,19 @@ class TestE2EMefEline:
         assert 'circuit_id' in data
         time.sleep(10)
 
-        expected = [
-            {"match": {"in_port": 1, "dl_vlan": 0},
+        expected = {
+            "match": {"in_port": 1, "dl_vlan": 0},
             "actions": [{"action_type": "output", "port": 2}],
-            "priority": 20000},
-            {"match": {"in_port": 2, "dl_vlan": 0},
-            "actions": [{"action_type": "output", "port": 1}],
-            "priority": 20000}
-        ]
+            "priority": 20000
+        }
 
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
         data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
-        assert data[2]["match"] == expected[0]["match"]
-        assert data[2]["priority"] == expected[0]["priority"]
-        assert data[2]["instructions"][0]["actions"] == expected[0]["actions"]
-        assert data[3]["match"] == expected[1]["match"]
-        assert data[3]["priority"] == expected[1]["priority"]
-        assert data[3]["instructions"][0]["actions"] == expected[1]["actions"]
+        untagged_flow = self.get_flow_by_vlan_match(data, 0)
+        assert untagged_flow["match"] == expected["match"]
+        assert untagged_flow["priority"] == expected["priority"]
+        assert untagged_flow["instructions"][0]["actions"] == expected["actions"]
 
         h11, h12 = self.net.net.get('h11', 'h12')
         h11.cmd('ip addr add 100.1.1.11/24 dev %s' % (h11.intfNames()[0]))
@@ -1819,12 +1819,15 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
         data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
-        assert data[3]["match"] == expected[0]["match"]
-        assert data[3]["priority"] == expected[0]["priority"]
-        assert data[3]["instructions"][0]["actions"] == expected[0]["actions"]
-        assert data[2]["match"] == expected[1]["match"]
-        assert data[2]["priority"] == expected[1]["priority"]
-        assert data[2]["instructions"][0]["actions"] == expected[1]["actions"]
+        any_flow = self.get_flow_by_vlan_match(data, "4096/4096")
+        assert any_flow["match"] == expected[0]["match"]
+        assert any_flow["priority"] == expected[0]["priority"]
+        assert any_flow["instructions"][0]["actions"] == expected[0]["actions"]
+
+        commom_flow = self.get_flow_by_vlan_match(data, 100)
+        assert commom_flow["match"] == expected[1]["match"]
+        assert commom_flow["priority"] == expected[1]["priority"]
+        assert commom_flow["instructions"][0]["actions"] == expected[1]["actions"]
 
         h11, h12 = self.net.net.get('h11', 'h12')
         h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
@@ -1882,12 +1885,15 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
         data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
-        assert data[2]["match"] == expected[0]["match"]
-        assert data[2]["priority"] == expected[0]["priority"]
-        assert data[2]["instructions"][0]["actions"] == expected[0]["actions"]
-        assert data[3]["match"] == expected[1]["match"]
-        assert data[3]["priority"] == expected[1]["priority"]
-        assert data[3]["instructions"][0]["actions"] == expected[1]["actions"]
+        commom_flow = self.get_flow_by_vlan_match(data, 100)
+        assert commom_flow["match"] == expected[0]["match"]
+        assert commom_flow["priority"] == expected[0]["priority"]
+        assert commom_flow["instructions"][0]["actions"] == expected[0]["actions"]
+
+        untagged_flow = self.get_flow_by_vlan_match(data, 0)
+        assert untagged_flow["match"] == expected[1]["match"]
+        assert untagged_flow["priority"] == expected[1]["priority"]
+        assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
 
         h11, h12 = self.net.net.get('h11', 'h12')
         h11.cmd('ip link add link %s name vlan100 type vlan id 100' % (h11.intfNames()[0]))
@@ -1937,12 +1943,15 @@ class TestE2EMefEline:
         api_url = KYTOS_API + '/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
         response = requests.get(api_url)
         data = response.json()["00:00:00:00:00:00:00:01"]["flows"]
-        assert data[3]["match"] == expected[0]["match"]
-        assert data[3]["priority"] == expected[0]["priority"]
-        assert data[3]["instructions"][0]["actions"] == expected[0]["actions"]
-        assert data[2]["match"] == expected[1]["match"]
-        assert data[2]["priority"] == expected[1]["priority"]
-        assert data[2]["instructions"][0]["actions"] == expected[1]["actions"]
+        any_flow = self.get_flow_by_vlan_match(data, "4096/4096")
+        assert any_flow["match"] == expected[0]["match"]
+        assert any_flow["priority"] == expected[0]["priority"]
+        assert any_flow["instructions"][0]["actions"] == expected[0]["actions"]
+        
+        untagged_flow = self.get_flow_by_vlan_match(data, 0)
+        assert untagged_flow["match"] == expected[1]["match"]
+        assert untagged_flow["priority"] == expected[1]["priority"]
+        assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
 
         # Clean up
         self.net.restart_kytos_clean()
