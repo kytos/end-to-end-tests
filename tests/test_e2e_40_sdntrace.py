@@ -556,22 +556,6 @@ class TestE2ESDNTrace:
         assert response.status_code == 202, response.text
         time.sleep(10)
         # Add a flow in S2: 
-        payload_stored_flow = {
-                "flows": [
-                    {
-                        "match": {
-                            "in_port": 2,
-                            "dl_vlan": 100
-                        },
-                        "actions": [
-                            {
-                                "action_type": "output",
-                                "port": 2
-                            }
-                        ]
-                    }
-                ]
-            }
         api_url = KYTOS_API + '/kytos/flow_manager/v2/flows/00:00:00:00:00:00:00:02'
         response = requests.post(api_url, json = payload_stored_flow)
         assert response.status_code == 202, response.text
@@ -597,6 +581,135 @@ class TestE2ESDNTrace:
         data = response.json()
         list_results = data["result"] 
         assert len(list_results[0]) == 2
+        assert list_results[0][-1]['type'] == 'loop'
+
+    def test_055_run_sdntrace_loop(cls):
+        """Run SDNTrace to verify loop type"""
+        cls.create_evc(5, "00:00:00:00:00:00:00:01:1", "00:00:00:00:00:00:00:03:1")
+
+        # len(trace_result) -> 1
+        payload_stored_flow = {
+            "flows": [
+                {
+                    "priority": 55000,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 10
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 1,
+                        }, 
+                    ]
+                }
+            ]
+        }
+        api_url = KYTOS_API + '/kytos/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.post(api_url, json = payload_stored_flow)
+        assert response.status_code == 202, response.text
+        time.sleep(10)
+        payload = [
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:01",
+                                "in_port": 1,
+                            },
+                            "eth": {
+                                "dl_vlan": 10
+                            }
+                        }
+                    }
+                ]
+
+        api_url = KYTOS_API + '/amlight/sdntrace_cp/traces'
+        response = requests.put(api_url, json=payload)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        list_results = data["result"] 
+        assert len(list_results[0]) == 1
+        assert list_results[0][0]['type'] == 'loop'
+
+        # len(trace_result) > 1
+
+        payload_stored_flow = {
+            "flows": [
+                {
+                    "priority": 55000,
+                    "match": {
+                        "in_port": 1,
+                        "dl_vlan": 10
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2,
+                        }, {"action_type": "set_vlan", "vlan_id": 5 }
+                    ]
+                },
+                {
+                    "priority": 55000,
+                    "match": {
+                        "in_port": 2,
+                        "dl_vlan": 5
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 1,
+                        }
+                    ]
+                }
+            ]
+        }
+        api_url = KYTOS_API + '/kytos/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.post(api_url, json = payload_stored_flow)
+        assert response.status_code == 202, response.text
+        time.sleep(10)
+
+        # Add a flow in S2: 
+        payload_stored_flow = {
+            "flows": [
+                {
+                    "priority": 55000,
+                    "match": {
+                        "in_port": 2,
+                        "dl_vlan": 5
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 3
+                        }
+                    ]
+                },
+                {
+                    "priority": 55000,
+                    "match": {
+                        "in_port": 2,
+                        "dl_vlan": 5
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 2
+                        }
+                    ]
+                }
+            ]
+        }
+        api_url = KYTOS_API + '/kytos/flow_manager/v2/flows/00:00:00:00:00:00:00:02'
+        response = requests.post(api_url, json = payload_stored_flow)
+        assert response.status_code == 202, response.text
+        time.sleep(10)
+
+        api_url = KYTOS_API + '/amlight/sdntrace_cp/traces'
+        response = requests.put(api_url, json=payload)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        list_results = data["result"] 
+        assert len(list_results[0]) > 1
         assert list_results[0][-1]['type'] == 'loop'
 
     def test_060_run_sdntrace_order(cls):
@@ -658,4 +771,5 @@ class TestE2ESDNTrace:
         assert response.status_code == 200, response.text
         data = response.json()
         list_results = data["result"] 
+        print(list_results)
         assert list_results[0][0]["out"]["port"] == 1
