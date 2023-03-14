@@ -1428,7 +1428,6 @@ class TestE2EMefEline:
         # Clean up
         h11.cmd('ip addr del 100.0.0.11/24 dev %s' % (h11.intfNames()[0]))
         h2.cmd('ip addr del 100.0.0.2/24 dev %s' % (h2.intfNames()[0]))
-        self.net.restart_kytos_clean()
         
     def test_165_create_any_evc(self):
         """Test create an EVC with any in both uni"""
@@ -1484,7 +1483,6 @@ class TestE2EMefEline:
         # Clean up
         h11.cmd('ip link del vlan_ra')
         h2.cmd('ip link del vlan_ra')
-        self.net.restart_kytos_clean()
 
     def test_170_create_any_100_evc(self):
         """Test create an EVC with any and 100 as uni.tag.value"""
@@ -1555,7 +1553,6 @@ class TestE2EMefEline:
         # Clean up
         h11.cmd('ip link del vlan100')
         h2.cmd('ip link del vlan100')
-        self.net.restart_kytos_clean()
 
     def test_175_create_100_untagged_evc(self):
         """Test create an EVC with 100 and untagged as uni.tag.value"""
@@ -1626,7 +1623,6 @@ class TestE2EMefEline:
         # Clean up
         h11.cmd('ip link del vlan100')
         h2.cmd('ip addr del 100.0.0.2/24 dev %s' % (h2.intfNames()[0]))
-        self.net.restart_kytos_clean()
 
     def test_180_create_any_untagged_evc(self):
         """Test create an EVC with any and untagged as uni.tag.value"""
@@ -1685,9 +1681,6 @@ class TestE2EMefEline:
         assert untagged_flow["priority"] == expected[1]["priority"]
         assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
 
-        # Clean up
-        self.net.restart_kytos_clean()
-
     def test_185_create_any_intra_evc(self):
         """Test create an intra-switch EVC with any as uni.tag.value"""
         payload = {
@@ -1737,7 +1730,6 @@ class TestE2EMefEline:
         # clean up
         h11.cmd('ip link del ra_vlan')
         h12.cmd('ip link del ra_vlan')
-        self.net.restart_kytos_clean()
 
     def test_190_create_untagged_intra_evc(self):
         """Test create an intra-switch EVC with untagged as uni.tag.value"""
@@ -1783,7 +1775,6 @@ class TestE2EMefEline:
         # clean up
         h11.cmd('ip addr del 100.1.1.11/24 dev %s' % (h11.intfNames()[0]))
         h12.cmd('ip addr del 100.1.1.12/24 dev %s' % (h12.intfNames()[0]))
-        self.net.restart_kytos_clean()
 
     def test_195_create_any_100_intra_evc(self):
         """Test create an intra-switch EVC with any and 100 as uni.tag.value"""
@@ -1842,7 +1833,6 @@ class TestE2EMefEline:
         # clean up
         h11.cmd('ip link del vlan100')
         h12.cmd('ip link del vlan100')
-        self.net.restart_kytos_clean()
 
     def test_200_create_100_untagged_intra_evc(self):
         """Test create an intra-switch EVC with 100 and untagged as 
@@ -1906,7 +1896,6 @@ class TestE2EMefEline:
         # clean up
         h11.cmd('ip link del vlan100')
         h12.cmd('ip addr del 100.1.1.12/24 dev %s' % (h12.intfNames()[0]))
-        self.net.restart_kytos_clean()
 
     def test_205_create_any_untagged_intra_evc(self):
         """Test create an intra-switch EVC with any and untagged as 
@@ -1952,6 +1941,3 @@ class TestE2EMefEline:
         assert untagged_flow["match"] == expected[1]["match"]
         assert untagged_flow["priority"] == expected[1]["priority"]
         assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
-
-        # Clean up
-        self.net.restart_kytos_clean()
