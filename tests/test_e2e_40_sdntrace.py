@@ -772,3 +772,92 @@ class TestE2ESDNTrace:
         data = response.json()
         list_results = data["result"]
         assert list_results[0][0]["out"]["port"] == 1
+
+    def test_070_run_sdntrace_str_vlan(cls):
+        """Run SDNTrace to test run_sdntrace when vlan is a special string"""
+        payload_stored_flow = {
+            "flows": [
+                {
+                    "match": {
+                        "in_port": 2,
+                        "dl_vlan": 0
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 1
+                        }
+                    ]
+                },
+                {
+                    "match": {
+                        "in_port": 2,
+                        "dl_vlan": "4096/4096"
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 1
+                        }
+                    ]
+                }
+            ]
+        }
+        api_url = KYTOS_API + '/kytos/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.post(api_url, json = payload_stored_flow)
+        assert response.status_code == 202, response.text
+        time.sleep(10)
+
+        payload = [
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:01",
+                                "in_port": 2
+                            },
+                            "eth": {
+                                "dl_vlan": "untagged"
+                            }
+                        }
+                    },
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:01",
+                                "in_port": 2
+                            },
+                            "eth": {
+                                "dl_vlan": "any"
+                            }
+                        }
+                    },
+                    {
+                        "trace": {
+                            "switch": {
+                                "dpid": "00:00:00:00:00:00:00:01",
+                                "in_port": 2
+                            },
+                            "eth": {
+                                "dl_vlan": 0
+                            }
+                        }
+                    }
+        ]
+
+        api_url = KYTOS_API + '/amlight/sdntrace_cp/traces'
+        response = requests.put(api_url, json=payload)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        list_results = data["result"]
+
+        assert list_results[0][0]["type"] == "last"
+        assert list_results[0][0]["out"]["port"] == 1
+        assert list_results[0][0]["vlan"] == "untagged"
+
+        assert list_results[1][0]["type"] == "last"
+        assert list_results[1][0]["out"]["port"] == 1
+        assert list_results[1][0]["vlan"] == "any"
+
+        assert list_results[2][0]["type"] == "last"
+        assert list_results[2][0]["out"]["port"] == 1
+        assert list_results[2][0]["vlan"] == 0
