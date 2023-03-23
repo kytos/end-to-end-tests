@@ -778,6 +778,19 @@ class TestE2ESDNTrace:
         payload_stored_flow = {
             "flows": [
                 {
+                    "priority": 1000,
+                    "match": {
+                        "in_port": 2,
+                        "dl_vlan": 10
+                    },
+                    "actions": [
+                        {
+                            "action_type": "output",
+                            "port": 1
+                        }
+                    ]
+                },
+                {
                     "priority": 100,
                     "match": {
                         "in_port": 2,
@@ -786,7 +799,7 @@ class TestE2ESDNTrace:
                     "actions": [
                         {
                             "action_type": "output",
-                            "port": 1
+                            "port": 2
                         }
                     ]
                 },
@@ -799,7 +812,7 @@ class TestE2ESDNTrace:
                         {
                             "action_type": "output",
                             "port": 2
-                        }
+                        }, {"action_type": "set_vlan", "vlan_id": 5 }
                     ]
                 }
             ]
@@ -810,28 +823,6 @@ class TestE2ESDNTrace:
         time.sleep(10)
 
         payload = [
-                    {
-                        "trace": {
-                            "switch": {
-                                "dpid": "00:00:00:00:00:00:00:01",
-                                "in_port": 2
-                            },
-                            "eth": {
-                                "dl_vlan": "untagged"
-                            }
-                        }
-                    },
-                    {
-                        "trace": {
-                            "switch": {
-                                "dpid": "00:00:00:00:00:00:00:01",
-                                "in_port": 2
-                            },
-                            "eth": {
-                                "dl_vlan": 0
-                            }
-                        }
-                    },
                     {
                         "trace": {
                             "switch": {
@@ -859,14 +850,36 @@ class TestE2ESDNTrace:
         data = response.json()
         list_results = data["result"]
 
-        assert list_results[0][0]["type"] == "last"
-        assert list_results[0][0]["out"]["port"] == 1
+        # Topo: linear(10): s1-eth2:s2-eth2
+        assert len(list_results[0]) > 1
+        assert list_results[0][1]["dpid"] == '00:00:00:00:00:00:00:02'
+        assert list_results[0][1]["port"] == 2
 
         assert list_results[1][0]["type"] == "last"
         assert list_results[1][0]["out"]["port"] == 1
 
-        assert len(list_results[2]) > 1
-        assert len(list_results[3]) > 1
+        # change priority
+
+        payload_stored_flow["flows"][1]["priority"] = 2000
+
+        api_url = KYTOS_API + '/kytos/flow_manager/v2/flows/00:00:00:00:00:00:00:01'
+        response = requests.post(api_url, json = payload_stored_flow)
+        assert response.status_code == 202, response.text
+        time.sleep(10)
+
+        api_url = KYTOS_API + '/amlight/sdntrace_cp/traces'
+        response = requests.put(api_url, json=payload)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        list_results = data["result"]
+
+        assert len(list_results[0]) > 1
+        assert list_results[0][1]["dpid"] == '00:00:00:00:00:00:00:02'
+        assert list_results[0][1]["port"] == 2
+
+        assert list_results[1][0]["type"] == "last"
+        assert list_results[1][0]["out"]["port"] == 1
+
 
     def test_075_run_sdntrace_any_vlan(cls):
         """Run SDNTrace to test run_sdntrace when vlan is any"""
@@ -876,7 +889,7 @@ class TestE2ESDNTrace:
                     "priority": 100,
                     "match": {
                         "in_port": 2,
-                        "dl_vlan": 100
+                        "dl_vlan": "4096/4096"
                     },
                     "actions": [
                         {
@@ -913,17 +926,6 @@ class TestE2ESDNTrace:
                                 "in_port": 2
                             },
                             "eth": {
-                                "dl_vlan": "any"
-                            }
-                        }
-                    },
-                    {
-                        "trace": {
-                            "switch": {
-                                "dpid": "00:00:00:00:00:00:00:01",
-                                "in_port": 2
-                            },
-                            "eth": {
                                 "dl_vlan": 10
                             }
                         }
@@ -938,6 +940,3 @@ class TestE2ESDNTrace:
 
         assert list_results[0][0]["type"] == "last"
         assert list_results[0][0]["out"]["port"] == 1
-
-        assert len(list_results[1]) > 1
-        assert list_results[1][0]["vlan"] == 10
