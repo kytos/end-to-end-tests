@@ -1942,7 +1942,7 @@ class TestE2EMefEline:
         assert untagged_flow["priority"] == expected[1]["priority"]
         assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
 
-    def test_210_create(self):
+    def test_210_bulk_update_evc(self):
         """Test bulk updates to EVCs"""
         evc_1 = {
             "name": "EVC_1",
