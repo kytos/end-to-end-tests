@@ -1941,3 +1941,61 @@ class TestE2EMefEline:
         assert untagged_flow["match"] == expected[1]["match"]
         assert untagged_flow["priority"] == expected[1]["priority"]
         assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
+
+    def test_210_create(self):
+        """Test bulk updates to EVCs"""
+        evc_1 = {
+            "name": "EVC_1",
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": 100},
+                "interface_id": "00:00:00:00:00:00:00:01:1",
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": 200},
+                "interface_id": "00:00:00:00:00:00:00:01:2",
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=evc_1)
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        evc_1_id = data["circuit_id"]
+
+        evc_2 = {
+            "name": "EVC_2",
+            "enabled": True,
+            "uni_a": {
+                "tag": {"tag_type": 1, "value": 100},
+                "interface_id": "00:00:00:00:00:00:00:02:1",
+            },
+            "uni_z": {
+                "tag": {"tag_type": 1, "value": 2200},
+                "interface_id": "00:00:00:00:00:00:00:02:2",
+            }
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.post(api_url, json=evc_2)
+        assert response.status_code == 201, response.text
+        data = response.json()
+        assert 'circuit_id' in data
+        evc_2_id = data["circuit_id"]
+
+        time.sleep(10)
+        
+        payload = {
+            "circuit_ids":[evc_1_id, evc_2_id],
+            "test": "data"
+        }
+        api_url = KYTOS_API + '/mef_eline/v2/evc/metadata'
+        response = requests.post(api_url, json=payload)
+        assert response.status_code == 201, response.text
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc?metadata.test=data'
+        response = requests.get(api_url, json=payload)
+        assert response.status_code == 200
+        data = response.json()
+        assert "test" in data[evc_1_id]["metadata"]
+        assert "test" in data[evc_2_id]["metadata"]
+
