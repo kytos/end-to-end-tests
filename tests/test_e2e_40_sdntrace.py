@@ -886,7 +886,7 @@ class TestE2ESDNTrace:
         payload_stored_flow = {
             "flows": [
                 {
-                    "priority": 100,
+                    "priority": 1000,
                     "match": {
                         "in_port": 2,
                         "dl_vlan": "4096/4096"
@@ -899,7 +899,7 @@ class TestE2ESDNTrace:
                     ]
                 },
                 {
-                    "priority": 10,
+                    "priority": 100,
                     "match": {
                         "in_port": 2,
                         "dl_vlan": 10
