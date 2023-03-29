@@ -1941,3 +1941,28 @@ class TestE2EMefEline:
         assert untagged_flow["match"] == expected[1]["match"]
         assert untagged_flow["priority"] == expected[1]["priority"]
         assert untagged_flow["instructions"][0]["actions"] == expected[1]["actions"]
+
+    def test_250_run_bulk_sdntraces_any_vlan(self):
+        """Test /traces for special dl_vlan"""
+        evc_id = self.create_evc("any")
+        time.sleep(10)
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.get(api_url + evc_id)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        # path found
+        assert len(data['current_path']) > 0
+
+    def test_255_run_bulk_sdntraces_untagged_vlan(self):
+        """Test /traces for special dl_vlan"""
+        evc_id = self.create_evc("untagged")
+        time.sleep(10)
+
+        api_url = KYTOS_API + '/mef_eline/v2/evc/'
+        response = requests.get(api_url + evc_id)
+        assert response.status_code == 200, response.text
+        data = response.json()
+        # path found
+        assert len(data['current_path']) > 0
+
